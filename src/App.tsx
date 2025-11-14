@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
-import { JanithNirmal } from './lib/components/janith-nirmal'
+import { ProductCard } from './lib/product/component/product-card'
+import { dummyProducts } from './lib/data/products'
 
 import './lib/css/app.css'
 
@@ -9,7 +10,9 @@ function App() {
 
   return (
     <>
-      
+      <div className="app-container">
+        <ProductCard product={dummyProducts[0]} showDiscountBadge={false} />
+      </div>
     </>
   )
 }
