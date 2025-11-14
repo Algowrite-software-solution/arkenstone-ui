@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { ProductCard } from './lib/product/component/product-card'
+import { ProductCard } from './lib/product/components/product-card/product-card'
 import { dummyProducts } from './lib/data/products'
 
 import './lib/css/app.css'

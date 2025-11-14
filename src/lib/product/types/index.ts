@@ -53,8 +53,8 @@ export interface Product {
   description: string;
   sku: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   price: number;
   discount_type: string | null;
   discount_value: number | null;
