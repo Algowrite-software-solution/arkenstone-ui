@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
-import { Button } from './lib/components/button'
+import { JanithNirmal } from './lib/components/janith-nirmal'
+
+import './lib/css/app.css'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,7 +18,7 @@ function App() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-      <Button />
+      <JanithNirmal name='Janith Nirmal 123' />
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
