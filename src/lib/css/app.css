@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+:root {
+    --background: #f4f8f5;
+    --foreground: #2c2f2a;
+
+    --card: #e7edea;
+    --card-foreground: #2c2f2a;
+
+    --popover: #edf3ef;
+    --popover-foreground: #2c2f2a;
+
+    --primary: #8ca982; /* Elvish leaf green */
+    --primary-foreground: #ffffff;
+
+    --secondary: #d9e1db;
+    --secondary-foreground: #1e241f;
+
+    --muted: #c4ccc7;
+    --muted-foreground: #5a605b;
+
+    --accent: #aa8745; /* golden leaf */
+    --accent-foreground: #ffffff;
+
+    --destructive: #b54949;
+    --destructive-foreground: #ffffff;
+
+    --border: #a1b0a2;
+    --input: #90a093;
+    --ring: #b9cbbd;
+
+    --chart-1: #6b8e6d;
+    --chart-2: #b2a56e;
+    --chart-3: #748f99;
+    --chart-4: #e5c67c;
+    --chart-5: #9e7a3e;
+
+    --radius: 0.625rem;
+
+    --sidebar: #e0e8e3;
+    --sidebar-foreground: #2c2f2a;
+    --sidebar-primary: #8ca982;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #aa8745;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #cdd9d3;
+    --sidebar-ring: #b9cbbd;
+
+    --color-card: #dce5de;
+}
+
+
+/* scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 30px;
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 30px;
+    background: var(--muted-foreground);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--accent);
+}
+
+
+.c-text {
+    color: rgb(255, 180, 40); /* world best color */
+}

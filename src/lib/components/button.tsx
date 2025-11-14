@@ -1,9 +1,9 @@
-export function Button({children, className}: {children: React.ReactNode, className?: string}) {
+export function Button({children, className, active}: {children: React.ReactNode, className?: string, active?: boolean}) {
     return (
-        <div className="px-10 py-5 rounded-full">
-            <h3>Button Field</h3>
+        <div className="px-10 py-5 rounded-full w-full bg-green-500">
+            <h3 className="c-text">Button Field</h3>
             <button className={className}>{children}</button>
-            <p>description</p>
+            {active && <p>description</p>}
         </div>
     )
 }
