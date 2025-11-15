@@ -3,8 +3,6 @@ import './App.css'
 import { ProductCard } from './lib/product/components/product-card/product-card'
 import { dummyProducts } from './lib/data/products'
 
-import './lib/css/app.css'
-
 function App() {
   const [count, setCount] = useState(0)
 
