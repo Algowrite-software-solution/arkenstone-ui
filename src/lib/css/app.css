@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-
 :root {
     --background: #f4f8f5;
     --foreground: #2c2f2a;
@@ -77,5 +76,5 @@
 
 
 .c-text {
-    color: rgb(255, 180, 40); /* world best color */
+    color: rgb(255, 0, 0); /* world best color */
 }
