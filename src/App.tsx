@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import './App.css'
 import { ProductCard } from './lib/product/components/product-card/product-card'
-import { ProductCardViewDetails } from './lib/product/components/product-card/product-card-view-details'
+import { ProductCardViewDetails } from './lib/product/components/product-card/components/product-card-view-details'
 import { dummyProducts } from './lib/data/products'
 
+
 import './lib/css/app.css'
+import { Product } from './lib/product/types'
 
 function App() {
   const handleAddToCart = (product: Product) => {

@@ -1,6 +1,6 @@
 // components/ProductCard/components/ProductCardStockAndColor.tsx
 import React from 'react';
-import { Product } from '../../types'; // Adjust path as needed
+import { Product } from '../../../types'; // Adjust path as needed
 
 interface ProductCardStockAndColorProps {
   product: Product;
