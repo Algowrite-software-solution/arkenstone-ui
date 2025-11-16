@@ -46,44 +46,33 @@ export interface Taxonomy {
   children?: Taxonomy[];
 }
 
+export interface ProductTaxonomy{
+  product_id: number;
+  taxonomy_id: number;
+}
+
 export interface Product {
   id: number;
-  brand_id: number;
+  brand_id: number | null;
   name: string;
-  description: string;
-  sku: string;
+  description: string | null;
+  sku: string | null;
   is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
-  price: number;
+  created_at: string;
+  updated_at: string;
+  price: number | null;
   discount_type: string | null;
   discount_value: number | null;
-  quantity: number;
-  final_price: number;
-  categories: Category[];
+  quantity: number | null;
+  final_price: number | null;
+  categories: Category[] | null;
   brand: Brand | null;
-  images: ProductImage[];
-  taxonomies: Taxonomy[];
+  images: ProductImage[] | null;
+  taxonomies: any[] | null;
+  colors: ProductColor[] | null;
 }
 
-// API Response Types
-export interface ApiResponse<T> {
-  status: string;
-  message: string | null;
-  data: T;
-}
-
-export interface PaginatedResponse<T> {
-  current_page: number;
-  data: T[];
-  first_page_url: string;
-  from: number;
-  last_page: number;
-  last_page_url: string;
-  next_page_url: string | null;
-  path: string;
-  per_page: number;
-  prev_page_url: string | null;
-  to: number;
-  total: number;
+export interface ProductColor {
+  name: string;
+  hex_code: string; // e.g., "#FF0000"
 }

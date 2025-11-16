@@ -86,7 +86,8 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
-    ]
+    ],
+    colors: null
   },
   {
     id: 2,
@@ -188,7 +189,8 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
-    ]
+    ],
+    colors: null
   },
   {
     id: 3,
@@ -297,6 +299,11 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
+    ],
+    colors: [
+      { name: "Black", hex_code: "#000000" },
+      { name: "Silver", hex_code: "#C0C0C0" },
+      { name: "Rose Gold", hex_code: "#B76E79" }
     ]
   },
   {
@@ -399,6 +406,11 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
+    ],
+    colors: [
+      { name: "Brown", hex_code: "#8B4513" },
+      { name: "Black", hex_code: "#000000" },
+      { name: "Tan", hex_code: "#D2B48C" }
     ]
   },
   {
@@ -479,6 +491,12 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
+    ],
+    colors: [
+      { name: "Black", hex_code: "#000000" },
+      { name: "White", hex_code: "#FFFFFF" },
+      { name: "Blue", hex_code: "#0000FF" },
+      { name: "Pink", hex_code: "#FFC0CB" }
     ]
   },
   {
@@ -581,6 +599,12 @@ export const dummyProducts: Product[] = [
         parent: null,
         children: []
       }
+    ],
+    colors: [
+      { name: "Purple", hex_code: "#800080" },
+      { name: "Blue", hex_code: "#0000FF" },
+      { name: "Green", hex_code: "#008000" },
+      { name: "Pink", hex_code: "#FFC0CB" }
     ]
   }
 ];
