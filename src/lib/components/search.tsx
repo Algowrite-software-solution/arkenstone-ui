@@ -17,6 +17,7 @@ export interface SearchProps {
     buttonText?: string;
     searchIconPosition?: "left" | "right";
     searchButtonTextPosition?: "left" | "right";
+    placeholderTextPosition?: "left" | "center" | "right";
 }
 
 export default function Search({
@@ -35,6 +36,7 @@ export default function Search({
     buttonText = "Search",
     searchIconPosition = "left",
     searchButtonTextPosition = "right",
+    placeholderTextPosition = "left",
 }: SearchProps) {
     const [internalValue, setInternalValue] = useState(value);
 
@@ -67,6 +69,13 @@ export default function Search({
         </button>
     );
 
+    const placeholderAlignClass =
+        placeholderTextPosition === "center"
+            ? "text-center"
+            : placeholderTextPosition === "right"
+            ? "text-right"
+            : "text-left";
+
     return (
         <form onSubmit={handleSubmit} className={`w-full ${className ?? ""}`}>
             {label && (
@@ -88,7 +97,7 @@ export default function Search({
                 {/* INPUT */}
                 <input
                     type="text"
-                    className="flex-1 outline-none text-sm"
+                    className={`flex-1 outline-none text-sm ${placeholderAlignClass}`}
                     placeholder={placeholder}
                     value={internalValue}
                     onChange={(e) => {

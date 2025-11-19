@@ -1,18 +1,22 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
+import CategoryFilter from "./category-filter";
 
 export interface FilterOption {
   label: string;
-  value: string | number | boolean; 
-  color?: string;     
-  image?: string;     
-  icon?: React.ReactNode; 
-  rating?: number;    
+  value: string | number | boolean;
+  color?: string;
+  image?: string;
+  icon?: React.ReactNode;
+  rating?: number;
 
   // range specific
   min?: number;
   max?: number;
   step?: number;
+
+  // tree / nested
+  children?: FilterOption[];
 }
 
 export interface FilterItemProps {
@@ -21,22 +25,30 @@ export interface FilterItemProps {
   options: FilterOption[];
   collapsible?: boolean;
   defaultCollapsed?: boolean;
-  type?:
-    | "checkbox"
-    | "radio"
-    | "chip"
-    | "toggle"
-    | "switch"
-    | "color"
-    | "image"
-    | "rating"
-    | "tag"
-    | "icon"
-    | "range";
+
+  // allow any string so users can plug custom types
+  type?: string;
+
+  // optional custom renderer/component per filter item
+  component?: React.ComponentType<{
+    filter: FilterItemProps;
+    state: Record<string, any>;
+    update: (id: string, value: any) => void;
+  }>;
+  render?: (props: {
+    filter: FilterItemProps;
+    state: Record<string, any>;
+    // FIX: update should return void, not ReactNode
+    update: (id: string, value: any) => void;
+  }) => React.ReactNode;
+
+  // passthrough custom props (optional)
+  customProps?: Record<string, any>;
 }
 
 export interface FiltersProps {
-  filters: FilterItemProps[];
+  // allow arrays (and arrays-of-arrays) so stories / callers can pass grouped filters
+  filters: (FilterItemProps | FilterItemProps[])[];
 
   // layout
   direction?: "vertical" | "horizontal";
@@ -47,6 +59,16 @@ export interface FiltersProps {
 
   // UI overrides
   className?: string;
+
+  // registry of custom renderers keyed by type or id
+  customRenderers?: Record<
+    string,
+    React.ComponentType<{
+      filter: FilterItemProps;
+      state: Record<string, any>;
+      update: (id: string, value: any) => void;
+    }>
+  >;
 }
 
 // Main Filters Component
@@ -56,6 +78,7 @@ export default function Filters({
   value,
   onChange,
   className = "",
+  customRenderers,
 }: FiltersProps) {
   const [internal, setInternal] = useState<Record<string, any>>({});
 
@@ -66,14 +89,23 @@ export default function Filters({
     value ? onChange?.(updated) : setInternal(updated);
   }
 
+  // flatten passed filters so callers can pass arrays or grouped filter arrays
+  const flatFilters = filters.flatMap((f) => (Array.isArray(f) ? f : [f]));
+
   return (
     <div
       className={`flex ${
         direction === "vertical" ? "flex-col gap-4" : "flex-row gap-6"
       } ${className} border p-2 rounded-sm `}
     >
-      {filters.map((filter) => (
-        <FilterItem key={filter.id} {...filter} state={state} update={update} />
+      {flatFilters.map((filter) => (
+        <FilterItem
+          key={filter.id}
+          {...filter}
+          state={state}
+          update={update}
+          customRenderers={customRenderers}
+        />
       ))}
     </div>
   );
@@ -89,17 +121,24 @@ function FilterItem({
   type = "checkbox",
   state,
   update,
+  component,
+  render,
+  customProps,
+  customRenderers,
 }: FilterItemProps & {
   state: Record<string, any>;
   update: (id: string, value: any) => void;
+  customRenderers?: FiltersProps["customRenderers"];
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   // set sensible defaults depending on type
   let defaultSelected: any;
-  if (type === "checkbox" || type === "tag") defaultSelected = [];
+  if (type === "checkbox" || type === "tag" || type === "tree") defaultSelected = [];
   else if (type === "toggle" || type === "switch") defaultSelected = false;
-  else if (type === "range") defaultSelected = (options && options.length > 0 && typeof options[0].min === "number") ? options[0].min : 0;
+  else if (type === "range")
+    defaultSelected =
+      options && options.length > 0 && typeof options[0].min === "number" ? options[0].min : 0;
   else defaultSelected = "";
 
   const selected = state[id] ?? defaultSelected;
@@ -114,6 +153,9 @@ function FilterItem({
     update(id, value);
   }
 
+  // determine if there's a custom renderer for this item
+  const Registered = component ?? (customRenderers && (customRenderers[id] || customRenderers[type]));
+
   return (
     <div className="p-3">
       <div
@@ -125,24 +167,37 @@ function FilterItem({
       </div>
 
       {!collapsed && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {options.map((opt) => (
-            <FilterOptionItem
-              key={String(opt.value)}
-              type={type}
-              option={opt}
-              selected={selected}
-              onCheckboxToggle={toggleCheckbox}
-              onRadioSelect={selectRadio}
-            />
-          ))}
+        <div className="mt-2">
+          {/* if caller passed a render function for this filter item, use it */}
+          {render ? (
+            render({ filter: { id, title, options, collapsible, defaultCollapsed, type, customProps }, state, update })
+          ) : Registered ? (
+            // render registered/custom component
+            <Registered filter={{ id, title, options, collapsible, defaultCollapsed, type, customProps }} state={state} update={update} />
+          ) : // built-in tree handling
+          type === "tree" ? (
+            <CategoryFilter options={options} selected={selected} onToggle={(vals: (string | number | boolean)[]) => update(id, vals)} />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {options.map((opt) => (
+                <FilterOptionItem
+                  key={String(opt.value)}
+                  type={type}
+                  option={opt}
+                  selected={selected}
+                  onCheckboxToggle={toggleCheckbox}
+                  onRadioSelect={selectRadio}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// Single Filter Option Component
+// Single Filter Option Component 
 function FilterOptionItem({
   type,
   option,
@@ -161,7 +216,8 @@ function FilterOptionItem({
     | "rating"
     | "tag"
     | "icon"
-    | "range";
+    | "range"
+    | string;
   option: FilterOption;
   selected: any;
   onCheckboxToggle: (v: any) => void;
@@ -262,9 +318,7 @@ function FilterOptionItem({
     return (
       <button
         onClick={() => onRadioSelect(option.value)}
-        className={`text-xl ${
-          selected === option.value ? "text-yellow-500" : "text-gray-400"
-        }`}
+        className={`text-xl ${selected === option.value ? "text-yellow-500" : "text-gray-400"}`}
       >
         {"★".repeat(Number(option.rating ?? option.value))}
       </button>
@@ -275,9 +329,7 @@ function FilterOptionItem({
     return (
       <button
         className={`px-2 py-1 rounded-md text-xs border ${
-          Array.isArray(selected) && selected.includes(option.value)
-            ? "bg-black text-white"
-            : "bg-white text-black"
+          Array.isArray(selected) && selected.includes(option.value) ? "bg-black text-white" : "bg-white text-black"
         }`}
         onClick={() => onCheckboxToggle(String(option.value))}
       >
@@ -289,9 +341,7 @@ function FilterOptionItem({
   if (type === "icon")
     return (
       <button
-        className={`p-2 rounded-md border ${
-          selected === option.value ? "bg-black text-white" : "bg-white text-black"
-        }`}
+        className={`p-2 rounded-md border ${selected === option.value ? "bg-black text-white" : "bg-white text-black"}`}
         onClick={() => onRadioSelect(option.value)}
       >
         {option.icon}
@@ -308,14 +358,7 @@ function FilterOptionItem({
 
     return (
       <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onRadioSelect(Number(e.target.value))}
-        />
+        <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onRadioSelect(Number(e.target.value))} />
         <span className="text-sm w-12 text-right">{value}</span>
       </div>
     );

@@ -1,4 +1,4 @@
-// stories/Filters.stories.tsx
+import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import Filters from "../../lib/components/filter";
 import { Star, Heart, Image as ImageIcon } from "lucide-react";
@@ -15,9 +15,58 @@ const meta: Meta<typeof Filters> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * Custom filter component used by the story.
+ * Props contract matches Filters' custom renderer signature:
+ * { filter, state, update }
+ */
+function CustomPriceFilter({ filter, state, update }: any) {
+  // Try to read existing value (we store { min, max } for this custom filter)
+  const current = state[filter.id] ?? { min: filter.options?.[0]?.min ?? 0, max: filter.options?.[0]?.max ?? 100 };
+  const min = Number(current.min ?? 0);
+  const max = Number(current.max ?? 100);
+
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-sm w-full">
+        <div className="text-xs text-gray-600">Min</div>
+        <input
+          type="number"
+          value={min}
+          onChange={(e) => update(filter.id, { min: Number(e.target.value), max })}
+          className="w-full border rounded px-2 py-1 text-sm"
+        />
+      </label>
+
+      <label className="text-sm w-full">
+        <div className="text-xs text-gray-600">Max</div>
+        <input
+          type="number"
+          value={max}
+          onChange={(e) => update(filter.id, { min, max: Number(e.target.value) })}
+          className="w-full border rounded px-2 py-1 text-sm"
+        />
+      </label>
+
+      <button
+        onClick={() => update(filter.id, { min, max })}
+        className="ml-2 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+        type="button"
+      >
+        Apply
+      </button>
+    </div>
+  );
+}
+
+// FullTest story: includes custom price filter plugged via customRenderers
 export const FullTest: Story = {
   args: {
     direction: "vertical",
+    // pass customRenderers mapping so Filters can render our CustomPriceFilter for 'price_custom' type
+    customRenderers: {
+      price_custom: CustomPriceFilter,
+    },
     filters: [
       // -------------------------------
       // CHECKBOX
@@ -201,6 +250,68 @@ export const FullTest: Story = {
             max: 500,
             step: 10,
           },
+        ],
+      },
+
+      // Custom price filter entry: use type that matches the key in customRenderers
+      {
+        id: "price_custom",
+        title: "Custom Price Filter",
+        type: "price_custom", // Filters will look up customRenderers[type] or customRenderers[id]
+        collapsible: true,
+        defaultCollapsed: false,
+        options: [
+          // provide min/max defaults via options for the custom renderer to read
+          { label: "Price range", value: "price", min: 0, max: 1000, step: 10 },
+        ],
+      },
+    ],
+  },
+};
+
+// -------------------------------
+// Tree test story
+// -------------------------------
+export const TreeTest: Story = {
+  args: {
+    direction: "vertical",
+    filters: [
+      {
+        id: "categories",
+        title: "Categories",
+        type: "tree",
+        collapsible: true,
+        defaultCollapsed: false,
+        options: [
+          {
+            label: "Tops",
+            value: "tops",
+            children: [
+              {
+                label: "Shirts & Blouses",
+                value: "shirts-blouses",
+                children: [
+                  { label: "Basic", value: "basic" },
+                  { label: "Cardigans & Jumpers", value: "cardigans-jumpers" },
+                  { label: "Hoodies & Sweatshirts", value: "hoodies-sweatshirts" },
+                ],
+              },
+              { label: "Knitwear", value: "knitwear" },
+            ],
+          },
+          {
+            label: "Dresses",
+            value: "dresses",
+            children: [
+              { label: "Short Dresses", value: "short-dresses" },
+              { label: "Midi Dresses", value: "midi-dresses" },
+              { label: "Bodycon", value: "bodycon" },
+              { label: "Party Dresses", value: "party-dresses" },
+              { label: "Maxi Dresses", value: "maxi-dresses" },
+            ],
+          },
+          { label: "Skirts", value: "skirts" },
+          { label: "Trousers", value: "trousers" },
         ],
       },
     ],
