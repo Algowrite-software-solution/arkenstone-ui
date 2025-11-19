@@ -1,6 +1,5 @@
 // components/ProductCard/ProductCard.tsx
 import React from 'react';
-import { Product } from '../../types'; // Adjust path as needed
 import {
   CommonProductCardLayoutProps,
   DefaultProductCardLayout,
