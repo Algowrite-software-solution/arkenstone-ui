@@ -5,7 +5,6 @@ import { ProductCardImage } from '../components/product-card-image';
 import { ProductCardBrandTitle } from '../components/product-card-brand-title';
 import { ProductCardPrice } from '../components/product-card-price';
 import { ProductCardStock } from '../components/product-card-stock';
-import { ProductCardStockAndColor } from '../components/product-card-stock-and-color';
 import { ProductCardAddToCart } from '../components/product-card-add-to-cart';
 import { ProductCardViewDetails } from '../components/product-card-view-details';
 import { ProductCardCategories } from '../components/product-card-categories';
@@ -30,7 +29,6 @@ export interface CommonProductCardLayoutProps {
   brandTitleProps?: Omit<React.ComponentProps<typeof ProductCardBrandTitle>, 'product'>;
   priceProps?: Omit<React.ComponentProps<typeof ProductCardPrice>, 'product'>;
   stockProps?: Omit<React.ComponentProps<typeof ProductCardStock>, 'product'>;
-  stockAndColorProps?: Omit<React.ComponentProps<typeof ProductCardStockAndColor>, 'product' | 'onColorSelect'>;
   addToCartProps?: Omit<React.ComponentProps<typeof ProductCardAddToCart>, 'product' | 'onAddToCart'>;
   viewDetailsProps?: Omit<React.ComponentProps<typeof ProductCardViewDetails>, 'product' | 'onViewDetails'>;
   categoriesProps?: Omit<React.ComponentProps<typeof ProductCardCategories>, 'product'>;
@@ -59,7 +57,6 @@ export const DefaultProductCardLayout: React.FC<CommonProductCardLayoutProps> = 
   brandTitleProps,
   priceProps,
   stockProps,
-  stockAndColorProps,
   addToCartProps,
   viewDetailsProps,
   categoriesProps,
@@ -110,26 +107,6 @@ export const DefaultProductCardLayout: React.FC<CommonProductCardLayoutProps> = 
           />
         )}
 
-        {showStockAndColor ? (
-          <ProductCardStockAndColor
-            product={product}
-            onColorSelect={onColorSelect}
-            stockClassName="text-sm mb-2"
-            colorSwatchClassName="w-7 h-7 rounded-full border-2 border-gray-300 hover:border-blue-500 cursor-pointer transition-all hover:scale-110"
-            {...stockAndColorProps}
-          />
-        ) : showStock ? (
-          <ProductCardStock 
-            product={product} 
-            stockClassName="text-sm"
-            inStockClassName="text-green-600 font-medium"
-            outOfStockClassName="text-red-600 font-medium"
-            lowStockClassName="text-orange-600 font-medium"
-            lowStockThreshold={20}
-            {...stockProps} 
-          />
-        ) : null}
-
         {(showAddToCart || showViewDetails) && (
           <div className={actionsWrapperClassName}>
             {showAddToCart && (
@@ -173,7 +150,6 @@ export const ImageHeavyProductCardLayout: React.FC<CommonProductCardLayoutProps>
   imageProps,
   brandTitleProps,
   priceProps,
-  stockAndColorProps,
   addToCartProps,
   viewDetailsProps,
   categoriesProps,
@@ -236,15 +212,6 @@ export const ImageHeavyProductCardLayout: React.FC<CommonProductCardLayoutProps>
           />
         )}
         
-        {showStockAndColor && (
-          <ProductCardStockAndColor
-            product={product}
-            onColorSelect={onColorSelect}
-            stockClassName="text-sm"
-            colorSwatchClassName="w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-500 cursor-pointer transition-all"
-            {...stockAndColorProps}
-          />
-        )}
         
         {/* Categories below image for this layout */}
         {showCategories && (

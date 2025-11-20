@@ -8,16 +8,24 @@ export interface SearchProps {
     onSubmit?: (value: string) => void;
     debounce?: number;
     label?: string;
-    className?: string;
     rightSlot?: React.ReactNode;
     leftSlot?: React.ReactNode;
 
-    // NEW PROPS
+    // CONTROLS
     buttonType?: "icon" | "text" | "none";
     buttonText?: string;
     searchIconPosition?: "left" | "right";
     searchButtonTextPosition?: "left" | "right";
-    placeholderTextPosition?: "left" | "center" | "right";
+
+    // STYLING
+    formClassName?: string;
+    searchIconClassName?: string;
+    searchButtonTextClassName?: string;
+    placeholderTextClassName?: string;
+    labelClassName?: string;
+    leftSlotClassName?: string;
+    rightSlotClassName?: string;
+    searchContainerClassName?: string;
 }
 
 export default function Search({
@@ -27,16 +35,24 @@ export default function Search({
     onSubmit,
     debounce = 0,
     label,
-    className,
     rightSlot,
     leftSlot,
 
-    // NEW DEFAULTS
+    // CONTROLS
     buttonType = "icon",
     buttonText = "Search",
     searchIconPosition = "left",
     searchButtonTextPosition = "right",
-    placeholderTextPosition = "left",
+
+    // STYLING
+    formClassName = "",
+    searchIconClassName = "text-gray-600",
+    searchButtonTextClassName = "max-h-full px-3 py-1 bg-gray-800 text-white rounded-sm text-sm",
+    placeholderTextClassName = "text-left",
+    labelClassName = "text-sm font-medium mb-1 block",
+    leftSlotClassName = "",
+    rightSlotClassName = "",
+    searchContainerClassName = "flex items-center gap-2 border rounded-sm min-h-[40px] px-2 bg-white ",
 }: SearchProps) {
     const [internalValue, setInternalValue] = useState(value);
 
@@ -55,7 +71,7 @@ export default function Search({
     }
 
     const renderIconButton = () => (
-        <button type="submit" className="text-gray-600">
+        <button type="submit" className={`${searchIconClassName}`}>
             <SearchIcon size={18} />
         </button>
     );
@@ -63,30 +79,24 @@ export default function Search({
     const renderTextButton = () => (
         <button
             type="submit"
-            className="max-h-full px-3 py-1 bg-gray-800 text-white rounded-sm text-sm"
+            className={`${searchButtonTextClassName}`}
         >
             {buttonText}
         </button>
     );
 
-    const placeholderAlignClass =
-        placeholderTextPosition === "center"
-            ? "text-center"
-            : placeholderTextPosition === "right"
-            ? "text-right"
-            : "text-left";
 
     return (
-        <form onSubmit={handleSubmit} className={`w-full ${className ?? ""}`}>
+        <form onSubmit={handleSubmit} className={`w-full ${formClassName ?? ""}`}>
             {label && (
-                <label className="text-sm font-medium mb-1 block">
+                <label className={labelClassName}>
                     {label}
                 </label>
             )}
 
-            <div className="flex items-center gap-2 border rounded-sm min-h-[40px] px-2 bg-white">
-                {leftSlot && <div className="flex items-center">{leftSlot}</div>}
-
+            <div className={`${searchContainerClassName}`}>
+                {leftSlot && <div className={`flex items-center ${leftSlotClassName}`}>{leftSlot}</div>}
+            
                 {/* LEFT CONTROLS */}
                 {(buttonType === "icon" && searchIconPosition === "left") &&
                     renderIconButton()}
@@ -97,7 +107,7 @@ export default function Search({
                 {/* INPUT */}
                 <input
                     type="text"
-                    className={`flex-1 outline-none text-sm ${placeholderAlignClass}`}
+                    className={`flex-1 outline-none text-sm ${placeholderTextClassName}`}
                     placeholder={placeholder}
                     value={internalValue}
                     onChange={(e) => {
@@ -113,7 +123,7 @@ export default function Search({
                 {(buttonType === "text" && searchButtonTextPosition === "right") &&
                     renderTextButton()}
 
-                {rightSlot && <div className="flex items-center">{rightSlot}</div>}
+                {rightSlot && <div className={`flex items-center ${rightSlotClassName}`}>{rightSlot}</div>}
             </div>
         </form>
     );

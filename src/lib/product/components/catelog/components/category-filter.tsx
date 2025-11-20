@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import type { ClassNamesMap } from "./filter";
 
 type CategoryNode = {
   label: string;
@@ -12,11 +13,13 @@ export default function CategoryFilter({
   selected,
   onToggle,
   level = 0,
+  classNames,
 }: {
   options: CategoryNode[];
   selected: any[];
   onToggle: (values: (string | number | boolean)[]) => void;
   level?: number;
+  classNames?: ClassNamesMap;
 }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -52,8 +55,10 @@ export default function CategoryFilter({
     onToggle(Array.from(selectedSet).map((v) => (isNaN(Number(v)) ? v : (Number(v) as any))));
   }
 
+  const indentStyle = (lvl: number) => ({ paddingLeft: `${lvl}rem` });
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className={classNames?.tree ?? "flex flex-col gap-1"}>
       {options.map((opt) => {
         const key = String(opt.value);
         const allValues = getAllValues(opt).map(String);
@@ -62,9 +67,19 @@ export default function CategoryFilter({
         const isPartial = allValues.some((v) => selectedSet.has(v)) && !hasAllChildren;
 
         return (
-          <div key={key} style={{ paddingLeft: `${level}rem` }}>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2">
+          <div key={key} style={indentStyle(level)} className={classNames?.treeNode ?? undefined}>
+            <div className={`flex items-center gap-2 ${classNames?.treeLabel ?? ""}`}>
+              {opt.children && opt.children.length > 0 && (
+                <button
+                  className={classNames?.treeToggle ?? "p-1"}
+                  onClick={() => setExpanded((s) => ({ ...s, [key]: !s[key] }))}
+                  aria-label="Toggle"
+                >
+                  {expanded[key] ? <ChevronUp /> : <ChevronDown />}
+                </button>
+              )}
+
+              <label className={`flex items-center gap-2 ${classNames?.option ?? ""}`}>
                 <input
                   type="checkbox"
                   checked={hasAllChildren}
@@ -72,35 +87,25 @@ export default function CategoryFilter({
                     if (el) el.indeterminate = isPartial;
                   }}
                   onChange={() => toggleNode(opt)}
+                  className={classNames?.checkbox ?? ""}
                 />
                 <span
                   className={`cursor-pointer ${hasAllChildren ? "font-semibold" : ""}`}
-                  onClick={() =>
-                    opt.children && opt.children.length > 0 ? toggleNode(opt) : toggleLeaf(opt.value)
-                  }
+                  onClick={() => (opt.children && opt.children.length > 0 ? toggleNode(opt) : toggleLeaf(opt.value))}
                 >
                   {opt.label}
                 </span>
               </label>
-
-              {opt.children && opt.children.length > 0 && (
-                <button
-                  className="p-1"
-                  onClick={() => setExpanded((s) => ({ ...s, [key]: !s[key] }))}
-                  aria-label="Toggle"
-                >
-                  {expanded[key] ? <ChevronUp /> : <ChevronDown />}
-                </button>
-              )}
             </div>
 
             {opt.children && opt.children.length > 0 && expanded[key] && (
-              <div className="ml-6 mt-1">
+              <div className={classNames?.treeChildren ?? "ml-6 mt-1"}>
                 <CategoryFilter
                   options={opt.children}
                   selected={selected}
                   onToggle={onToggle}
                   level={level + 1}
+                  classNames={classNames}
                 />
               </div>
             )}

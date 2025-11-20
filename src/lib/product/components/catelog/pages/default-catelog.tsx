@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import CatalogContentLayout from "../layouts/catelog-content-layout";
 import Search from "../../../../components/search";
-import Filters from "../../../../components/filter";
+import Filters from "../components/filter";
 import { Listing } from "../layouts/listings-layout";
-import { ListingControl } from "../../../../components/listing-controls";
-import { Pagination } from "../../../../components/pagination";
+import { ListingControl } from "../components/listing-controls";
+import { Pagination } from "../components/pagination";
 import { ProductCard } from "../../product-card/product-card";
 import { useCatalogStore } from "../useCatalogStore";
 

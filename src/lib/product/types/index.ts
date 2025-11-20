@@ -69,10 +69,4 @@ export interface Product {
   brand: Brand | null;
   images: ProductImage[] | null;
   taxonomies: any[] | null;
-  colors: ProductColor[] | null;
-}
-
-export interface ProductColor {
-  name: string;
-  hex_code: string; // e.g., "#FF0000"
 }
