@@ -2,33 +2,16 @@ import React from "react";
 import { SortBar, SortBarProps } from "./sort-bar";
 import { ViewModeSwitcher, ViewMode, ViewModeSwitcherProps } from "./view-mode";
 
-interface ListingControlProps {
-  /** Sorting */
-  sortProps?: SortBarProps;
+export interface ListingControlProps {
 
-  /** View mode */
+  sortProps?: SortBarProps;
   viewModeProps?: ViewModeSwitcherProps;
 
-  /**
-   * Replace the SortBar component completely.
-   * Example: <ListingControl sortComponent={<MyCustomSort />} />
-   */
   sortComponent?: React.ReactNode;
-
-  /**
-   * Replace the ViewModeSwitcher completely.
-   */
   viewModeComponent?: React.ReactNode;
 
-  /**
-   * Add extra custom components (buttons, filters, actions, etc.)
-   * Example: extra={[<Button ... />, <TagSelector ... />]}
-   */
   extra?: React.ReactNode[];
 
-  /**
-   * Layout direction
-   */
   direction?: "row" | "column";
 }
 
