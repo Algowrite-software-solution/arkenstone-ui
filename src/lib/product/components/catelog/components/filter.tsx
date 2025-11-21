@@ -28,70 +28,73 @@ export interface FilterOption {
   className?: string;
 }
 
+export interface FilterOptionItemProps extends FilterOption {
+  type: "checkbox" | "radio" | "chip" | "toggle" | "switch" | "color" | "image" | "rating" | "tag" | "icon" | "range" | string;
+  selected: any;
+
+  onCheckboxToggle: (value: string) => void;
+  onRadioSelect: (value: any) => void;
+
+  classNames?: ClassNamesMap;
+}
+
+export interface FiltersProps {
+  filters: (FilterItemProps | FilterItemProps[])[];
+
+  direction?: "vertical" | "horizontal";
+
+  value?: Record<string, string | string[] | boolean | number>;
+  onChange?: (values: Record<string, string | string[] | boolean | number>) => void;
+
+  verticalFilterClassName?: string;
+  horizontalFilterClassName?: string;
+
+  customRenderers?: Record<string, React.ComponentType<FilterRenderProps>>;
+
+  globalClassNames?: ClassNamesMap;
+}
+
 export interface FilterItemProps {
   id: string;
   title: string;
   options: FilterOption[];
+
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   collapsibleIconUp?: React.ReactNode;
   collapsibleIconDown?: React.ReactNode;
 
-  // allow any string so users can plug custom types
+  // default type: checkbox
   type?: string;
 
-  // optional per-item class names
   classNames?: ClassNamesMap;
 
-  // optional custom renderer/component per filter item
-  component?: React.ComponentType<{
-    filter: FilterItemProps;
-    state: Record<string, any>;
-    update: (id: string, value: any) => void;
-    classNames?: ClassNamesMap;
-  }>;
-  render?: (props: {
-    filter: FilterItemProps;
-    state: Record<string, any>;
-    update: (id: string, value: any) => void;
-    classNames?: ClassNamesMap;
-  }) => React.ReactNode;
+  // custom renderer component
+  component?: React.ComponentType<FilterRenderProps>;
 
-  // passthrough custom props (optional)
+  // render override
+  render?: (props: FilterRenderProps) => React.ReactNode;
+
+  // extra
   customProps?: Record<string, any>;
 
-  // per-item simple wrapper class
+  // wrapper class
   filterItemsClassName?: string;
 }
 
-export interface FiltersProps {
-  // allow arrays (and arrays-of-arrays) so stories / callers can pass grouped filters
-  filters: (FilterItemProps | FilterItemProps[])[];
+export interface FilterItemInternalProps extends FilterItemProps {
+  state: Record<string, any>;
+  update: (id: string, value: any) => void;
 
-  // layout
-  direction?: "vertical" | "horizontal";
-
-  // state handling
-  value?: Record<string, string | string[] | boolean | number>;
-  onChange?: (values: Record<string, string | string[] | boolean | number>) => void;
-
-  // UI overrides
-  verticalFilterClassName?: string;
-  horizontalFilterClassName?: string;
-
-  // registry of custom renderers keyed by type or id
-  customRenderers?: Record<
-    string,
-    React.ComponentType<{
-      filter: FilterItemProps;
-      state: Record<string, any>;
-      update: (id: string, value: any) => void;
-      classNames?: ClassNamesMap;
-    }>
-  >;
-
-  // global classnames applied to every item (can be overridden by item.classNames)
+  customRenderers?: FiltersProps["customRenderers"];
   globalClassNames?: ClassNamesMap;
+}
+
+export interface FilterRenderProps {
+  filter: FilterItemProps;
+  state: Record<string, any>;
+  update: (id: string, value: any) => void;
+  classNames?: ClassNamesMap;
 }
 
 // Main Filters Component
@@ -126,113 +129,91 @@ export default function Filters({
       {flatFilters.map((filter) => (
         <FilterItem
           key={filter.id}
-          {...filter}
-          state={state}
-          update={update}
-          customRenderers={customRenderers}
-          globalClassNames={globalClassNames}
+          options={{...filter, state, update, customRenderers, globalClassNames}}
         />
       ))}
     </div>
   );
 }
 
+
 // Single Filter Item Component
-function FilterItem({
-  id,
-  title,
-  options,
-  collapsible = true,
-  defaultCollapsed = false,
-  type = "checkbox",
-  state,
-  update,
-  component,
-  render,
-  customProps,
-  customRenderers,
-  collapsibleIconUp = <ChevronUp />,
-  collapsibleIconDown = <ChevronDown />,
-  filterItemsClassName = "p-3",
-  classNames,
-  globalClassNames,
-}: FilterItemProps & {
-  state: Record<string, any>;
-  update: (id: string, value: any) => void;
-  customRenderers?: FiltersProps["customRenderers"];
-  globalClassNames?: ClassNamesMap;
-}) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+function FilterItem({options}: {options:FilterItemInternalProps}) {
+  const [collapsed, setCollapsed] = useState(!!options.defaultCollapsed);
 
   // merge class maps: global <- item
   const mergedClassNames: ClassNamesMap = {
-    ...(globalClassNames || {}),
-    ...(classNames || {}),
+    ...(options.globalClassNames || {}),
+    ...(options.classNames || {}),
   };
 
   // set sensible defaults depending on type
   let defaultSelected: any;
-  if (type === "checkbox" || type === "tag" || type === "tree") defaultSelected = [];
-  else if (type === "toggle" || type === "switch") defaultSelected = false;
-  else if (type === "range")
+  if (options.type === "checkbox" || options.type === "tag" || options.type === "tree") defaultSelected = [];
+  else if (options.type === "toggle" || options.type === "switch") defaultSelected = false;
+  else if (options.type === "range")
     defaultSelected =
-      options && options.length > 0 && typeof options[0].min === "number" ? options[0].min : 0;
+      options && options.options.length > 0 && typeof options.options[0].min === "number" ? options.options[0].min : 0;
   else defaultSelected = "";
 
-  const selected = state[id] ?? defaultSelected;
+  const selected = options.state[options.id] ?? defaultSelected;
 
   function toggleCheckbox(value: string) {
     const arr = new Set(Array.isArray(selected) ? selected : []);
     arr.has(value) ? arr.delete(value) : arr.add(value);
-    update(id, Array.from(arr));
+    options.update(options.id, Array.from(arr));
   }
 
   function selectRadio(value: any) {
-    update(id, value);
+    options.update(options.id, value);
   }
 
   // determine if there's a custom renderer for this item
-  const Registered = component ?? (customRenderers && (customRenderers[id] || customRenderers[type]));
+  const Registered = options.component ?? (options.customRenderers && (options.customRenderers[options.id] || options.customRenderers[options.type || ""]));
+
+  // provide sensible default collapsible icons if caller didn't pass any
+  const collapsibleIconUp = options.collapsibleIconUp ?? <ChevronUp />;
+  const collapsibleIconDown = options.collapsibleIconDown ?? <ChevronDown />;
 
   return (
-    <div className={filterItemsClassName}>
+    <div className={options.filterItemsClassName}>
       <div
         className={`${mergedClassNames.wrapper ?? "flex justify-between items-center cursor-pointer"}`}
-        onClick={() => collapsible && setCollapsed(!collapsed)}
+        onClick={() => options.collapsible && setCollapsed(!collapsed)}
       >
-        <span className={mergedClassNames.title ?? "font-semibold"}>{title}</span>
-        {collapsible && <span className={mergedClassNames.collapseIcon ?? ""}>{collapsed ? collapsibleIconUp : collapsibleIconDown}</span>}
+        <span className={mergedClassNames.title ?? "font-semibold"}>{options.title}</span>
+        {options.collapsible && <span className={mergedClassNames.collapseIcon ?? ""}>{collapsed ? collapsibleIconUp : collapsibleIconDown}</span>}
       </div>
 
       {!collapsed && (
         <div className={mergedClassNames.options ?? "mt-2"}>
           {/* if caller passed a render function for this filter item, use it */}
-          {render ? (
+          {options.render ? (
             // pass mergedClassNames as `classNames` key (render expects classNames)
-            render({
-              filter: { id, title, options, collapsible, defaultCollapsed, type, customProps, classNames },
-              state,
-              update,
+            options.render({
+              filter: { id: options.id, title: options.title, options: options.options, collapsible: options.collapsible, defaultCollapsed: options.defaultCollapsed, type: options.type, customProps: options.customProps, classNames: mergedClassNames },
+              state: options.state,
+              update: options.update,
               classNames: mergedClassNames,
             })
           ) : Registered ? (
             // render registered/custom component
-            <Registered filter={{ id, title, options, collapsible, defaultCollapsed, type, customProps, classNames }} state={state} update={update} classNames={mergedClassNames} />
+            <Registered filter={{ id: options.id, title: options.title, options: options.options, collapsible: options.collapsible, defaultCollapsed: options.defaultCollapsed, type: options.type, customProps: options.customProps, classNames: mergedClassNames }} state={options.state} update={options.update} classNames={mergedClassNames} />
           ) : // built-in tree handling
-          type === "tree" ? (
+          options.type === "tree" ? (
             <CategoryFilter
-              options={options}
+              options={options.options}
               selected={selected}
-              onToggle={(vals: (string | number | boolean)[]) => update(id, vals)}
+              onToggle={(vals: (string | number | boolean)[]) => options.update(options.id, vals)}
               classNames={mergedClassNames}
             />
           ) : (
             <div className={mergedClassNames.options ?? "flex flex-wrap gap-2"}>
-              {options.map((opt) => (
+              {options.options.map((opt) => (
                 <FilterOptionItem
                   key={String(opt.value)}
-                  type={type}
-                  option={opt}
+                  {...opt}
+                  type={options.type || "checkbox"}
                   selected={selected}
                   onCheckboxToggle={toggleCheckbox}
                   onRadioSelect={selectRadio}
@@ -250,20 +231,22 @@ function FilterItem({
 // Single Filter Option Component 
 function FilterOptionItem({
   type,
-  option,
+  label,
+  value,
+  color,
+  image,
+  icon,
+  rating,
+  min,
+  max,
+  step,
+  className,
   selected,
   onCheckboxToggle,
   onRadioSelect,
   classNames,
-}: {
-  type: "checkbox" | "radio" | "chip" | "toggle" | "switch" | "color" | "image" | "rating" | "tag" | "icon" | "range" | string;
-  option: FilterOption;
-  selected: any;
-  onCheckboxToggle: (v: any) => void;
-  onRadioSelect: (v: any) => void;
-  classNames?: ClassNamesMap;
-}) {
-  const optClass = option.className ?? classNames?.option ?? "";
+}: FilterOptionItemProps) {
+  const optClass = className ?? classNames?.option ?? "";
   const inputClass = classNames?.input ?? "";
   const checkboxClass = classNames?.checkbox ?? "";
   const radioClass = classNames?.radio ?? "";
@@ -273,12 +256,12 @@ function FilterOptionItem({
     return (
       <label className={`flex items-center gap-2 ${optClass}`}>
         <input
-          className={checkboxClass}
+          className={`${inputClass} ${checkboxClass}`.trim()}
           type="checkbox"
-          checked={Array.isArray(selected) ? selected.includes(option.value) : false}
-          onChange={() => onCheckboxToggle(String(option.value))}
+          checked={Array.isArray(selected) ? selected.includes(value) : false}
+          onChange={() => onCheckboxToggle(String(value))}
         />
-        {option.label}
+        {label}
       </label>
     );
 
@@ -287,12 +270,12 @@ function FilterOptionItem({
     return (
       <label className={`flex items-center gap-2 ${optClass}`}>
         <input
-          className={radioClass}
+          className={`${inputClass} ${radioClass}`.trim()}
           type="radio"
-          checked={selected === option.value}
-          onChange={() => onRadioSelect(option.value)}
+          checked={selected === value}
+          onChange={() => onRadioSelect(value)}
         />
-        {option.label}
+        {label}
       </label>
     );
 
@@ -300,10 +283,10 @@ function FilterOptionItem({
   if (type === "chip")
     return (
       <button
-        className={`${optClass} px-3 py-1 rounded-full border ${selected === option.value ? "bg-black text-white" : "bg-white text-black"}`}
-        onClick={() => onRadioSelect(option.value)}
+        className={`${optClass} px-3 py-1 rounded-full border ${selected === value ? "bg-black text-white" : "bg-white text-black"}`}
+        onClick={() => onRadioSelect(value)}
       >
-        {option.label}
+        {label}
       </button>
     );
 
@@ -317,7 +300,7 @@ function FilterOptionItem({
         >
           <div className={`bg-white w-4 h-4 rounded-full shadow transform transition ${selected ? "translate-x-5" : "translate-x-0"}`} />
         </div>
-        {option.label}
+        {label}
       </label>
     );
 
@@ -325,9 +308,9 @@ function FilterOptionItem({
   if (type === "color")
     return (
       <div
-        onClick={() => onRadioSelect(option.value)}
-        className={`${classNames?.color ?? "w-6 h-6 rounded-full border cursor-pointer"} ${selected === option.value ? "ring-2 ring-black" : ""} ${optClass}`}
-        style={{ backgroundColor: option.color ?? String(option.value) }}
+        onClick={() => onRadioSelect(value)}
+        className={`${classNames?.color ?? "w-6 h-6 rounded-full border cursor-pointer"} ${selected === value ? "ring-2 ring-black" : ""} ${optClass}`}
+        style={{ backgroundColor: color ?? String(value) }}
       />
     );
 
@@ -335,18 +318,18 @@ function FilterOptionItem({
   if (type === "image")
     return (
       <div
-        className={`${classNames?.image ?? "w-12 h-12 rounded-lg border overflow-hidden cursor-pointer"} ${selected === option.value ? "ring-2 ring-black" : ""} ${optClass}`}
-        onClick={() => onRadioSelect(option.value)}
+        className={`${classNames?.image ?? "w-12 h-12 rounded-lg border overflow-hidden cursor-pointer"} ${selected === value ? "ring-2 ring-black" : ""} ${optClass}`}
+        onClick={() => onRadioSelect(value)}
       >
-        {option.image ? <img src={option.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-gray-200">No Image</div>}
+        {image ? <img src={image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-gray-200">No Image</div>}
       </div>
     );
 
   // RATING
   if (type === "rating")
     return (
-      <button onClick={() => onRadioSelect(option.value)} className={`${classNames?.rating ?? "text-xl"} ${selected === option.value ? "text-yellow-500" : "text-gray-400"} ${optClass}`}>
-        {"★".repeat(Number(option.rating ?? option.value))}
+      <button onClick={() => onRadioSelect(value)} className={`${classNames?.rating ?? "text-xl"} ${selected === value ? "text-yellow-500" : "text-gray-400"} ${optClass}`}>
+        {"★".repeat(Number(rating ?? value))}
       </button>
     );
 
@@ -354,39 +337,39 @@ function FilterOptionItem({
   if (type === "tag")
     return (
       <button
-        className={`${classNames?.tag ?? "px-2 py-1 rounded-md text-xs border"} ${Array.isArray(selected) && selected.includes(option.value) ? "bg-black text-white" : "bg-white text-black"} ${optClass}`}
-        onClick={() => onCheckboxToggle(String(option.value))}
+        className={`${classNames?.tag ?? "px-2 py-1 rounded-md text-xs border"} ${Array.isArray(selected) && selected.includes(value) ? "bg-black text-white" : "bg-white text-black"} ${optClass}`}
+        onClick={() => onCheckboxToggle(String(value))}
       >
-        {option.label}
+        {label}
       </button>
     );
 
   // ICON
   if (type === "icon")
     return (
-      <button className={`${classNames?.icon ?? "p-2 rounded-md border"} ${selected === option.value ? "bg-black text-white" : "bg-white text-black"} ${optClass}`} onClick={() => onRadioSelect(option.value)}>
-        {option.icon}
+      <button className={`${classNames?.icon ?? "p-2 rounded-md border"} ${selected === value ? "bg-black text-white" : "bg-white text-black"} ${optClass}`} onClick={() => onRadioSelect(value)}>
+        {icon}
       </button>
     );
 
   // RANGE
   if (type === "range") {
     // use numeric value for range
-    const min = typeof option.min === "number" ? option.min : 0;
-    const max = typeof option.max === "number" ? option.max : 100;
-    const step = typeof option.step === "number" ? option.step : 1;
-    const value = typeof selected === "number" ? selected : Number(selected || min);
+    const minVal = typeof min === "number" ? min : 0;
+    const maxVal = typeof max === "number" ? max : 100;
+    const stepVal = typeof step === "number" ? step : 1;
+    const curr = typeof selected === "number" ? selected : Number(selected || minVal);
 
     return (
       <div className={`flex items-center gap-2 ${classNames?.range ?? ""} ${optClass}`}>
-        <input className={classNames?.input ?? ""} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onRadioSelect(Number(e.target.value))} />
-        <span className="text-sm w-12 text-right">{value}</span>
+        <input className={classNames?.input ?? ""} type="range" min={minVal} max={maxVal} step={stepVal} value={curr} onChange={(e) => onRadioSelect(Number(e.target.value))} />
+        <span className="text-sm w-12 text-right">{curr}</span>
       </div>
     );
   }
 
   // DEFAULT
-  return <span className={classNames?.option ?? ""}>{option.label}</span>;
+  return <span className={classNames?.option ?? ""}>{label}</span>;
 }
 
 

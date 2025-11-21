@@ -61,12 +61,14 @@ export default function DefaultCatalogPage() {
     searchQuery,
     filters,
     sortOrder,
+    sortBy,
     viewMode,
     page,
     pageSize,
     setSearchQuery,
     setFilters,
     setSortOrder,
+    setSortBy,
     setViewMode,
     setPage,
     fetchProducts,
@@ -142,11 +144,16 @@ export default function DefaultCatalogPage() {
 
   const controls = (
     <ListingControl
-      sortOrder={sortOrder}
-      onSortChange={(o) => setSortOrder(o)}
-      viewMode={viewMode}
-      onViewModeChange={(m) => setViewMode(m)}
-      enableViewMode
+      sortProps={{
+        sortOrder: sortOrder ?? "desc",
+        sortBy: sortBy ?? "price",
+        onSortChange: (order) => setSortOrder(order),
+        onSortByChange: (by) => setSortBy(by),
+      }}
+      viewModeProps={{
+        mode: viewMode,
+        onChange: (m) => setViewMode(m),
+      }}
     />
   );
 

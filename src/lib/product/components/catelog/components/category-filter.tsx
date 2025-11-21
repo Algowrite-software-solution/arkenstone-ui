@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { ClassNamesMap } from "./filter";
 
-type CategoryNode = {
+export type CategoryNode = {
   label: string;
   value: string | number | boolean;
   children?: CategoryNode[];
 };
+
+export interface CategoryFilterProps {
+  options: CategoryNode[];
+  selected: (string | number | boolean)[];
+  onToggle: (values: (string | number | boolean)[]) => void;
+  level?: number;
+  classNames?: ClassNamesMap;
+}
 
 export default function CategoryFilter({
   options,
@@ -14,13 +22,7 @@ export default function CategoryFilter({
   onToggle,
   level = 0,
   classNames,
-}: {
-  options: CategoryNode[];
-  selected: any[];
-  onToggle: (values: (string | number | boolean)[]) => void;
-  level?: number;
-  classNames?: ClassNamesMap;
-}) {
+}: CategoryFilterProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const isSelectedArray = Array.isArray(selected);
