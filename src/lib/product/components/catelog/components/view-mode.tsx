@@ -11,45 +11,64 @@ export interface ViewModeSwitcherProps {
 
   /** Optional: allow developer to pass custom modes or hide some */
   availableModes?: ViewMode[];
+
+  /** Classname overrides */
+  containerClassName?: string;
+  buttonClassName?: string;
+  selectedButtonClassName?: string;
+  unselectedButtonClassName?: string;
+
+  /** Per-button extra classnames (optional) */
+  cardButtonClassName?: string;
+  listButtonClassName?: string;
+  tableButtonClassName?: string;
+
+  /** Icon size */
+  iconSize?: number;
 }
 
 export function ViewModeSwitcher({
   mode,
   onChange,
   availableModes = ["card", "list", "table"],
+  containerClassName = "flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",
+  buttonClassName = "p-2 rounded-md border transition",
+  selectedButtonClassName = "bg-gray-200 border-gray-400",
+  unselectedButtonClassName = "border-gray-300",
+  cardButtonClassName = "",
+  listButtonClassName = "",
+  tableButtonClassName = "",
+  iconSize = 16,
 }: ViewModeSwitcherProps) {
+  const btnClasses = (isSelected: boolean, extra = "") =>
+    `${buttonClassName} ${isSelected ? selectedButtonClassName : unselectedButtonClassName} ${extra}`.trim();
+
   return (
-    <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm">
+    <div className={containerClassName}>
       {availableModes.includes("card") && (
         <button
-          className={`p-2 rounded-md border transition ${
-            mode === "card" ? "bg-gray-200 border-gray-400" : "border-gray-300"
-          }`}
+          className={btnClasses(mode === "card", cardButtonClassName)}
           onClick={() => onChange("card")}
         >
-          <LayoutGrid size={16} />
+          <LayoutGrid size={iconSize} />
         </button>
       )}
 
       {availableModes.includes("list") && (
         <button
-          className={`p-2 rounded-md border transition ${
-            mode === "list" ? "bg-gray-200 border-gray-400" : "border-gray-300"
-          }`}
+          className={btnClasses(mode === "list", listButtonClassName)}
           onClick={() => onChange("list")}
         >
-          <List size={16} />
+          <List size={iconSize} />
         </button>
       )}
 
       {availableModes.includes("table") && (
         <button
-          className={`p-2 rounded-md border transition ${
-            mode === "table" ? "bg-gray-200 border-gray-400" : "border-gray-300"
-          }`}
+          className={btnClasses(mode === "table", tableButtonClassName)}
           onClick={() => onChange("table")}
         >
-          <Table size={16} />
+          <Table size={iconSize} />
         </button>
       )}
     </div>

@@ -25,8 +25,15 @@ export interface PaginationProps {
   renderPage?: (page: number, isActive: boolean) => React.ReactNode;
   renderPageSize?: React.ReactNode;
 
-  /** Styling */
-  className?: string;
+  /** Styling (new) */
+  containerClassName?: string;
+  summaryClassName?: string;
+  pageClassName?: string;
+  activePageClassName?: string;
+  prevNextClassName?: string;
+  pageSizeSelectClassName?: string;
+  pageButtonClassName?: string;
+  disabledClassName?: string;
 }
 
 export function Pagination({
@@ -45,29 +52,34 @@ export function Pagination({
   renderPage,
   renderPageSize,
 
-  className,
+  // styling props with sensible defaults
+  containerClassName = "flex items-center justify-center gap-2 p-3",
+  summaryClassName = "text-sm text-gray-600 mr-3",
+  pageClassName = "px-3 py-1 border rounded",
+  activePageClassName = "bg-gray-200 font-semibold",
+  prevNextClassName = "px-3 py-1 border rounded disabled:opacity-40",
+  pageSizeSelectClassName = "border rounded px-2 py-1 text-sm mr-3",
+  pageButtonClassName = "", // extra wrapper for page button if needed
+  disabledClassName = "opacity-40",
 }: PaginationProps) {
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = Math.max(0, Math.ceil(total / pageSize));
 
   const defaultPage = (pageNum: number, isActive: boolean) => (
     <button
       key={pageNum}
       onClick={() => onChange(pageNum)}
-      className={`px-3 py-1 border rounded ${
-        isActive ? "bg-gray-200 font-semibold" : ""
-      }`}
+      className={`${pageClassName} ${isActive ? activePageClassName : ""} ${pageButtonClassName}`.trim()}
+      aria-current={isActive ? "page" : undefined}
     >
       {pageNum}
     </button>
   );
 
   return (
-    <div
-      className={`flex items-center justify-center gap-2 p-3 ${className || ""}`}
-    >
+    <div className={containerClassName}>
       {/* Summary */}
       {showSummary && (
-        <span className="text-sm text-gray-600 mr-3">
+        <span className={summaryClassName}>
           Showing {(page - 1) * pageSize + 1}–
           {Math.min(page * pageSize, total)} of {total}
         </span>
@@ -76,7 +88,12 @@ export function Pagination({
       {/* Page-size selector */}
       {showPageSize && (
         renderPageSize || (
-          <select className="border rounded px-2 py-1 text-sm mr-3">
+          <select
+            className={pageSizeSelectClassName}
+            aria-label="Select page size"
+            // NOTE: this is UI only; handle changes externally if you wire up a handler
+            onChange={() => {}}
+          >
             <option>10</option>
             <option>25</option>
             <option>50</option>
@@ -89,9 +106,10 @@ export function Pagination({
       {showArrows &&
         (renderPrev || (
           <button
-            className="px-3 py-1 border rounded disabled:opacity-40"
+            className={`${prevNextClassName} ${page === 1 ? disabledClassName : ""}`.trim()}
             disabled={page === 1}
-            onClick={() => onChange(page - 1)}
+            onClick={() => onChange(Math.max(1, page - 1))}
+            aria-label="Previous page"
           >
             Prev
           </button>
@@ -102,18 +120,17 @@ export function Pagination({
         Array.from({ length: totalPages }, (_, i) => {
           const p = i + 1;
           const isActive = p === page;
-          return renderPage
-            ? renderPage(p, isActive)
-            : defaultPage(p, isActive);
+          return renderPage ? renderPage(p, isActive) : defaultPage(p, isActive);
         })}
 
       {/* Next button */}
       {showArrows &&
         (renderNext || (
           <button
-            className="px-3 py-1 border rounded disabled:opacity-40"
+            className={`${prevNextClassName} ${page === totalPages ? disabledClassName : ""}`.trim()}
             disabled={page === totalPages}
-            onClick={() => onChange(page + 1)}
+            onClick={() => onChange(Math.min(totalPages || 1, page + 1))}
+            aria-label="Next page"
           >
             Next
           </button>
