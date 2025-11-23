@@ -7,6 +7,11 @@ export interface ProductImageLayoutProps {
   width?: string | number;
   height?: string | number;
 
+  // optional custom background node (img, video, carousel, animated component...)
+  background?: React.ReactNode;
+  backgroundClassName?: string;
+  backgroundWrapperClassName?: string;
+
   // Classname overrides
   containerClassName?: string;
   imageClassName?: string;
@@ -20,6 +25,14 @@ export interface ProductImageLayoutProps {
   bottomLeft?: React.ReactNode;
   bottomRight?: React.ReactNode;
   center?: React.ReactNode;
+
+  // placeholders shown when both left & right for a region are missing
+  topPlaceholder?: React.ReactNode;
+  bottomPlaceholder?: React.ReactNode;
+
+  // wrapper classnames for top / bottom rows
+  topRowClassName?: string;
+  bottomRowClassName?: string;
 }
 
 /**
@@ -33,10 +46,12 @@ export function ProductImageLayout({
   imageAlt = "Product image",
   width = "100%",
   height = 280,
-
+  background,
+  backgroundClassName = "absolute inset-0 z-0",
+  backgroundWrapperClassName = "absolute inset-0 overflow-hidden z-0",
   containerClassName = "relative rounded-lg overflow-hidden bg-gray-100",
-  imageClassName = "absolute inset-0 bg-center bg-cover",
-  overlayClassName = "absolute inset-0 pointer-events-none",
+  imageClassName = "absolute inset-0 bg-center bg-cover z-0",
+  overlayClassName = "absolute inset-0 pointer-events-none z-10",
   cornerClassName = "p-2 pointer-events-auto",
   centerClassName = "absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto",
 
@@ -45,45 +60,80 @@ export function ProductImageLayout({
   bottomLeft,
   bottomRight,
   center,
+
+  topPlaceholder,
+  bottomPlaceholder,
+  topRowClassName = "absolute left-0 right-0 top-2 px-2 flex items-center",
+  bottomRowClassName = "absolute left-0 right-0 bottom-2 px-2 flex items-center",
 }: ProductImageLayoutProps) {
   const placeholder =
     "linear-gradient(135deg,#f3f4f6 0%, #e5e7eb 50%, #f8fafc 100%)";
 
-  const bgStyle: React.CSSProperties = {
-    backgroundImage: imageUrl ? `url(${imageUrl})` : placeholder,
+  const rootStyle: React.CSSProperties = {
     width: typeof width === "number" ? `${width}px` : String(width),
     height: typeof height === "number" ? `${height}px` : String(height),
   };
 
+  const renderTopRow = () => {
+    const hasAny = !!topLeft || !!topRight;
+    if (!hasAny && topPlaceholder) {
+      return <div className="w-full flex justify-center">{topPlaceholder}</div>;
+    }
+
+    return (
+      <>
+        <div className="flex-1 flex items-start">
+          {topLeft ? <div className={cornerClassName}>{topLeft}</div> : null}
+        </div>
+        <div className="flex-1 flex items-end justify-end">
+          {topRight ? <div className={cornerClassName}>{topRight}</div> : null}
+        </div>
+      </>
+    );
+  };
+
+  const renderBottomRow = () => {
+    const hasAny = !!bottomLeft || !!bottomRight;
+    if (!hasAny && bottomPlaceholder) {
+      return <div className="w-full flex justify-center">{bottomPlaceholder}</div>;
+    }
+
+    return (
+      <>
+        <div className="flex-1 flex items-start">
+          {bottomLeft ? <div className={cornerClassName}>{bottomLeft}</div> : null}
+        </div>
+        <div className="flex-1 flex items-end justify-end">
+          {bottomRight ? <div className={cornerClassName}>{bottomRight}</div> : null}
+        </div>
+      </>
+    );
+  };
+
   return (
-    <div className={`${containerClassName}`} style={bgStyle}>
-      {/* background is applied via inline style to the root; keep an overlay layer for gradients */}
-      <div className={imageClassName} aria-hidden style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : placeholder }} />
+    <div className={containerClassName} style={rootStyle}>
+      {/* background slot: if provided render it; otherwise render built-in background image */}
+      <div className={backgroundWrapperClassName} aria-hidden>
+        {background ? (
+          <div className={backgroundClassName}>{background}</div>
+        ) : (
+          <div
+            className={imageClassName}
+            style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : placeholder }}
+            role="img"
+            aria-label={imageAlt}
+          />
+        )}
+      </div>
 
-      {/* Overlay container (inset) */}
+      {/* Overlay container (above background) */}
       <div className={overlayClassName}>
+        {/* Top row: shows left & right; if both missing uses topPlaceholder centered */}
+        <div className={topRowClassName}>{renderTopRow()}</div>
 
-        {/* Top-left slot */}
-        <div className={`absolute left-2 top-2 ${cornerClassName}`}>
-          {topLeft}
-        </div>
+        {/* Bottom row: shows left & right; if both missing uses bottomPlaceholder centered */}
+        <div className={bottomRowClassName}>{renderBottomRow()}</div>
 
-        {/* Top-right slot */}
-        <div className={`absolute right-2 top-2 ${cornerClassName}`}>
-          {topRight}
-        </div>
-
-        {/* Bottom-left slot */}
-        <div className={`absolute left-2 bottom-2 ${cornerClassName} flex flex-col items-start gap-1`}>
-          {bottomLeft}
-        </div>
-
-        {/* Bottom-right slot */}
-        <div className={`absolute right-2 bottom-2 ${cornerClassName}`}>
-          {bottomRight}
-        </div>
-
-        {/* Center slot (for badges, quick actions, or children) */}
         {center && <div className={centerClassName}>{center}</div>}
       </div>
     </div>

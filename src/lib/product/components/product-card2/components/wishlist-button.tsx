@@ -28,7 +28,7 @@ export function WishlistButton({
   animationDuration = 200,
 }: WishlistButtonProps) {
   const handleClick = () => {
-    onToggle?.(!isWishlisted);
+    onToggle?.(!isWishlisted);       
   };
 
   const defaultIcon = (

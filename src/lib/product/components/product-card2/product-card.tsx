@@ -1,11 +1,14 @@
 import { Product } from "../../types";
 import { ProductCardLayout } from "./layouts/product-card-layout";
-import { DefaultProductImage } from "./components/product-image/default-product-image";
+import { ProductImageLayout } from "./layouts/product-card-image-layout";
 import { WishlistButton } from "./components/wishlist-button";
 import { DiscountBadge } from "./components/discount-badge";
 import { ViewDetailsButton } from "./components/view-details-button";
 import { BrandTitle } from "./components/brand-title";
 import { PriceCard } from "./components/price-card";
+import { AddToCart } from "./components/add-to-cart-button";
+import { CategoriesBadgeList } from "./components/categories";
+import { useProductCardStore , useCategoryStore, useCartStore} from "../../../useStore";
 
 export interface ProductCardProps {
   product: Product;
@@ -35,39 +38,56 @@ export function ProductCard({
   showViewDetails = true,
   showBrand = true,
   showPrice = true,
-  onToggleWishlist,
-  onViewDetails,
-  onAddToCart,
   containerClassName,
-  imageHeight = 280,
 }: ProductCardProps) {
   const primaryImage = product.images?.find((i) => i.is_primary) ?? product.images?.[0];
   const imageUrl = primaryImage?.url;
   const imageAlt = primaryImage?.alt_text ?? product.name;
 
+  // Zustand selectors/actions
+  const isWishlisted = useProductCardStore((s) => s.wishlist.includes(product.id));
+  const toggleWishlist = useProductCardStore((s) => s.toggleWishlist);
+  const addToCartAction = useCartStore((s) => s.addToCart);
+  const getCartQuantity = useCartStore((s) => s.getCartQuantity);
+  const viewDetailsAction = useProductCardStore((s) => s.viewDetails);
+  const setSelectedCategory = useCategoryStore((s) => s.setSelectedCategory);
+
+  const inCart = (getCartQuantity(product.id) ?? 0) > 0;
+
   const wishlistNode = showWishlist ? (
     <WishlistButton
-      isWishlisted={false}
-      onToggle={() => onToggleWishlist?.(product.id, true)}
+      isWishlisted={isWishlisted}
+      onToggle={() => {
+        toggleWishlist(product.id);
+
+        // ADD YOUR GLOBAL SIDE EFFECTS HERE ↓↓↓
+        console.log("Wishlist changed globally!");
+      }}
       size={20}
       ariaLabel="Wishlist"
     />
   ) : null;
 
   const discountNode =
-    showDiscount && (product.discount_value || product.final_price !== product.price) ? (
+    showDiscount && (product.discount_value != null || (product.final_price != null && product.price != null && product.final_price !== product.price)) ? (
       <DiscountBadge
-        discount={product.discount_value || 0}
-        discountType={product.discount_type === "fixed" ? "fixed" : "percentage"}
+        discount={product.discount_value ?? undefined}
+        discountType={
+          product.discount_type === "fixed"
+            ? "fixed"
+            : product.discount_type === "percentage"
+            ? "percentage"
+            : undefined
+        }
       />
     ) : null;
 
   const viewDetailsNode = showViewDetails ? (
-    <ViewDetailsButton onClick={() => onViewDetails?.(product.id)} />
+    <ViewDetailsButton onClick={() => viewDetailsAction(product.id)} />
   ) : null;
 
   const brandNode = showBrand && product.brand ? (
-    <BrandTitle brand={product.brand_id} title={product.name} showBrand={true} />
+    <BrandTitle brand={product.brand?.name} title={product.name} showBrand={true} />
   ) : null;
 
   const priceNode = showPrice ? (
@@ -75,30 +95,38 @@ export function ProductCard({
       finalPrice={product.final_price ?? product.price ?? 0}
       price={product.price ?? 0}
       discountType={product.discount_type}
+      discountValue={product.discount_value ?? null}
       currency="USD"
+      showOriginalPrice={false}
+      showDiscountPercentage={false}
     />
   ) : null;
 
   const imageComponent = (
-    <DefaultProductImage
+    <ProductImageLayout
       imageUrl={imageUrl}
       imageAlt={imageAlt}
-      height={imageHeight}
       topLeft={wishlistNode}
       topRight={discountNode}
-      bottomLeft={
-        <>
-          {brandNode}
-          {priceNode}
-        </>
+      bottomPlaceholder={
+          <CategoriesBadgeList 
+            categories={product.categories || []}
+            onCategoryClick={(category) => setSelectedCategory(category)}
+            positionClassName="bottom-3 left-3"
+          />
       }
-      bottomRight={viewDetailsNode}
     />
   );
 
   const detailsComponent = (
     <div className="p-3">
-      <div className="text-sm text-gray-500 mb-1">{product.brand?.name}</div>
+      {brandNode}
+      {priceNode}
+      <AddToCart
+        onAddToCart={() => addToCartAction(product.id)}
+        addToCartText="Add to cart"
+        isInCart={inCart}
+      />
     </div>
   );
 

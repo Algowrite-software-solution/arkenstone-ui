@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Product } from "../../../product/types";
-import { dummyProducts } from "../../../data/products";
+import type { Product, Category } from "./product/types";
+import { dummyProducts } from "./data/products";
 
 // --- Types ---
 interface CatalogState {
@@ -29,6 +29,35 @@ interface CatalogState {
 
   // The "API Call"
   fetchProducts: () => Promise<void>;
+}
+
+interface ProductCardState {
+  // wishlist: product ids
+  wishlist: number[];
+  
+  // currently opened product details id (if any)
+  activeProductId?: number | null;
+
+  // actions
+  toggleWishlist: (productId: number) => void;
+  isWishlisted: (productId: number) => boolean;
+  viewDetails: (productId: number) => void;
+  closeDetails: () => void;
+}
+
+interface CartState {
+  // cart: productId => quantity
+  cart: Record<number, number>;
+
+  addToCart: (productId: number, qty?: number) => void;
+  removeFromCart: (productId: number) => void;
+  getCartQuantity: (productId: number) => number;
+}
+
+interface CategoryState {
+  selectedCategory: Category | null;
+  // accept either full Category or a lightweight CategoryItem from UI components
+  setSelectedCategory: (cat: Category | Record<string, any>) => void;
 }
 
 // --- Store Implementation ---
@@ -166,4 +195,52 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       set({ products: result, total: result.length, loading: false });
     }, 500);
   }
+}));
+
+export const useProductCardStore = create<ProductCardState>((set, get) => ({
+  wishlist: [],
+  activeProductId: null,
+
+  toggleWishlist: (productId) =>
+    set((s) => {
+      const exists = s.wishlist.includes(productId);
+      return { wishlist: exists ? s.wishlist.filter((id) => id !== productId) : [...s.wishlist, productId] };
+    }),
+
+  isWishlisted: (productId) => {
+    const s = get();
+    return s.wishlist.includes(productId);
+  },
+
+  viewDetails: (productId) => set({ activeProductId: productId }),
+
+  closeDetails: () => set({ activeProductId: null }),
+}));
+
+export const useCartStore = create<CartState>((set, get) => ({
+  cart: {},
+
+  addToCart: (productId, qty = 1) =>
+    set((s) => {
+      const current = s.cart[productId] ?? 0;
+      return { cart: { ...s.cart, [productId]: current + qty } };
+    }),
+
+  removeFromCart: (productId) =>
+    set((s) => {
+      const next = { ...s.cart };
+      delete next[productId];
+      return { cart: next };
+    }),
+
+  getCartQuantity: (productId) => {
+    const s = get();
+    return s.cart[productId] ?? 0;
+  },
+}));
+
+export const useCategoryStore = create<CategoryState>((set) => ({
+  selectedCategory: null,
+
+  setSelectedCategory: (cat) => set({ selectedCategory: (cat as Category) ?? null }),
 }));

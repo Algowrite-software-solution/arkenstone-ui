@@ -5,8 +5,8 @@ import Filters from "../components/filter";
 import { Listing } from "../layouts/listings-layout";
 import { ListingControl } from "../components/listing-controls";
 import { Pagination } from "../components/pagination";
-import { ProductCard } from "../../product-card/product-card";
-import { useCatalogStore } from "../useCatalogStore";
+import { ProductCard } from "../../product-card2/product-card";
+import { useCatalogStore } from "../../../../useStore";
 
 const FILTER_CONFIG = [
   {
