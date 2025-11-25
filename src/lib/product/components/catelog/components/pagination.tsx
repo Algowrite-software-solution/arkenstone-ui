@@ -14,26 +14,31 @@ export interface PaginationProps {
   onChange: (page: number) => void;
 
   /** Optional customizations */
-  showArrows?: boolean;
-  showPages?: boolean;
-  showSummary?: boolean;
-  showPageSize?: boolean;
+  show?: {
+    arrows?: boolean;
+    pages?: boolean;
+    summary?: boolean;
+    pageSize?: boolean;
+  }
 
   /** Custom render overrides */
-  renderPrev?: React.ReactNode;
-  renderNext?: React.ReactNode;
-  renderPage?: (page: number, isActive: boolean) => React.ReactNode;
-  renderPageSize?: React.ReactNode;
-
-  /** Styling (new) */
-  containerClassName?: string;
-  summaryClassName?: string;
-  pageClassName?: string;
-  activePageClassName?: string;
-  prevNextClassName?: string;
-  pageSizeSelectClassName?: string;
-  pageButtonClassName?: string;
-  disabledClassName?: string;
+  customRender?: {
+    renderPrev?: React.ReactNode;
+    renderNext?: React.ReactNode;
+    renderPage?: (page: number, isActive: boolean) => React.ReactNode;
+    renderPageSize?: React.ReactNode;
+  }
+  /** Styling */
+  className?: {
+    container?: string;
+    summary?: string;
+    page?: string;
+    activePage?: string;
+    prevNext?: string;
+    pageSizeSelect?: string;
+    pageButton?: string;
+    disabled?: string;
+  }
 }
 
 export function Pagination({
@@ -42,25 +47,32 @@ export function Pagination({
   pageSize,
   onChange,
 
-  showArrows = true,
-  showPages = true,
-  showSummary = false,
-  showPageSize = false,
+  show = {
+    arrows: true,
+    pages: true,
+    summary: true,
+    pageSize: false,
+  },
 
-  renderPrev,
-  renderNext,
-  renderPage,
-  renderPageSize,
+  customRender = {
+    renderPrev: undefined,
+    renderNext: undefined,
+    renderPage: undefined,
+    renderPageSize: undefined,
+  },
 
   // styling props with sensible defaults
-  containerClassName = "flex items-center justify-center gap-2 p-3",
-  summaryClassName = "text-sm text-gray-600 mr-3",
-  pageClassName = "px-3 py-1 border rounded",
-  activePageClassName = "bg-gray-200 font-semibold",
-  prevNextClassName = "px-3 py-1 border rounded disabled:opacity-40",
-  pageSizeSelectClassName = "border rounded px-2 py-1 text-sm mr-3",
-  pageButtonClassName = "", // extra wrapper for page button if needed
-  disabledClassName = "opacity-40",
+  className = {
+    container : "flex items-center justify-center gap-2 p-3",
+    summary : "text-sm text-gray-600 mr-3",
+    page : "px-3 py-1 border rounded",
+    activePage : "bg-gray-200 font-semibold",
+    prevNext : "px-3 py-1 border rounded disabled:opacity-40",
+    pageSizeSelect : "border rounded px-2 py-1 text-sm mr-3",
+    pageButton : "", // extra wrapper for page button if needed
+    disabled : "opacity-40",
+  }
+  
 }: PaginationProps) {
   const totalPages = Math.max(0, Math.ceil(total / pageSize));
 
@@ -68,7 +80,7 @@ export function Pagination({
     <button
       key={pageNum}
       onClick={() => onChange(pageNum)}
-      className={`${pageClassName} ${isActive ? activePageClassName : ""} ${pageButtonClassName}`.trim()}
+      className={`${className.page} ${isActive ? className.activePage : ""} ${className.pageButton}`.trim()}
       aria-current={isActive ? "page" : undefined}
     >
       {pageNum}
@@ -76,20 +88,20 @@ export function Pagination({
   );
 
   return (
-    <div className={containerClassName}>
+    <div className={className.container}>
       {/* Summary */}
-      {showSummary && (
-        <span className={summaryClassName}>
+      {show?.summary && (
+        <span className={className.summary}>
           Showing {(page - 1) * pageSize + 1}–
           {Math.min(page * pageSize, total)} of {total}
         </span>
       )}
 
       {/* Page-size selector */}
-      {showPageSize && (
-        renderPageSize || (
+      {show?.pageSize && (
+        customRender.renderPageSize || (
           <select
-            className={pageSizeSelectClassName}
+            className={className.pageSizeSelect}
             aria-label="Select page size"
             // NOTE: this is UI only; handle changes externally if you wire up a handler
             onChange={() => {}}
@@ -103,10 +115,10 @@ export function Pagination({
       )}
 
       {/* Prev button */}
-      {showArrows &&
-        (renderPrev || (
+      {show?.arrows &&
+        (customRender.renderPrev || (
           <button
-            className={`${prevNextClassName} ${page === 1 ? disabledClassName : ""}`.trim()}
+            className={`${className.prevNext} ${page === 1 ? className.disabled : ""}`.trim()}
             disabled={page === 1}
             onClick={() => onChange(Math.max(1, page - 1))}
             aria-label="Previous page"
@@ -116,18 +128,18 @@ export function Pagination({
         ))}
 
       {/* Page numbers */}
-      {showPages &&
+      {show?.pages &&
         Array.from({ length: totalPages }, (_, i) => {
           const p = i + 1;
           const isActive = p === page;
-          return renderPage ? renderPage(p, isActive) : defaultPage(p, isActive);
+          return customRender.renderPage ? customRender.renderPage(p, isActive) : defaultPage(p, isActive);
         })}
 
       {/* Next button */}
-      {showArrows &&
-        (renderNext || (
+      {show?.arrows &&
+        (customRender.renderNext || (
           <button
-            className={`${prevNextClassName} ${page === totalPages ? disabledClassName : ""}`.trim()}
+            className={`${className.prevNext} ${page === totalPages ? className.disabled : ""}`.trim()}
             disabled={page === totalPages}
             onClick={() => onChange(Math.min(totalPages || 1, page + 1))}
             aria-label="Next page"

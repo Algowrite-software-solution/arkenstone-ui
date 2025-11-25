@@ -158,7 +158,13 @@ export default function DefaultCatalogPage() {
   );
 
   const pagination = (
-    <Pagination page={page} total={total} pageSize={pageSize} onChange={(p) => setPage(p)} showSummary />
+    <Pagination
+      page={page}
+      total={total}
+      pageSize={pageSize}
+      onChange={(p) => setPage(p)}
+      show={{ summary: true }}
+    />
   );
 
   return (

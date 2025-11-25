@@ -12,24 +12,27 @@ export interface CategoriesBadgeListProps {
   /** Show +X badge */
   showRemainingCount?: boolean;
 
-  positionClassName?: string;
-  categoryClassName?: string;
-  remainingClassName?: string;
+  className?: {
+    position?: string;
+    category?: string;
+    remaining?: string;
+    wrapper?: string;
+  }
 
   onCategoryClick?: (category: CategoryItem) => void;
-
-  wrapperClassName?: string;
 }
 
 export function CategoriesBadgeList({
   categories = [{ id: 1, name: "test1" }, { id: 2, name: "test2" }, { id: 3, name: "test3" }],
   maxCategories = 1,
   showRemainingCount = true,
-  positionClassName = "",
-  categoryClassName = "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full shadow",
-  remainingClassName = "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full",
+  className = {
+    position: "",
+    category: "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full shadow",
+    remaining: "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full",
+    wrapper: "flex flex-wrap gap-2",
+  },
   onCategoryClick = () => console.log('clicked'),
-  wrapperClassName = "flex flex-wrap gap-2",
 }: CategoriesBadgeListProps) {
   
   if (!categories || categories.length === 0) return null;
@@ -38,15 +41,15 @@ export function CategoriesBadgeList({
   const remainingCount = categories.length - maxCategories;
 
   return (
-    <div className={`absolute z-10 ${positionClassName}`}>
-      <div className={wrapperClassName}>
+    <div className={`absolute z-10 ${className.position}`}>
+      <div className={className.wrapper}>
         {categoriesToShow.map((category) => {
           const isClickable = Boolean(onCategoryClick);
 
           return (
             <span
               key={category.id}
-              className={`inline-block cursor-${isClickable ? "pointer" : "default"} ${categoryClassName}`}
+              className={`inline-block cursor-${isClickable ? "pointer" : "default"} ${className.category}`}
               onClick={() => isClickable && onCategoryClick?.(category)}
             >
               {category.name}
@@ -55,7 +58,7 @@ export function CategoriesBadgeList({
         })}
 
         {showRemainingCount && remainingCount > 0 && (
-          <span className={`inline-block ${remainingClassName}`}>
+          <span className={`inline-block ${className.remaining}`}>
             +{remainingCount}
           </span>
         )}

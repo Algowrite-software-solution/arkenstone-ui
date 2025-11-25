@@ -4,11 +4,14 @@ export interface ProductImageProps {
   /** "bg" uses background-image, "img" uses an <img> */
   mode?: "bg" | "img";
   height?: number | string;
-  className?: string;
-  imageClassName?: string;
-  overlayClassName?: string;
   children?: React.ReactNode;
   onClick?: React.MouseEventHandler;
+
+  className?: {
+    wrapper?: string;
+    image?: string;
+    overlay?: string;
+  }
 }
 
 export default function ProductImage({
@@ -16,9 +19,11 @@ export default function ProductImage({
   alt = "Product image",
   mode = "bg",
   height = 200,
-  className = "relative overflow-hidden rounded-lg",
-  imageClassName = "w-full h-full object-cover",
-  overlayClassName = "absolute inset-0 pointer-events-none",
+  className = {
+    wrapper : "relative overflow-hidden rounded-lg",
+    image : "w-full h-full object-cover",
+    overlay : "absolute inset-0 pointer-events-none",
+  },
   children,
   onClick,
 }: ProductImageProps) {
@@ -33,19 +38,19 @@ export default function ProductImage({
       : { height: typeof height === "number" ? `${height}px` : height };
 
   return (
-    <div className={className} style={style} onClick={onClick}>
+    <div className={className.wrapper} style={style} onClick={onClick}>
       {mode === "img" ? (
         imageUrl ? (
-          <img src={imageUrl} alt={alt} className={imageClassName} />
+          <img src={imageUrl} alt={alt} className={className.image} />
         ) : (
-          <div className={`flex items-center justify-center ${imageClassName}`}>No image</div>
+          <div className={`flex items-center justify-center ${className.image}`}>No image</div>
         )
       ) : (
         // when using background mode, keep an inner element so overlay children are positioned properly
         <div style={{ width: "100%", height: "100%" }} aria-hidden />
       )}
 
-      {children ? <div className={overlayClassName}>{children}</div> : null}
+      {children ? <div className={className.overlay}>{children}</div> : null}
     </div>
   );
 }

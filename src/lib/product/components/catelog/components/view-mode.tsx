@@ -12,63 +12,66 @@ export interface ViewModeSwitcherProps {
   /** Optional: allow developer to pass custom modes or hide some */
   availableModes?: ViewMode[];
 
-  /** Classname overrides */
-  containerClassName?: string;
-  buttonClassName?: string;
-  selectedButtonClassName?: string;
-  unselectedButtonClassName?: string;
+  /** Styles */
+  className?: {
+    container?: string;
+    button?: string;
+    selectedButton?: string;
+    unselectedButton?: string;
+    cardButton?: string;
+    listButton?: string;
+    tableButton?: string;
 
-  /** Per-button extra classnames (optional) */
-  cardButtonClassName?: string;
-  listButtonClassName?: string;
-  tableButtonClassName?: string;
+    /** Icon size */
+    iconSize?: number;
+  }
 
-  /** Icon size */
-  iconSize?: number;
 }
 
 export function ViewModeSwitcher({
   mode,
   onChange,
   availableModes = ["card", "list", "table"],
-  containerClassName = "flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",
-  buttonClassName = "p-2 rounded-md border transition",
-  selectedButtonClassName = "bg-gray-200 border-gray-400",
-  unselectedButtonClassName = "border-gray-300",
-  cardButtonClassName = "",
-  listButtonClassName = "",
-  tableButtonClassName = "",
-  iconSize = 16,
+  className = {
+    container : "flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",
+    button : "p-2 rounded-md border transition",
+    selectedButton : "bg-gray-200 border-gray-400",
+    unselectedButton : "border-gray-300",
+    cardButton : "",
+    listButton : "",
+    tableButton : "",
+    iconSize : 16,
+  }
 }: ViewModeSwitcherProps) {
   const btnClasses = (isSelected: boolean, extra = "") =>
-    `${buttonClassName} ${isSelected ? selectedButtonClassName : unselectedButtonClassName} ${extra}`.trim();
+    `${className.button} ${isSelected ? className.selectedButton : className.unselectedButton} ${extra}`.trim();
 
   return (
-    <div className={containerClassName}>
+    <div className={className.container}>
       {availableModes.includes("card") && (
         <button
-          className={btnClasses(mode === "card", cardButtonClassName)}
+          className={btnClasses(mode === "card", className.cardButton)}
           onClick={() => onChange("card")}
         >
-          <LayoutGrid size={iconSize} />
+          <LayoutGrid size={className.iconSize} />
         </button>
       )}
 
       {availableModes.includes("list") && (
         <button
-          className={btnClasses(mode === "list", listButtonClassName)}
+          className={btnClasses(mode === "list", className.listButton)}
           onClick={() => onChange("list")}
         >
-          <List size={iconSize} />
+          <List size={className.iconSize} />
         </button>
       )}
 
       {availableModes.includes("table") && (
         <button
-          className={btnClasses(mode === "table", tableButtonClassName)}
+          className={btnClasses(mode === "table", className.tableButton)}
           onClick={() => onChange("table")}
         >
-          <Table size={iconSize} />
+          <Table size={className.iconSize} />
         </button>
       )}
     </div>

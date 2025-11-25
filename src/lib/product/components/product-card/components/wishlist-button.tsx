@@ -8,10 +8,13 @@ export interface WishlistButtonProps {
   icon?: React.ReactNode;
   activeIcon?: React.ReactNode;
 
-  className?: string;
-  iconClassName?: string;
   ariaLabel?: string;
   size?: number;
+
+  className?:{
+    button?: string;
+    icon?: string;
+  }
 
   animationDuration?: number;
 }
@@ -21,10 +24,12 @@ export function WishlistButton({
   onToggle,
   icon,
   activeIcon,
-  className = "",
-  iconClassName = "",
   ariaLabel = "Add to wishlist",
   size = 22,
+  className = {
+    button: "",
+    icon: "",
+  },
   animationDuration = 200,
 }: WishlistButtonProps) {
   const handleClick = () => {
@@ -34,14 +39,14 @@ export function WishlistButton({
   const defaultIcon = (
     <Heart
       size={size}
-      className={`transition-all ${iconClassName}`}
+      className={`transition-all ${className?.icon}`}
     />
   );
 
   const defaultActiveIcon = (
     <Heart
       size={size}
-      className={`transition-all ${iconClassName}`}
+      className={`transition-all ${className?.icon}`}
       fill="currentColor"
     />
   );
@@ -50,7 +55,7 @@ export function WishlistButton({
     <button
       aria-label={ariaLabel}
       onClick={handleClick}
-      className={`group transition-all duration-${animationDuration} ${className}`}
+      className={`group transition-all duration-${animationDuration} ${className?.button}`}
     >
       {isWishlisted
         ? activeIcon || defaultActiveIcon

@@ -88,9 +88,17 @@ import { ProductCardLayout } from "product-card/layouts";
   layout="detailed" // Side-by-side view
   ImageComponent={<MyCustomImage />}
   DetailsComponent={<MyCustomDetails />}
-  containerClassName="border-blue-500 border-2"
+  className={{
+    container: "border-blue-500 border-2",
+    imageContainer: "w-1/3",
+    detailsContainer: "w-2/3 p-4"
+  }}
 />
 ```
+
+Note: ProductCardLayout now accepts a `className` object with optional keys:
+- `container`, `compactWrapper`, `detailedWrapper`, `imageContainer`, `detailsContainer`
+use these to override per-part styles instead of a single `containerClassName` prop.
 
 ### 3.2 `ProductImageLayout`
 A powerful slot-based image wrapper. It divides the image area into regions (Corners, Center, Top/Bottom Rows) for overlaying badges.
@@ -105,6 +113,13 @@ A powerful slot-based image wrapper. It divides the image area into regions (Cor
 | [BottomLeft]                     [BottomRight]  |  <-- BottomRow
 +-------------------------------------------------+
 ```
+Props (high level)
+- imageUrl, imageAlt, width, height
+- background: ReactNode — render any element behind overlays (carousel, video, <img>, etc.)
+- topLeft, topRight, bottomLeft, bottomRight, center — overlay slots
+- topPlaceholder, bottomPlaceholder — shown centered when both left+right for the row are missing
+- className: { container, image, overlay, corner, center, background, backgroundWrapper } — per-part class overrides
+- placeholderClassName: { top, bottom } — wrapper classes for top/bottom rows
 
 **Usage:**
 ```tsx
@@ -113,17 +128,34 @@ import { ProductImageLayout } from "product-card/layouts";
 <ProductImageLayout
   imageUrl="https://example.com/shoe.jpg"
   height={300}
-  // Slots
-  topRight={<DiscountBadge discount={50} />}
-  topLeft={<WishlistButton isWishlisted={true} />}
-  bottomPlaceholder={<CategoryBadgeList categories={...} />}
-/>
-```
 
-**Advanced Feature:** You can replace the static background image with a video or carousel using the `background` prop:
-```tsx
-<ProductImageLayout
-  background={<video src="preview.mp4" autoPlay loop className="w-full h-full object-cover" />}
+  // overlay slots
+  topLeft={<WishlistButton isWishlisted />}
+  topRight={<DiscountBadge discount={50} />}
+  bottomLeft={null}
+  bottomRight={null}
+
+  // when both bottomLeft & bottomRight are absent this placeholder is centered
+  bottomPlaceholder={<CategoriesBadgeList categories={product.categories} />}
+
+  // replace the CSS background with any node (carousel / video)
+  background={<video src="preview.mp4" autoPlay muted loop className="w-full h-full object-cover" />}
+
+  // class overrides (object form)
+  className={{
+    container: "relative rounded-lg overflow-hidden bg-gray-100",
+    image: "absolute inset-0 bg-center bg-cover",
+    overlay: "absolute inset-0 pointer-events-none z-10",
+    corner: "p-2 pointer-events-auto",
+    center: "absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto",
+    backgroundWrapper: "absolute inset-0 overflow-hidden",
+    background: "absolute inset-0",
+  }}
+
+  placeholderClassName={{
+    top: "absolute left-0 right-0 top-2 px-2 flex items-center",
+    bottom: "absolute left-0 right-0 bottom-2 px-2 flex items-center"
+  }}
 />
 ```
 
@@ -138,26 +170,23 @@ Displays price, original price (strikethrough), and discount percentage.
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
-| `price` | `number \| null` | `null` | Base / original price. If null it's treated as absent. |
-| `salePrice` | `number \| null` | `null` | Actual selling price. If null `price` is used as fallback. |
-| `discountType` | `string \| null` | `null` | `"percentage"` or `"fixed"` (backend hint). If omitted the component will infer discount from price difference. |
-| `discountValue` | `number \| null` | `null` | Value of discount: percent when `discountType === "percentage"`, fixed amount when `"fixed"`. |
-| `showOriginalPrice` | `boolean` | `true` | When true shows the original price as strikethrough if original > final. |
-| `showDiscountPercentage` | `boolean` | `true` | When true shows a computed or provided discount percentage. |
-| `currency` | `string` | `"USD"` | ISO currency code used with Intl.NumberFormat. |
-| `fractionDigits` | `number` | `2` | Number of fraction digits to format currency with. |
-| `wrapperClassName` | `string` | `"flex items-center gap-2 flex-wrap"` | Root container class override. |
-| `priceClassName` | `string` | `"text-lg font-semibold"` | Class for the displayed final price. |
-| `originalPriceClassName` | `string` | `"line-through text-gray-500"` | Class for the original (struck) price. |
-| `discountClassName` | `string` | `"text-red-600 font-semibold"` | Class for the discount percentage label. |
+| `price` | `number \| null` | `null` | Original/base price. |
+| `salePrice` | `number \| null` | `null` | Final/sale price (falls back to `price` when absent). |
+| `discountType` | `"percentage" \| "fixed" \| null` | `null` | Hint for interpreting `discountValue`. |
+| `discountValue` | `number \| null` | `null` | Discount amount (percent when `discountType === "percentage"`, fixed amount when `"fixed"`). |
+| `showOriginalPrice` | `boolean` | `true` | Show original price as strikethrough when greater than `salePrice`. |
+| `showDiscountPercentage` | `boolean` | `true` | Show computed or provided discount percentage. |
+| `currency` | `string` | `"USD"` | Currency code used by Intl.NumberFormat. |
+| `fractionDigits` | `number` | `2` | Maximum fraction digits for formatting. |
+| `className` | `object` | default classes object | Object of per-part class overrides: `{ wrapper?, price?, originalPrice?, discount? }` |
 
 Notes:
-- If both `price` and `salePrice` are numbers, the component considers a discount present when `price > salePrice`.
-- `discountValue` + `discountType` take precedence for determining the displayed percentage:
-  - `"percentage"`: display `discountValue` directly.
-  - `"fixed"`: convert fixed amount to percent = round((discountValue / price) * 100) when `price` is available.
-  - If no explicit discount fields, percentage is computed from `price` and `salePrice`.
-- Null values are handled gracefully — the UI displays `---` for missing final price and hides elements that cannot be computed.
+- A discount is considered present when both `price` and `salePrice` are numbers and `price > salePrice`.
+- Priority for discount display:
+  1. If `discountType === "percentage"` and `discountValue` provided → use it.
+  2. If `discountType === "fixed"` and `discountValue` + `price` provided → compute percent = round((discountValue / price) * 100).
+  3. Else infer percent from `price` and `salePrice`.
+- Missing/null values are handled gracefully; when `salePrice` is absent the component displays the `price`.
 
 Example
 ```tsx
@@ -169,17 +198,19 @@ import { PriceCard } from "./components/price-card";
 // fixed discount (backend provided fixed amount)
 <PriceCard price={120} salePrice={90} discountType="fixed" discountValue={30} />
 
-// backend omitted discount, inferred from prices
+// fallback (infer from prices)
 <PriceCard price={200} salePrice={150} />
 
-// customize styles / currency
+// customize styles / currency (use className object)
 <PriceCard
   price={500}
   salePrice={450}
   currency="EUR"
   fractionDigits={2}
-  wrapperClassName="flex items-baseline gap-3"
-  priceClassName="text-2xl font-bold"
+  className={{
+    wrapper: "flex items-baseline gap-3",
+    price: "text-2xl font-bold"
+  }}
 />
 ```
 
@@ -190,18 +221,14 @@ Handles brand and product title layout and styling. Renders brand and title in d
 | :--- | :--- | :---: | :--- |
 | `brand` | `React.ReactNode` | `"test brand"` | Brand content (string, element, or node). |
 | `title` | `React.ReactNode` | `"test title"` | Product title content (string, element, or node). |
-| `showBrand` | `boolean` | `true` | Toggle rendering of the brand node. |
-| `showTitle` | `boolean` | `true` | Toggle rendering of the title node. |
-| `brandPlacement` | `"before" \| "after" \| "top" \| "bottom" \| "hidden"` | `"before"` | Position of brand relative to title: `<brand> - <title>` (`before`), `<title> - <brand>` (`after`), stacked with brand on top (`top`) or below (`bottom`). `hidden` renders only the title. |
-| `brandClassName` | `string` | `""` | CSS class(es) applied to the brand element. |
-| `titleClassName` | `string` | `""` | CSS class(es) applied to the title element. |
-| `wrapperClassName` | `string` | `""` | CSS class(es) applied to the outer wrapper. |
-| `separatorClassName` | `string` | `"px-2 opacity-60"` | CSS class(es) for the separator element shown between brand and title in horizontal placements. |
+| `show` | `{ brand?: boolean; title?: boolean }` | `{ brand: true, title: true }` | Toggle rendering of brand/title via an object. |
+| `brandPlacement` | `"before" \| "after" \| "top" \| "bottom" \| "hidden"` | `"before"` | Position of brand relative to title: `before` = `<brand> - <title>`, `after` = `<title> - <brand>`, `top`/`bottom` = stacked, `hidden` = title only. |
+| `className` | `{ brand?: string; title?: string; wrapper?: string; separator?: string }` | `{ separator: "px-2 opacity-60" }` | Per-part class overrides: brand, title, wrapper and separator. |
 
 Notes:
-- When both `brand` and `title` are provided, a separator (`-`) is rendered between them for horizontal placements (`before` / `after`). You can override separator styling via `separatorClassName`.
-- Use `showBrand` / `showTitle` to selectively hide parts without removing content.
-- `brandPlacement="hidden"` is useful when you want the title only (same as `showBrand = false` but explicit).
+- Separator (`-`) is rendered for horizontal placements (`before` / `after`) when both brand and title are shown. Override via `className.separator`.
+- Use `show` to selectively hide brand or title without changing provided content.
+- `brandPlacement="hidden"` renders only the title (equivalent to `show.brand = false` but explicit).
 
 Example:
 ```tsx
@@ -209,9 +236,13 @@ Example:
   brand="ACME"
   title={<strong>Falcon Shoes</strong>}
   brandPlacement="top"
-  brandClassName="text-xs text-gray-500"
-  titleClassName="text-lg font-semibold"
-  wrapperClassName="truncate"
+  show={{ brand: true, title: true }}
+  className={{
+    brand: "text-xs text-gray-500",
+    title: "text-lg font-semibold",
+    wrapper: "truncate",
+    separator: "px-2 opacity-60"
+  }}
 />
 ```
 
@@ -221,67 +252,65 @@ Primary action button. Handles "Out of Stock" and "In Cart" states, supports ico
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
 | `onAddToCart` | `() => void` | `undefined` | Click handler invoked when button clicked (if not disabled). |
-| `addToCartText` | `string` | `"Add to Cart"` | Text shown when item is not in cart. |
-| `inCartText` | `string` | `"In Cart"` | Text shown when item is in cart. |
-| `className` | `string` | `"flex-1 bg-black ..."` | Root button class (Tailwind default provided). |
+| `labels` | `{ addToCartText?: string; inCartText?: string }` | `{ addToCartText: "Add to Cart", inCartText: "In Cart" }` | Text labels for button states. |
+| `state` | `{ isOutOfStock?: boolean; isInCart?: boolean }` | `{ isOutOfStock: false, isInCart: false }` | Visual state flags (disable / show "In Cart"). |
+| `className` | `string` | Tailwind default | Root button classes. |
 | `iconOnly` | `boolean` | `false` | If true renders only the cart icon (no text). |
 | `icon` | `React.ReactNode` | `<ShoppingCart size={20} />` | Custom icon node. |
-| `showIconWithText` | `boolean` | `true` | When false and `iconOnly` is false, only text is shown; when true shows icon + text. |
-| `isOutOfStock` | `boolean` | `undefined` | When true button is disabled and shows tooltip/title "Out of stock". |
-| `isInCart` | `boolean` | `false` | When true button displays `inCartText` instead of `addToCartText`. |
+| `showIconWithText` | `boolean` | `true` | When true shows icon alongside text (unless `iconOnly`). |
+| `aria / title` | auto | — | `aria-label` and `title` reflect current state (`Add to Cart` / `In Cart` / `Out of stock`). |
 
 Notes:
-- Button disables clicks when `isOutOfStock` is truthy.
-- Preference: call `onAddToCart` to update store/state; UI consumers can pass `isInCart` based on store selectors.
-- Accessibility: `aria-label` and `title` reflect current state (Add / In Cart / Out of stock).
+- Button is disabled when `state.isOutOfStock` is truthy.
+- Component is presentational — call `onAddToCart` to update your store; pass `state.isInCart` from your cart selector.
+- Use `labels` to localize/customize button text.
 
 Example
-````tsx
-// Example: use with Zustand selector
-const inCart = useCartStore(s => s.getCartQuantity(product.id) > 0);
+```tsx
+// using Zustand selectors
+const isInCart = useCartStore(s => s.getCartQuantity(product.id) > 0);
 const addToCart = useCartStore(s => s.addToCart);
 
 <AddToCart
   onAddToCart={() => addToCart(product.id)}
-  isInCart={inCart}
-  addToCartText="Buy"
-  inCartText="In basket"
+  state={{ isInCart, isOutOfStock: product.stock === 0 }}
+  labels={{ addToCartText: "Buy", inCartText: "In basket" }}
 />
-`````
+```
 
 ### `CategoriesBadgeList`
 Renders a list of pill-shaped category tags (lightweight CategoryItem shape).
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
-| `categories` | `CategoryItem[]` | `[]` | Array of category items. Minimal shape: `{ id: string \| number; name: string }`. |
-| `maxCategories` | `number` | `1` | Number of categories to show before summarising the rest as `+N`. |
-| `showRemainingCount` | `boolean` | `true` | When true shows a `+N` pill for hidden categories. |
-| `onCategoryClick` | `(category: CategoryItem) => void` | `() => {}` | Click handler invoked with the clicked category item. |
-| `positionClassName` | `string` | `""` | Additional positioning classes for the outer wrapper (eg. `absolute left-2 top-2`). |
-| `categoryClassName` | `string` | Tailwind pill default | Classes applied to each category pill. |
-| `remainingClassName` | `string` | Tailwind pill default | Classes applied to the `+N` pill. |
-| `wrapperClassName` | `string` | `"flex flex-wrap gap-2"` | Inner wrapper classes for layout (flex/grid). |
+| `categories` | `CategoryItem[]` | `[]` | Array of category items: `{ id: string \| number; name: string }`. |
+| `maxCategories` | `number` | `1` | How many items to show before summarising the rest as `+N`. |
+| `showRemainingCount` | `boolean` | `true` | When true shows the `+N` pill for hidden items. |
+| `onCategoryClick` | `(category: CategoryItem) => void` | `() => {}` | Click handler called with the clicked category. |
+| `className` | `object` | See defaults below | Object of class overrides: `{ position?: string; category?: string; remaining?: string; wrapper?: string }` — controls placement and pill styles. |
+
+Default `className` values used by the component:
+- position: `""`
+- category: `bg-black text-white px-2 py-1 text-xs font-semibold rounded-full shadow`
+- remaining: `bg-black text-white px-2 py-1 text-xs font-semibold rounded-full`
+- wrapper: `flex flex-wrap gap-2`
 
 Notes:
-- The component expects lightweight CategoryItem objects (id + name). If you have a richer `Category` type (with slug, parent_id, etc.), map it before passing or in the `onCategoryClick` handler.
-- `maxCategories` controls how many items are rendered; remaining items are represented by `+N` when `showRemainingCount` is true.
-- Each pill is clickable only when `onCategoryClick` is provided.
-- Defaults are chosen to be safe for direct usage in slot overlays; override class names to fit your design system.
+- Component returns `null` when `categories` is empty.
+- `maxCategories` controls the slice shown; the remaining count = `categories.length - maxCategories`.
+- Use `onCategoryClick` to map lightweight items to your fuller `Category` shape (e.g., add `slug`) before updating global store.
+- Use `className.position` to place the badge group (e.g., `absolute left-2 bottom-2`).
 
 Example:
 ```tsx
-import { CategoriesBadgeList } from "./components/categories";
-
 <CategoriesBadgeList
-  categories={[
-    { id: 1, name: "Shoes" },
-    { id: 2, name: "New Arrivals" },
-    { id: 3, name: "Sale" },
-  ]}
+  categories={[{ id: 1, name: "Shoes" }, { id: 2, name: "Sale" }]}
   maxCategories={2}
-  onCategoryClick={(c) => console.log("clicked", c)}
-  positionClassName="absolute left-2 bottom-2"
+  onCategoryClick={(c) => setSelectedCategory({ id: Number(c.id), name: c.name, slug: c.name.toLowerCase().replace(/\s+/g, "-") })}
+  className={{
+    position: "absolute left-2 bottom-2",
+    category: "bg-white text-black px-2 py-1 rounded-full",
+  }}
 />
 ```
 
@@ -318,36 +347,37 @@ Examples
 ```
 
 ### `WishlistButton`
-Icon button for adding/removing a product from the wishlist. 
+Icon button for adding/removing a product from the wishlist.
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
 | `isWishlisted` | `boolean` | `false` | Current wishlist state. When true shows the active icon. |
-| `onToggle` | `(value: boolean) => void` \| `undefined` | `undefined` | Called with the new boolean state when the button is clicked. Parent/store should update state. |
+| `onToggle` | `(value: boolean) => void \| undefined` | `undefined` | Called with the next boolean state when clicked. Parent/store should update state. |
 | `icon` | `React.ReactNode` | `undefined` | Custom icon node when not wishlisted. |
 | `activeIcon` | `React.ReactNode` | `undefined` | Custom icon node when wishlisted (rendered instead of `icon`). |
-| `className` | `string` | `""` | Root button class(es). |
-| `iconClassName` | `string` | `""` | Class(es) applied to the icon element. |
-| `ariaLabel` | `string` | `"Add to wishlist"` | Accessible label for the button. |
-| `size` | `number` | `22` | Suggested icon size (passed to internal icon components). |
-| `animationDuration` | `number` | `200` | Duration in ms used in CSS class name for transition timing. |
+| `ariaLabel` | `string` | `"Add to wishlist"` | Accessible label for the button; update it when state changes (e.g., `"Remove from wishlist"`). |
+| `size` | `number` | `22` | Icon size in pixels. |
+| `className` | `{ button?: string; icon?: string }` | `{ button: "", icon: "" }` | Per-part class overrides: `button` and `icon`. |
+| `animationDuration` | `number` | `200` | Transition duration (ms) used in CSS class utility; adjust to match your animation utilities. |
 
 Notes
-- Keep the component stateless: the parent (or a Zustand store) should own the wishlist array and pass `isWishlisted` + `onToggle`.
-- If you prefer store-driven behavior, pass a wrapper that selects from the store and calls the store action inside `onToggle`.
-- Accessibility: ensure `ariaLabel` reflects action (e.g., `"Remove from wishlist"` when `isWishlisted` is true).
+- Component is stateless — the parent (or a store) must own and update wishlist state.
+- `onToggle` receives the new boolean state (the component calls it with `!isWishlisted`).
+- Ensure `ariaLabel` reflects the action for accessibility (e.g., `"Remove from wishlist"` when `isWishlisted` is true).
 
 Example
 ```tsx
 // parent (store)
 const isWishlisted = useProductCardStore(s => s.wishlist.includes(product.id));
-const toggle = useProductCardStore(s => s.toggleWishlist);
+const toggleWishlist = useProductCardStore(s => s.toggleWishlist);
 
+// simple wrapper that calls store.toggle(product.id)
 <WishlistButton
   isWishlisted={isWishlisted}
-  onToggle={() => toggle(product.id)}
+  onToggle={() => toggleWishlist(product.id)}
   size={20}
   ariaLabel={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+  className={{ button: "p-1 rounded-full bg-white/80", icon: "text-red-500" }}
 />
 ```
 
@@ -372,26 +402,23 @@ Example:
 ```
 
 ### `ProductImage`
-Simple, flexible image component used as a background or an <img>. Supports an overlay slot (children) for badges/buttons and an onClick handler on the root.
+Simple, flexible image component used as a CSS background or as a real <img>. Supports overlay children (badges/buttons) and an onClick on the root.
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
-| `imageUrl` | `string \| null` | `undefined` | Image URL (used as CSS background in `bg` mode, or as `src` in `img` mode). |
-| `alt` | `string` | `"Product image"` | Alt text for the image (used for accessibility / when rendering an `<img>`). |
-| `mode` | `"bg" \| "img"` | `"bg"` | Render as background (`bg`) or as an actual `<img>` (`img`). |
+| `imageUrl` | `string \| null` | `undefined` | Image URL (used as background in `bg` mode or as `src` in `img` mode). |
+| `alt` | `string` | `"Product image"` | Alt text for the `<img>` (when `mode === "img"`) and accessibility label. |
+| `mode` | `"bg" \| "img"` | `"bg"` | `"bg"` uses CSS background-image; `"img"` renders an `<img>` element. |
 | `height` | `number \| string` | `200` | Height of the image area (number = px, or any CSS size string). |
-| `className` | `string` | `"relative overflow-hidden rounded-lg"` | Classes for the outer container. |
-| `imageClassName` | `string` | `"w-full h-full object-cover"` | Classes for the image element or background holder. |
-| `overlayClassName` | `string` | `"absolute inset-0 pointer-events-none"` | Classes for the overlay wrapper that holds `children`. |
-| `children` | `React.ReactNode` | `undefined` | Nodes rendered on top of the image (badges, buttons, etc.). |
-| `onClick` | `React.MouseEventHandler` | `undefined` | Click handler for the image container (e.g. navigate to product). |
+| `className` | `object` | `{ wrapper: "relative overflow-hidden rounded-lg", image: "w-full h-full object-cover", overlay: "absolute inset-0 pointer-events-none" }` | Per-part class overrides: `{ wrapper?, image?, overlay? }`. |
+| `children` | `React.ReactNode` | `undefined` | Overlay nodes rendered above the image (badges, buttons). Use `pointer-events-auto` on interactive children. |
+| `onClick` | `React.MouseEventHandler` | `undefined` | Click handler attached to the root container (e.g. navigate to product). |
 
 Notes
-- Background mode (`mode="bg"`) keeps the markup simple and is ideal for decorative/cover images; place interactive overlays as children and give them `pointer-events-auto`.
-- Image mode (`mode="img"`) renders a real `<img>` for better accessibility and browser handling of loading/decoding.
-- `height` accepts both number and string. If you need responsive aspect-ratio control, wrap the component or supply CSS utilities externally.
-- `overlayClassName` default uses `pointer-events-none` so overlay children must opt-in with `pointer-events-auto` to receive pointer events.
-- Keep this component presentational; wire interaction state (wishlist/cart) with your Zustand stores from parent components.
+- Use `mode="img"` for an actual <img> (better for accessibility / SEO); `mode="bg"` is simpler for decorative/cover images.
+- `className.image` is applied to the inner `<img>` or background holder; `className.overlay` defaults to `pointer-events-none` so overlay children must opt into `pointer-events-auto`.
+- `height` accepts numbers and strings; numbers are converted to px.
+- Keep the component presentational — wire wishlist/cart state from parent stores or callbacks.
 
 Example
 ```tsx
@@ -399,8 +426,11 @@ Example
   imageUrl={product.images?.[0]?.url}
   mode="bg"
   height={280}
-  className="rounded-lg shadow-sm"
-  overlayClassName="absolute inset-0 flex flex-col justify-between p-2 pointer-events-none"
+  className={{
+    wrapper: "rounded-lg shadow-sm relative overflow-hidden",
+    image: "w-full h-full object-cover",
+    overlay: "absolute inset-0 flex flex-col justify-between p-2 pointer-events-none"
+  }}
   onClick={() => navigate(`/product/${product.id}`)}
 >
   <div className="pointer-events-auto self-end">
@@ -456,26 +486,37 @@ Ensure your data matches the `Product` interface for seamless integration.
 interface Product {
   id: number;
   name: string;
-  price: number | null;       // Base price
-  final_price: number | null; // Discounted price
-  
-  images: Array<{
-    url: string;
-    is_primary: boolean;
+
+  // Prices
+  price?: number | null;       // Base / original price
+  sale_price?: number | null;  // Final / discounted price 
+
+  // Images
+  primary_image?: {
+    image_url: string;
+    alt_text?: string;
+  } | null;
+  images?: Array<{
+    image_url: string;
+    is_primary?: boolean;
     alt_text?: string;
   }>;
-  
+
+  // Brand
   brand?: {
-    name: string;
+    name?: string;
   };
-  
+
+  // Categories (lightweight)
   categories?: Array<{
-    id: number;
+    id: number | string;
     name: string;
   }>;
-  
+
+  // Discount metadata
+  has_discount?: boolean;
   discount_type?: "percentage" | "fixed";
-  discount_value?: number;
+  discount_value?: number | null;
 }
 ```
 
@@ -483,18 +524,29 @@ interface Product {
 
 ## 7. Customization Example
 
-How to style the card using Tailwind overrides without touching the source code:
+How to style and wire behavior without modifying library source:
 
 ```tsx
 <ProductCard
   product={item}
   // 1. Style the outer container
   containerClassName="bg-slate-900 border-none shadow-xl hover:shadow-2xl transition-all"
-  
-  // 2. Custom behavior
-  showWishlist={false} // Hide default wishlist
-  
-  // 3. Pass a custom View Details handler
+
+  // 2. Toggle internals
+  showWishlist={false} // Hide default wishlist badge
+  showDiscount={true}
+  showPrice={true}
+
+  // 3. Override handlers (optional — components use Zustand by default)
+  onToggleWishlist={(id, wishlisted) => {
+    // custom side-effect + delegate to store if needed
+    console.log('wishlist toggled', id, wishlisted);
+    // use store action here if you want
+  }}
+  onAddToCart={(id) => {
+    // call your API / store
+    console.log('add to cart', id);
+  }}
   onViewDetails={(id) => navigate(`/product/${id}`)}
 />
 ```

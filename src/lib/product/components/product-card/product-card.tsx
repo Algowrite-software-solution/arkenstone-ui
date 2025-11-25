@@ -87,7 +87,7 @@ export function ProductCard({
   ) : null;
 
   const brandNode = showBrand && product.brand ? (
-    <BrandTitle brand={product.brand?.name} title={product.name} showBrand={true} />
+    <BrandTitle brand={product.brand?.name} title={product.name} show={{brand: true}} />
   ) : null;
 
   const priceNode = showPrice ? (
@@ -112,7 +112,7 @@ export function ProductCard({
           <CategoriesBadgeList 
             categories={product.categories || []}
             onCategoryClick={(category) => setSelectedCategory(category)}
-            positionClassName="bottom-3 left-3"
+            className={{ position: "bottom-3 left-3" }}
           />
       }
     />
@@ -124,8 +124,10 @@ export function ProductCard({
       {priceNode}
       <AddToCart
         onAddToCart={() => addToCartAction(product.id)}
-        addToCartText="Add to cart"
-        isInCart={inCart}
+        labels={{ inCartText: "In Cart" }}
+        state={{
+          isInCart: inCart,
+        }}
       />
     </div>
   );
@@ -135,7 +137,7 @@ export function ProductCard({
       layout={layout}
       ImageComponent={imageComponent}
       DetailsComponent={detailsComponent}
-      containerClassName={containerClassName}
+      className={{ container: containerClassName }}
     />
   );
 }

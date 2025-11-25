@@ -11,7 +11,7 @@ This package provides a modular, layer-based architecture for building e-commerc
 The package is designed around a **Composition Pattern**. You don't just import one giant component; instead, you assemble "Layers" to fit your specific design needs.
 
 *   **Layout Layer:** Handles the responsive grid, sidebars (filters), and top/bottom areas.
-*   **Control Layer:** Handles user inputs like Search, Sorting, and View Modes.
+*   **Control Layer:** Handles user inputs like Sorting, and View Modes.
 *   **Filter Layer:** A data-driven engine to render complex filter trees, checkboxes, color swatches, and ranges.
 *   **Listing Layer:** Displays the actual products and handles the relationship between the list, controls, and pagination.
 
@@ -80,7 +80,7 @@ type FilterOption = {
 interface FilterItemProps {
   id: string;                      // unique key for state lookup
   title?: string;                  // group title shown in UI
-  type?: 'checkbox' | 'radio' | 'tree' | 'color' | 'image' | 'chip' | 'tag' | 'rating' | 'range' | 'toggle';
+  type?:  "checkbox" | "radio" | "chip" | "toggle" | "switch" | "color" | "image" | "rating" | "tag" | "icon" | "range" | string;
   collapsible?: boolean;           // allow collapsing the group
   collapsed?: boolean;             // initial collapsed state
   placeholder?: string;            // empty state hint
@@ -198,25 +198,27 @@ Dropdown / controls for sorting list data.
 | :--- | :--- | :---: | :--- |
 | `sortOrder` | `"asc" \| "desc"` | required | Current sort direction. |
 | `sortBy` | `string` | required | Current sort field/value (e.g., `"price"`). |
-| `sortOptions` | `SortOption[]` | `[{name: "Name", value: "name"}, {name: "Price", value: "price"}]` | Dropdown options for sort field. |
+| `sortOptions` | `SortOption[]` | `[{ label: "Name", value: "name" }, { label: "Price", value: "price" }]` | Dropdown options for sort field. |
 | `onSortChange` | `(order: "asc" \| "desc") => void` | required | Called when user selects ascending/descending. |
 | `onSortByChange` | `(val: string) => void` | required | Called when user selects a different sort field. |
-| `orderTitle` | `string` | `"Order"` | Title above order options in the dropdown. |
-| `orderButtonLabel` | `string \| undefined` | `undefined` | Custom label for the sort button. Falls back to `Sort: {current} · {Asc|Desc}`. |
-| `sortByTitle` | `string` | `"Sort By"` | Heading shown above the sort field options. |
-| `orderClassName` | `string` | Tailwind default container | Root wrapper classes for the SortBar. |
-| `orderDropdownClassName` | `string` | Tailwind default | Wrapper for the dropdown trigger. |
-| `orderButtonClassName` | `string` | Tailwind default | Trigger button classes. |
-| `dropdownContainerClassName` | `string` | Tailwind default | Classes for the opened dropdown panel. |
-| `sortByHeaderClassName` | `string` | Tailwind default | Class for the "Sort By" header inside dropdown. |
-| `optionClassName` | `string` | Tailwind default | Class for each sort field option. |
-| `optionSelectedClassName` | `string` | Tailwind default | Applied to the currently selected option. |
-| `orderHeaderClassName` | `string` | Tailwind default | Header class for order section in dropdown. |
-| `orderOptionClassName` | `string` | Tailwind default | Class for each order option (Ascending / Descending). |
+| `labels` | `{ orderTitle?: string; orderButtonLabel?: string \| undefined; sortByTitle?: string }` | `{ orderTitle: "Order", orderButtonLabel: undefined, sortByTitle: "Sort By" }` | Small labels object used inside the dropdown and button. |
+| `className` | `{ order?: string; orderDropdown?: string; orderButton?: string; dropdownContainer?: string; sortByHeader?: string; option?: string; optionSelected?: string; orderHeader?: string; orderOption?: string }` | Tailwind defaults (see code) | Class map to style each internal part. |
+
+Default className values in implementation:
+- order: "w-full flex items-center justify-between bg-white rounded-lg shadow-sm p-3 mb-4"
+- orderDropdown: "relative"
+- orderButton: "px-3 py-2 border rounded-lg flex items-center gap-2 hover:bg-gray-100 transition"
+- dropdownContainer: "absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg border p-2 w-40 z-50"
+- sortByHeader: "text-xs mb-1 font-semibold text-gray-500"
+- option: "p-2 rounded cursor-pointer hover:bg-gray-100"
+- optionSelected: "bg-gray-100"
+- orderHeader: "mt-2 text-xs mb-1 font-semibold text-gray-500"
+- orderOption: "p-2 rounded cursor-pointer hover:bg-gray-100"
 
 Behavior:
-- Clicking the button toggles dropdown; selecting a field calls `onSortByChange`; selecting Asc/Desc calls `onSortChange`.
-- All className props let you style each part without touching internals.
+- The component renders a button that toggles a dropdown. The button label uses `labels.orderButtonLabel` if provided, otherwise shows `Sort: {currentLabel} · {Asc|Desc}`.
+- Selecting a sort field calls `onSortByChange`; selecting Asc/Desc calls `onSortChange`.
+- Use the `className` object to style parts without modifying internals.
 
 ---
 
@@ -228,18 +230,11 @@ Small control with buttons to switch render mode between card/grid/list/table.
 | `mode` | `"card" \| "list" \| "table"` | required | Currently selected view mode. |
 | `onChange` | `(mode: ViewMode) => void` | required | Callback invoked when user selects a mode. |
 | `availableModes` | `ViewMode[]` | `["card","list","table"]` | Which mode buttons to render. |
-| `containerClassName` | `string` | Tailwind default | Wrapper classes for the switcher. |
-| `buttonClassName` | `string` | Tailwind default | Base class applied to each button. |
-| `selectedButtonClassName` | `string` | Tailwind default | Class applied to the active/selected button. |
-| `unselectedButtonClassName` | `string` | Tailwind default | Class applied to inactive buttons. |
-| `cardButtonClassName` | `string` | `""` | Extra class for the "card" button. |
-| `listButtonClassName` | `string` | `""` | Extra class for the "list" button. |
-| `tableButtonClassName` | `string` | `""` | Extra class for the "table" button. |
-| `iconSize` | `number` | `16` | Size (px) of the icons inside buttons. |
+| `className` | `object` | Tailwind defaults | Object of styling overrides with keys: `container`, `button`, `selectedButton`, `unselectedButton`, `cardButton`, `listButton`, `tableButton`, `iconSize`. See implementation for default values. |
 
 Behavior:
 - Each available mode renders a button; clicking calls `onChange(mode)`.
-- Styling props let you customize look for selected/unselected states and per-button overrides.
+- Use the `className` object to tune container/button appearance and per-button overrides. `iconSize` is the icon pixel size.
 
 ---
 
@@ -279,40 +274,31 @@ Replace SortBar with custom component:
 | `total` | `number` | required | Total number of items. |
 | `pageSize` | `number` | required | Items per page. |
 | `onChange` | `(page: number) => void` | required | Called when the user selects a new page. |
-| `showArrows` | `boolean` | `true` | Show Prev / Next controls. |
-| `showPages` | `boolean` | `true` | Render individual page number buttons. |
-| `showSummary` | `boolean` | `false` | Show textual summary like "Showing 1–10 of 50". |
-| `showPageSize` | `boolean` | `false` | Render a page-size selector dropdown. |
-| `renderPrev` | `React.ReactNode` | `undefined` | Custom node for the Prev control (replaces default). |
-| `renderNext` | `React.ReactNode` | `undefined` | Custom node for the Next control (replaces default). |
-| `renderPage` | `(page: number, isActive: boolean) => React.ReactNode` | `undefined` | Custom renderer for each page button. |
-| `renderPageSize` | `React.ReactNode` | `undefined` | Custom renderer for the page-size control. |
-| `containerClassName` | `string` | `"flex items-center justify-center gap-2 p-3"` | Wrapper classes for the pagination bar. |
-| `summaryClassName` | `string` | `"text-sm text-gray-600 mr-3"` | Classes for the summary text. |
-| `pageClassName` | `string` | `"px-3 py-1 border rounded"` | Base class for page buttons. |
-| `activePageClassName` | `string` | `"bg-gray-200 font-semibold"` | Class applied to the active page button. |
-| `prevNextClassName` | `string` | `"px-3 py-1 border rounded disabled:opacity-40"` | Class for Prev / Next buttons. |
-| `pageSizeSelectClassName` | `string` | `"border rounded px-2 py-1 text-sm mr-3"` | Class for the page-size select. |
-| `pageButtonClassName` | `string` | `""` | Extra wrapper class applied to each page button. |
-| `disabledClassName` | `string` | `"opacity-40"` | Class applied to disabled controls. |
+| `show` | `{ arrows?: boolean; pages?: boolean; summary?: boolean; pageSize?: boolean }` | `{ arrows: true, pages: true, summary: true, pageSize: false }` | Toggle groups of pagination elements. |
+| `customRender` | `{ renderPrev?: React.ReactNode; renderNext?: React.ReactNode; renderPage?: (page: number, isActive: boolean) => React.ReactNode; renderPageSize?: React.ReactNode }` | `undefined` | Provide custom nodes or renderers to replace default Prev/Next, page buttons, or page-size control. |
+| `className` | `{ container?: string; summary?: string; page?: string; activePage?: string; prevNext?: string; pageSizeSelect?: string; pageButton?: string; disabled?: string }` | sensible Tailwind defaults (see implementation) | Per-part class map to style the component. |
 
 Notes
+- Use the `show` object to enable/disable arrows, individual page numbers, textual summary, and the page-size selector.
+- `customRender.renderPage` receives (page, isActive) and should return a React node for that page; fallback to default rendering when omitted.
+- `className` keys map to internal parts — defaults are provided in the component file and can be overridden for styling.
 - `totalPages` is computed as Math.ceil(total / pageSize).
-- The component exposes render props (`renderPrev`, `renderNext`, `renderPage`, `renderPageSize`) so you can fully control markup.
-- When using `showPageSize`, handle page-size changes externally (the component only renders the control by default).
-- Styling props let you restyle individual parts without modifying component internals.
+- The page-size control is presentational by default; if you enable `show.pageSize` handle changes externally.
 
 Example
 ```tsx
+// using the implemented props shape
 <Pagination
   page={page}
   total={200}
   pageSize={20}
   onChange={setPage}
-  showSummary
-  showPageSize
-  containerClassName="flex items-center gap-4"
+  show={{ arrows: true, pages: true, summary: true, pageSize: false }}
+  className={{ container: "flex items-center gap-4" }}
 />
+
+// or enable only the summary
+<Pagination page={page} total={50} pageSize={10} onChange={setPage} show={{ summary: true }} />
 ```
 
 ---

@@ -11,18 +11,18 @@ export interface DiscountBadgeProps {
   currency?: string;
   fractionDigits?: number;
 
-  className?: string;
-
   renderLabel?: (value: number, type: DiscountType) => React.ReactNode;
+
+  className?: string;
 }
 
 export function DiscountBadge({
   discount = 25,
   discountType = "fixed",
-  className = "bg-black text-white inline-flex items-center px-2 py-1 text-xs font-semibold rounded-md",
   currency = "$",
   fractionDigits = 2,
   renderLabel,
+  className = "bg-black text-white inline-flex items-center px-2 py-1 text-xs font-semibold rounded-md",
 }: DiscountBadgeProps) {
   if (!isFinite(Number(discount)) || discount <= 0) return null;
 

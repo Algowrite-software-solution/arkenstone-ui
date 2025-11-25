@@ -14,11 +14,14 @@ export interface PriceCardProps {
   currency?: string;
   fractionDigits?: number;
 
-  /** Tailwind overrides */
-  wrapperClassName?: string;
-  priceClassName?: string;
-  originalPriceClassName?: string;
-  discountClassName?: string;
+  /** Styles */
+  className?: {
+    wrapper?: string;
+    price?: string;
+    originalPrice?: string;
+    discount?: string;
+  }
+ 
 }
 
 const resolveCurrencyCode = (currency?: string) => currency || "USD";
@@ -35,10 +38,12 @@ export const PriceCard: React.FC<PriceCardProps> = ({
   currency = "USD",
   fractionDigits = 2,
 
-  wrapperClassName = "flex items-center gap-2 flex-wrap",
-  priceClassName = "text-lg font-semibold",
-  originalPriceClassName = "line-through text-gray-500",
-  discountClassName = "text-red-600 font-semibold",
+  className = {
+    wrapper : "flex items-center gap-2 flex-wrap",
+    price  : "text-lg font-semibold",
+    originalPrice : "line-through text-gray-500",
+    discount : "text-red-600 font-semibold",
+  }
 }) => {
   const original = typeof price === "number" ? price : null;
   const finalP = typeof salePrice === "number" ? salePrice : original;
@@ -73,10 +78,10 @@ export const PriceCard: React.FC<PriceCardProps> = ({
   };
 
   return (
-    <div className={wrapperClassName}>
+    <div className={className.wrapper}>
       
       {/* Final Price */}
-      <span className={priceClassName}>
+      <span className={className.price}>
         {finalP !== null ? formatCurrency(finalP) : "---"}
       </span>
 
@@ -84,7 +89,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
       {showOriginalPrice &&
         hasDiscount &&
         original !== null && (
-          <span className={originalPriceClassName}>
+          <span className={className.originalPrice}>
             {formatCurrency(original)}
           </span>
         )}
@@ -93,7 +98,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
       {showDiscountPercentage &&
         hasDiscount &&
         discountPercent > 0 && (
-          <span className={discountClassName}>
+          <span className={className.discount}>
             {discountPercent}% OFF
           </span>
         )}
