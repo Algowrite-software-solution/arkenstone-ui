@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DiscountBadge } from '../../lib/product/components/product-card2/components/discount-badge';
+import { DiscountBadge } from '../../lib/product/components/product-card/components/discount-badge';
 
 const meta: Meta<typeof DiscountBadge> = {
   title: 'Components/DiscountBadge',

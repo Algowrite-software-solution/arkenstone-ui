@@ -3,43 +3,52 @@ import { Product } from "../product/types";
 export const dummyProducts: Product[] = [
   {
     id: 1,
-    brand_id: 1,
     name: "Wireless Bluetooth Headphones",
-    description: "Premium over-ear headphones with active noise cancellation and 30-hour battery life",
-    sku: "WBH-001",
-    is_active: true,
-    created_at: "2024-01-15 10:30:00",
-    updated_at: "2024-11-10 14:20:00",
+    slug: "wireless-bluetooth-headphones",
+    description:
+      "Premium over-ear headphones with active noise cancellation and 30-hour battery life",
     price: 149.99,
     discount_type: "percentage",
     discount_value: 15,
+    sale_price: 127.49,
+    has_discount: true,
+    sku: "WBH-001",
     quantity: 45,
-    final_price: 127.49,
-    categories: [
-      { id: 1, name: "Electronics", slug: "electronics" },
-      { id: 5, name: "Audio", slug: "audio" }
-    ],
+    is_active: true,
     brand: {
       id: 1,
       name: "SoundWave",
       slug: "soundwave",
-      logo: "https://picsum.photos/seed/brand1/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand1/200/100",
+      is_active: true,
+      product_count: 24,
+      created_at: "2024-01-01T00:00:00.000Z",
+      updated_at: "2024-11-10T14:20:00.000Z",
     },
-    images: [
+    categories: [
       {
-        product_id: 1,
-        url: "https://picsum.photos/seed/product1/400/400",
-        alt_text: "Wireless headphones front view",
-        is_primary: true,
-        order: 0
+        id: 1,
+        parent_id: null,
+        name: "Electronics",
+        slug: "electronics",
+        description: null,
+        children: [],
+        products_count: 120,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
       {
-        product_id: 1,
-        url: "https://picsum.photos/seed/product1b/400/400",
-        alt_text: "Wireless headphones side view",
-        is_primary: false,
-        order: 1
-      }
+        id: 5,
+        parent_id: null,
+        name: "Audio",
+        slug: "audio",
+        description: null,
+        children: [],
+        products_count: 42,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
     taxonomies: [
       {
@@ -51,18 +60,23 @@ export const dummyProducts: Product[] = [
         description: "Electronic products and devices",
         sort_order: 0,
         meta: { featured: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
+        is_active: true,
         type: {
           id: 1,
           name: "Categories",
           slug: "categories",
           description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
+          is_active: true,
+          taxonomies_count: 0,
+          taxonomies: [],
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: "2024-01-01T00:00:00.000Z",
         },
         parent: null,
-        children: []
+        children: [],
+        products_count: 120,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
       {
         id: 10,
@@ -73,635 +87,103 @@ export const dummyProducts: Product[] = [
         description: "Premium quality products",
         sort_order: 1,
         meta: { color: "gold" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
+        is_active: true,
         type: {
           id: 2,
           name: "Tags",
           slug: "tags",
           description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
+          is_active: true,
+          taxonomies_count: 0,
+          taxonomies: [],
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: "2024-01-01T00:00:00.000Z",
         },
         parent: null,
-        children: []
-      }
+        children: [],
+        products_count: 10,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
-  },
-  {
-    id: 2,
-    brand_id: 2,
-    name: "Organic Green Tea - 100 Bags",
-    description: "Premium organic green tea sourced from high-altitude tea gardens. Rich in antioxidants.",
-    sku: "TEA-GT-100",
-    is_active: true,
-    created_at: "2024-02-20 09:15:00",
-    updated_at: "2024-11-12 11:45:00",
-    price: 24.99,
-    discount_type: null,
-    discount_value: null,
-    quantity: 120,
-    final_price: 24.99,
-    categories: [
-      { id: 10, name: "Food & Beverages", slug: "food-beverages" },
-      { id: 15, name: "Tea", slug: "tea" }
-    ],
-    brand: {
-      id: 2,
-      name: "Nature's Leaf",
-      slug: "natures-leaf",
-      logo: "https://picsum.photos/seed/brand2/200/100"
-    },
     images: [
       {
-        product_id: 2,
-        url: "https://picsum.photos/seed/product2/400/400",
-        alt_text: "Organic green tea box",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 2,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Food & Beverages",
-        slug: "food-beverages",
-        description: "Food and beverage products",
-        sort_order: 1,
-        meta: { icon: "utensils" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 11,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Organic",
-        slug: "organic",
-        description: "Certified organic products",
-        sort_order: 2,
-        meta: { certified: true, color: "green" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 12,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Health & Wellness",
-        slug: "health-wellness",
-        description: "Health and wellness products",
-        sort_order: 3,
-        meta: { icon: "heart" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
-    ],
-  },
-  {
-    id: 3,
-    brand_id: 3,
-    name: "Smart Fitness Watch Pro",
-    description: "Track your fitness goals with heart rate monitoring, GPS, and 50+ sport modes",
-    sku: "SFW-PRO-001",
-    is_active: true,
-    created_at: "2024-03-10 14:00:00",
-    updated_at: "2024-11-13 16:30:00",
-    price: 299.99,
-    discount_type: "fixed",
-    discount_value: 50,
-    quantity: 28,
-    final_price: 249.99,
-    categories: [
-      { id: 1, name: "Electronics", slug: "electronics" },
-      { id: 20, name: "Wearables", slug: "wearables" }
-    ],
-    brand: {
-      id: 3,
-      name: "FitTech",
-      slug: "fittech",
-      logo: "https://picsum.photos/seed/brand3/200/100"
-    },
-    images: [
-      {
-        product_id: 3,
-        url: "https://picsum.photos/seed/product3/400/400",
-        alt_text: "Smart fitness watch on wrist",
-        is_primary: true,
-        order: 0
-      },
-      {
-        product_id: 3,
-        url: "https://picsum.photos/seed/product3b/400/400",
-        alt_text: "Smart fitness watch display",
-        is_primary: false,
-        order: 1
-      }
-    ],
-    taxonomies: [
-      {
-        id: 1,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Electronics",
-        slug: "electronics",
-        description: "Electronic products and devices",
-        sort_order: 0,
-        meta: { featured: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 13,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Smart Device",
-        slug: "smart-device",
-        description: "Smart connected devices",
-        sort_order: 4,
-        meta: { icon: "wifi" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 14,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Fitness",
-        slug: "fitness",
-        description: "Fitness related products",
-        sort_order: 5,
-        meta: { color: "blue" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
-    ],
-  },
-  {
-    id: 4,
-    brand_id: 4,
-    name: "Leather Messenger Bag",
-    description: "Handcrafted genuine leather messenger bag with laptop compartment. Perfect for professionals.",
-    sku: "LMB-BRN-001",
-    is_active: true,
-    created_at: "2024-04-05 11:20:00",
-    updated_at: "2024-11-11 09:10:00",
-    price: 189.99,
-    discount_type: "percentage",
-    discount_value: 20,
-    quantity: 15,
-    final_price: 151.99,
-    categories: [
-      { id: 25, name: "Fashion", slug: "fashion" },
-      { id: 30, name: "Bags", slug: "bags" }
-    ],
-    brand: {
-      id: 4,
-      name: "Heritage Leather Co.",
-      slug: "heritage-leather-co",
-      logo: "https://picsum.photos/seed/brand4/200/100"
-    },
-    images: [
-      {
-        product_id: 4,
-        url: "https://picsum.photos/seed/product4/400/400",
-        alt_text: "Brown leather messenger bag",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 3,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Fashion & Accessories",
-        slug: "fashion-accessories",
-        description: "Fashion items and accessories",
-        sort_order: 2,
-        meta: { trending: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 15,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Handcrafted",
-        slug: "handcrafted",
-        description: "Handmade products",
-        sort_order: 6,
-        meta: { artisan: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 16,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Professional",
-        slug: "professional",
-        description: "Professional use products",
-        sort_order: 7,
-        meta: { business: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
-    ],
-  },
-  {
-    id: 5,
-    brand_id: 5,
-    name: "Stainless Steel Water Bottle 1L",
-    description: "Double-walled insulated water bottle keeps drinks cold for 24hrs, hot for 12hrs",
-    sku: "WSB-1L-BLK",
-    is_active: true,
-    created_at: "2024-05-12 08:45:00",
-    updated_at: "2024-11-14 07:30:00",
-    price: 34.99,
-    discount_type: null,
-    discount_value: null,
-    quantity: 200,
-    final_price: 34.99,
-    categories: [
-      { id: 35, name: "Home & Kitchen", slug: "home-kitchen" },
-      { id: 40, name: "Drinkware", slug: "drinkware" }
-    ],
-    brand: {
-      id: 5,
-      name: "HydroLife",
-      slug: "hydrolife",
-      logo: "https://picsum.photos/seed/brand5/200/100"
-    },
-    images: [
-      {
-        product_id: 5,
-        url: "https://picsum.photos/seed/product5/400/400",
-        alt_text: "Black stainless steel water bottle",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 4,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Home & Kitchen",
-        slug: "home-kitchen",
-        description: "Home and kitchen products",
-        sort_order: 3,
-        meta: { icon: "home" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 17,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Eco-Friendly",
-        slug: "eco-friendly",
-        description: "Environmentally friendly products",
-        sort_order: 8,
-        meta: { sustainable: true, color: "green" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
-    ],
-  },
-  {
-    id: 6,
-    brand_id: 6,
-    name: "Yoga Mat Premium Plus",
-    description: "Extra thick 8mm yoga mat with carrying strap. Non-slip surface for all yoga styles.",
-    sku: "YM-PP-PRP",
-    is_active: true,
-    created_at: "2024-06-18 13:00:00",
-    updated_at: "2024-11-09 15:20:00",
-    price: 49.99,
-    discount_type: "percentage",
-    discount_value: 25,
-    quantity: 75,
-    final_price: 37.49,
-    categories: [
-      { id: 45, name: "Sports & Fitness", slug: "sports-fitness" },
-      { id: 50, name: "Yoga", slug: "yoga" }
-    ],
-    brand: {
-      id: 6,
-      name: "ZenFit",
-      slug: "zenfit",
-      logo: "https://picsum.photos/seed/brand6/200/100"
-    },
-    images: [
-      {
-        product_id: 6,
-        url: "https://picsum.photos/seed/product6/400/400",
-        alt_text: "Purple yoga mat rolled",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 5,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Sports & Fitness",
-        slug: "sports-fitness",
-        description: "Sports and fitness equipment",
-        sort_order: 4,
-        meta: { popular: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 14,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Fitness",
-        slug: "fitness",
-        description: "Fitness related products",
-        sort_order: 5,
-        meta: { color: "blue" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 18,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Yoga",
-        slug: "yoga",
-        description: "Yoga products and accessories",
-        sort_order: 9,
-        meta: { wellness: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
-    ],
-  },
-  {
-    id: 7,
-    brand_id: 1,
-    name: "Wireless Bluetooth Headphones",
-    description: "Premium over-ear headphones with active noise cancellation and 30-hour battery life",
-    sku: "WBH-001",
-    is_active: true,
-    created_at: "2024-01-15 10:30:00",
-    updated_at: "2024-11-10 14:20:00",
-    price: 149.99,
-    discount_type: "percentage",
-    discount_value: 15,
-    quantity: 45,
-    final_price: 127.49,
-    categories: [
-      { id: 1, name: "Electronics", slug: "electronics" },
-      { id: 5, name: "Audio", slug: "audio" }
-    ],
-    brand: {
-      id: 1,
-      name: "SoundWave",
-      slug: "soundwave",
-      logo: "https://picsum.photos/seed/brand1/200/100"
-    },
-    images: [
-      {
+        id: 101,
         product_id: 1,
-        url: "https://picsum.photos/seed/product1/400/400",
+        image_url: "https://picsum.photos/seed/product1/400/400",
         alt_text: "Wireless headphones front view",
         is_primary: true,
-        order: 0
+        sort_order: 0,
       },
       {
+        id: 102,
         product_id: 1,
-        url: "https://picsum.photos/seed/product1b/400/400",
+        image_url: "https://picsum.photos/seed/product1b/400/400",
         alt_text: "Wireless headphones side view",
         is_primary: false,
-        order: 1
-      }
-    ],
-    taxonomies: [
-      {
-        id: 1,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Electronics",
-        slug: "electronics",
-        description: "Electronic products and devices",
-        sort_order: 0,
-        meta: { featured: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 18,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Premium",
-        slug: "premium",
-        description: "Premium quality products",
         sort_order: 1,
-        meta: { color: "gold" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
+      },
     ],
+    primary_image: {
+      id: 101,
+      product_id: 1,
+      image_url: "https://picsum.photos/seed/product1/400/400",
+      alt_text: "Wireless headphones front view",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-01-15T10:30:00.000Z",
+    updated_at: "2024-11-10T14:20:00.000Z",
   },
+
   {
-    id: 8,
-    brand_id: 2,
+    id: 2,
     name: "Organic Green Tea - 100 Bags",
-    description: "Premium organic green tea sourced from high-altitude tea gardens. Rich in antioxidants.",
-    sku: "TEA-GT-100",
-    is_active: true,
-    created_at: "2024-02-20 09:15:00",
-    updated_at: "2024-11-12 11:45:00",
+    slug: "organic-green-tea-100-bags",
+    description:
+      "Premium organic green tea sourced from high-altitude tea gardens. Rich in antioxidants.",
     price: 24.99,
     discount_type: null,
     discount_value: null,
+    sale_price: 24.99,
+    has_discount: false,
+    sku: "TEA-GT-100",
     quantity: 120,
-    final_price: 24.99,
-    categories: [
-      { id: 10, name: "Food & Beverages", slug: "food-beverages" },
-      { id: 15, name: "Tea", slug: "tea" }
-    ],
+    is_active: true,
     brand: {
       id: 2,
       name: "Nature's Leaf",
       slug: "natures-leaf",
-      logo: "https://picsum.photos/seed/brand2/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand2/200/100",
+      is_active: true,
+      product_count: 8,
+      created_at: "2024-02-01T00:00:00.000Z",
+      updated_at: "2024-11-12T11:45:00.000Z",
     },
-    images: [
+    categories: [
       {
-        product_id: 2,
-        url: "https://picsum.photos/seed/product2/400/400",
-        alt_text: "Organic green tea box",
-        is_primary: true,
-        order: 0
-      }
+        id: 10,
+        parent_id: null,
+        name: "Food & Beverages",
+        slug: "food-beverages",
+        description: null,
+        children: [],
+        products_count: 50,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
+      {
+        id: 15,
+        parent_id: null,
+        name: "Tea",
+        slug: "tea",
+        description: null,
+        children: [],
+        products_count: 12,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
     taxonomies: [
       {
@@ -713,104 +195,95 @@ export const dummyProducts: Product[] = [
         description: "Food and beverage products",
         sort_order: 1,
         meta: { icon: "utensils" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
+        is_active: true,
         type: {
           id: 1,
           name: "Categories",
           slug: "categories",
           description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
+          is_active: true,
+          taxonomies_count: 0,
+          taxonomies: [],
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: "2024-01-01T00:00:00.000Z",
         },
         parent: null,
-        children: []
+        children: [],
+        products_count: 50,
+        created_at: "2024-02-20T09:15:00.000Z",
+        updated_at: "2024-11-12T11:45:00.000Z",
       },
-      {
-        id: 11,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Organic",
-        slug: "organic",
-        description: "Certified organic products",
-        sort_order: 2,
-        meta: { certified: true, color: "green" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 12,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Health & Wellness",
-        slug: "health-wellness",
-        description: "Health and wellness products",
-        sort_order: 3,
-        meta: { icon: "heart" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
     ],
+    images: [
+      {
+        id: 201,
+        product_id: 2,
+        image_url: "https://picsum.photos/seed/product2/400/400",
+        alt_text: "Organic green tea box",
+        is_primary: true,
+        sort_order: 0,
+      },
+    ],
+    primary_image: {
+      id: 201,
+      product_id: 2,
+      image_url: "https://picsum.photos/seed/product2/400/400",
+      alt_text: "Organic green tea box",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-02-20T09:15:00.000Z",
+    updated_at: "2024-11-12T11:45:00.000Z",
   },
+
   {
-    id: 9,
-    brand_id: 3,
+    id: 3,
     name: "Smart Fitness Watch Pro",
-    description: "Track your fitness goals with heart rate monitoring, GPS, and 50+ sport modes",
-    sku: "SFW-PRO-001",
-    is_active: true,
-    created_at: "2024-03-10 14:00:00",
-    updated_at: "2024-11-13 16:30:00",
+    slug: "smart-fitness-watch-pro",
+    description:
+      "Track your fitness goals with heart rate monitoring, GPS, and 50+ sport modes",
     price: 299.99,
     discount_type: "fixed",
     discount_value: 50,
+    sale_price: 249.99,
+    has_discount: true,
+    sku: "SFW-PRO-001",
     quantity: 28,
-    final_price: 249.99,
-    categories: [
-      { id: 1, name: "Electronics", slug: "electronics" },
-      { id: 20, name: "Wearables", slug: "wearables" }
-    ],
+    is_active: true,
     brand: {
       id: 3,
       name: "FitTech",
       slug: "fittech",
-      logo: "https://picsum.photos/seed/brand3/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand3/200/100",
+      is_active: true,
+      product_count: 14,
+      created_at: "2024-03-01T00:00:00.000Z",
+      updated_at: "2024-11-13T16:30:00.000Z",
     },
-    images: [
+    categories: [
       {
-        product_id: 3,
-        url: "https://picsum.photos/seed/product3/400/400",
-        alt_text: "Smart fitness watch on wrist",
-        is_primary: true,
-        order: 0
+        id: 1,
+        parent_id: null,
+        name: "Electronics",
+        slug: "electronics",
+        description: null,
+        children: [],
+        products_count: 120,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
       {
-        product_id: 3,
-        url: "https://picsum.photos/seed/product3b/400/400",
-        alt_text: "Smart fitness watch display",
-        is_primary: false,
-        order: 1
-      }
+        id: 20,
+        parent_id: null,
+        name: "Wearables",
+        slug: "wearables",
+        description: null,
+        children: [],
+        products_count: 30,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
     taxonomies: [
       {
@@ -822,347 +295,267 @@ export const dummyProducts: Product[] = [
         description: "Electronic products and devices",
         sort_order: 0,
         meta: { featured: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
+        is_active: true,
         type: {
           id: 1,
           name: "Categories",
           slug: "categories",
           description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
+          is_active: true,
+          taxonomies_count: 0,
+          taxonomies: [],
+          created_at: "2024-01-01T00:00:00.000Z",
+          updated_at: "2024-01-01T00:00:00.000Z",
         },
         parent: null,
-        children: []
+        children: [],
+        products_count: 120,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
-      {
-        id: 13,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Smart Device",
-        slug: "smart-device",
-        description: "Smart connected devices",
-        sort_order: 4,
-        meta: { icon: "wifi" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 14,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Fitness",
-        slug: "fitness",
-        description: "Fitness related products",
-        sort_order: 5,
-        meta: { color: "blue" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
     ],
+    images: [
+      {
+        id: 301,
+        product_id: 3,
+        image_url: "https://picsum.photos/seed/product3/400/400",
+        alt_text: "Smart fitness watch on wrist",
+        is_primary: true,
+        sort_order: 0,
+      },
+      {
+        id: 302,
+        product_id: 3,
+        image_url: "https://picsum.photos/seed/product3b/400/400",
+        alt_text: "Smart fitness watch display",
+        is_primary: false,
+        sort_order: 1,
+      },
+    ],
+    primary_image: {
+      id: 301,
+      product_id: 3,
+      image_url: "https://picsum.photos/seed/product3/400/400",
+      alt_text: "Smart fitness watch on wrist",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-03-10T14:00:00.000Z",
+    updated_at: "2024-11-13T16:30:00.000Z",
   },
+
   {
-    id: 10,
-    brand_id: 4,
+    id: 4,
     name: "Leather Messenger Bag",
-    description: "Handcrafted genuine leather messenger bag with laptop compartment. Perfect for professionals.",
-    sku: "LMB-BRN-001",
-    is_active: true,
-    created_at: "2024-04-05 11:20:00",
-    updated_at: "2024-11-11 09:10:00",
+    slug: "leather-messenger-bag",
+    description:
+      "Handcrafted genuine leather messenger bag with laptop compartment. Perfect for professionals.",
     price: 189.99,
     discount_type: "percentage",
     discount_value: 20,
+    sale_price: 151.99,
+    has_discount: true,
+    sku: "LMB-BRN-001",
     quantity: 15,
-    final_price: 151.99,
-    categories: [
-      { id: 25, name: "Fashion", slug: "fashion" },
-      { id: 30, name: "Bags", slug: "bags" }
-    ],
+    is_active: true,
     brand: {
       id: 4,
       name: "Heritage Leather Co.",
       slug: "heritage-leather-co",
-      logo: "https://picsum.photos/seed/brand4/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand4/200/100",
+      is_active: true,
+      product_count: 6,
+      created_at: "2024-04-01T00:00:00.000Z",
+      updated_at: "2024-11-11T09:10:00.000Z",
     },
+    categories: [
+      {
+        id: 25,
+        parent_id: null,
+        name: "Fashion",
+        slug: "fashion",
+        description: null,
+        children: [],
+        products_count: 80,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
+      {
+        id: 30,
+        parent_id: null,
+        name: "Bags",
+        slug: "bags",
+        description: null,
+        children: [],
+        products_count: 40,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
+    ],
+    taxonomies: [],
     images: [
       {
+        id: 401,
         product_id: 4,
-        url: "https://picsum.photos/seed/product4/400/400",
+        image_url: "https://picsum.photos/seed/product4/400/400",
         alt_text: "Brown leather messenger bag",
         is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 3,
-        taxonomy_type_id: 1,
-        parent_id: null,
-        name: "Fashion & Accessories",
-        slug: "fashion-accessories",
-        description: "Fashion items and accessories",
-        sort_order: 2,
-        meta: { trending: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
+        sort_order: 0,
       },
-      {
-        id: 15,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Handcrafted",
-        slug: "handcrafted",
-        description: "Handmade products",
-        sort_order: 6,
-        meta: { artisan: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 16,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Professional",
-        slug: "professional",
-        description: "Professional use products",
-        sort_order: 7,
-        meta: { business: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
     ],
+    primary_image: {
+      id: 401,
+      product_id: 4,
+      image_url: "https://picsum.photos/seed/product4/400/400",
+      alt_text: "Brown leather messenger bag",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-04-05T11:20:00.000Z",
+    updated_at: "2024-11-11T09:10:00.000Z",
   },
+
   {
-    id: 11,
-    brand_id: 5,
+    id: 5,
     name: "Stainless Steel Water Bottle 1L",
-    description: "Double-walled insulated water bottle keeps drinks cold for 24hrs, hot for 12hrs",
-    sku: "WSB-1L-BLK",
-    is_active: true,
-    created_at: "2024-05-12 08:45:00",
-    updated_at: "2024-11-14 07:30:00",
+    slug: "stainless-steel-water-bottle-1l",
+    description:
+      "Double-walled insulated water bottle keeps drinks cold for 24hrs, hot for 12hrs",
     price: 34.99,
     discount_type: null,
     discount_value: null,
+    sale_price: 34.99,
+    has_discount: false,
+    sku: "WSB-1L-BLK",
     quantity: 200,
-    final_price: 34.99,
-    categories: [
-      { id: 35, name: "Home & Kitchen", slug: "home-kitchen" },
-      { id: 40, name: "Drinkware", slug: "drinkware" }
-    ],
+    is_active: true,
     brand: {
       id: 5,
       name: "HydroLife",
       slug: "hydrolife",
-      logo: "https://picsum.photos/seed/brand5/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand5/200/100",
+      is_active: true,
+      product_count: 18,
+      created_at: "2024-05-01T00:00:00.000Z",
+      updated_at: "2024-11-14T07:30:00.000Z",
     },
-    images: [
+    categories: [
       {
-        product_id: 5,
-        url: "https://picsum.photos/seed/product5/400/400",
-        alt_text: "Black stainless steel water bottle",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 4,
-        taxonomy_type_id: 1,
+        id: 35,
         parent_id: null,
         name: "Home & Kitchen",
         slug: "home-kitchen",
-        description: "Home and kitchen products",
-        sort_order: 3,
-        meta: { icon: "home" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
+        description: null,
+        children: [],
+        products_count: 200,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
       {
-        id: 17,
-        taxonomy_type_id: 2,
+        id: 40,
         parent_id: null,
-        name: "Eco-Friendly",
-        slug: "eco-friendly",
-        description: "Environmentally friendly products",
-        sort_order: 8,
-        meta: { sustainable: true, color: "green" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
+        name: "Drinkware",
+        slug: "drinkware",
+        description: null,
+        children: [],
+        products_count: 60,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
+    taxonomies: [],
+    images: [
+      {
+        id: 501,
+        product_id: 5,
+        image_url: "https://picsum.photos/seed/product5/400/400",
+        alt_text: "Black stainless steel water bottle",
+        is_primary: true,
+        sort_order: 0,
+      },
+    ],
+    primary_image: {
+      id: 501,
+      product_id: 5,
+      image_url: "https://picsum.photos/seed/product5/400/400",
+      alt_text: "Black stainless steel water bottle",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-05-12T08:45:00.000Z",
+    updated_at: "2024-11-14T07:30:00.000Z",
   },
+
   {
-    id: 12,
-    brand_id: 6,
+    id: 6,
     name: "Yoga Mat Premium Plus",
+    slug: "yoga-mat-premium-plus",
     description: "Extra thick 8mm yoga mat with carrying strap. Non-slip surface for all yoga styles.",
-    sku: "YM-PP-PRP",
-    is_active: true,
-    created_at: "2024-06-18 13:00:00",
-    updated_at: "2024-11-09 15:20:00",
     price: 49.99,
     discount_type: "percentage",
     discount_value: 25,
+    sale_price: 37.49,
+    has_discount: true,
+    sku: "YM-PP-PRP",
     quantity: 75,
-    final_price: 37.49,
-    categories: [
-      { id: 45, name: "Sports & Fitness", slug: "sports-fitness" },
-      { id: 50, name: "Yoga", slug: "yoga" }
-    ],
+    is_active: true,
     brand: {
       id: 6,
       name: "ZenFit",
       slug: "zenfit",
-      logo: "https://picsum.photos/seed/brand6/200/100"
+      description: null,
+      logo: "https://picsum.photos/seed/brand6/200/100",
+      is_active: true,
+      product_count: 9,
+      created_at: "2024-06-01T00:00:00.000Z",
+      updated_at: "2024-11-09T15:20:00.000Z",
     },
-    images: [
+    categories: [
       {
-        product_id: 6,
-        url: "https://picsum.photos/seed/product6/400/400",
-        alt_text: "Purple yoga mat rolled",
-        is_primary: true,
-        order: 0
-      }
-    ],
-    taxonomies: [
-      {
-        id: 5,
-        taxonomy_type_id: 1,
+        id: 45,
         parent_id: null,
         name: "Sports & Fitness",
         slug: "sports-fitness",
-        description: "Sports and fitness equipment",
-        sort_order: 4,
-        meta: { popular: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 1,
-          name: "Categories",
-          slug: "categories",
-          description: "Product categories",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
+        description: null,
+        children: [],
+        products_count: 70,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
       },
       {
-        id: 14,
-        taxonomy_type_id: 2,
-        parent_id: null,
-        name: "Fitness",
-        slug: "fitness",
-        description: "Fitness related products",
-        sort_order: 5,
-        meta: { color: "blue" },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      },
-      {
-        id: 18,
-        taxonomy_type_id: 2,
+        id: 50,
         parent_id: null,
         name: "Yoga",
         slug: "yoga",
-        description: "Yoga products and accessories",
-        sort_order: 9,
-        meta: { wellness: true },
-        created_at: "2024-01-01T12:00:00.000000Z",
-        updated_at: "2024-01-01T12:00:00.000000Z",
-        type: {
-          id: 2,
-          name: "Tags",
-          slug: "tags",
-          description: "Product tags",
-          created_at: "2024-01-01T12:00:00.000000Z",
-          updated_at: "2024-01-01T12:00:00.000000Z"
-        },
-        parent: null,
-        children: []
-      }
+        description: null,
+        children: [],
+        products_count: 18,
+        created_at: "2024-01-01T00:00:00.000Z",
+        updated_at: "2024-01-01T00:00:00.000Z",
+      },
     ],
-  }
+    taxonomies: [],
+    images: [
+      {
+        id: 601,
+        product_id: 6,
+        image_url: "https://picsum.photos/seed/product6/400/400",
+        alt_text: "Purple yoga mat rolled",
+        is_primary: true,
+        sort_order: 0,
+      },
+    ],
+    primary_image: {
+      id: 601,
+      product_id: 6,
+      image_url: "https://picsum.photos/seed/product6/400/400",
+      alt_text: "Purple yoga mat rolled",
+      is_primary: true,
+      sort_order: 0,
+    },
+    created_at: "2024-06-18T13:00:00.000Z",
+    updated_at: "2024-11-09T15:20:00.000Z",
+  },
 ];

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ViewDetailsButton } from '../../lib/product/components/product-card2/components/view-details-button';
+import { ViewDetailsButton } from '../../lib/product/components/product-card/components/view-details-button';
 
 const meta: Meta<typeof ViewDetailsButton> = {
   title: 'Components/ProductCardViewDetails',

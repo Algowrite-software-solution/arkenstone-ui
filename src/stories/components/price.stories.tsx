@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { PriceCard } from '../../lib/product/components/product-card2/components/price-card';
+import { PriceCard } from '../../lib/product/components/product-card/components/price-card';
 
 const meta: Meta<typeof PriceCard> = {
   title: 'Components/PriceCard',
