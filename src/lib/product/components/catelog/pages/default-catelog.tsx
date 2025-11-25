@@ -5,7 +5,7 @@ import Filters from "../components/filter";
 import { Listing } from "../layouts/listings-layout";
 import { ListingControl } from "../components/listing-controls";
 import { Pagination } from "../components/pagination";
-import { ProductCard } from "../../product-card2/product-card";
+import { ProductCard } from "../../product-card/product-card";
 import { useCatalogStore } from "../../../../useStore";
 
 const FILTER_CONFIG = [
@@ -99,7 +99,7 @@ export default function DefaultCatalogPage() {
               <tr key={p.id} className="border-b">
                 <td className="p-2">{p.name}</td>
                 <td className="p-2">{(p.categories || []).map((c: any) => c.name).join(", ")}</td>
-                <td className="p-2 text-right">{typeof p.final_price === "number" ? `$${p.final_price}` : `$${p.price ?? "0"}`}</td>
+                <td className="p-2 text-right">{typeof p.sale_price === "number" ? `$${p.sale_price}` : `$${p.price ?? "0"}`}</td>
               </tr>
             ))}
           </tbody>

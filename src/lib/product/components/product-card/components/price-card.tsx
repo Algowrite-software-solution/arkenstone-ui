@@ -2,7 +2,7 @@ import React from "react";
 
 export interface PriceCardProps {
   price: number | null;           // original/base price
-  finalPrice: number | null;      // discounted or actual price
+  salePrice: number | null;      // discounted or actual price
   discountType?: string | null;   // "percentage" | "fixed" | null
   discountValue?: number | null;  // value of discount
 
@@ -25,7 +25,7 @@ const resolveCurrencyCode = (currency?: string) => currency || "USD";
 
 export const PriceCard: React.FC<PriceCardProps> = ({
   price = null,
-  finalPrice = null,
+  salePrice = null,
   discountType = null,
   discountValue = null,
 
@@ -41,7 +41,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
   discountClassName = "text-red-600 font-semibold",
 }) => {
   const original = typeof price === "number" ? price : null;
-  const finalP = typeof finalPrice === "number" ? finalPrice : original;
+  const finalP = typeof salePrice === "number" ? salePrice : original;
 
   /** Detect if discount actually exists */
   const hasDiscount = 

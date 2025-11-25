@@ -126,7 +126,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       if (filters?.price_custom && typeof filters.price_custom === "object") {
         const { min = -Infinity, max = Infinity } = filters.price_custom;
         result = result.filter((p) => {
-          const price = typeof p.final_price === "number" ? p.final_price : (typeof p.price === "number" ? p.price : 0);
+          const price = typeof p.sale_price === "number" ? p.sale_price : (typeof p.price === "number" ? p.price : 0);
           return price >= min && price <= max;
         });
       }
@@ -134,9 +134,9 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       // 4) Sorting: support any sortBy (generic), with a special-case for "price"
       const resolveValue = (item: any, key: string | undefined) => {
         if (!key) return undefined;
-        // special handling for "price" to prefer final_price
+        // special handling for "price" to prefer sale_price
         if (key === "price") {
-          return typeof item.final_price === "number" ? item.final_price : (typeof item.price === "number" ? item.price : 0);
+          return typeof item.sale_price === "number" ? item.sale_price : (typeof item.price === "number" ? item.price : 0);
         }
         // support dot-notation e.g. "manufacturer.name"
         const parts = key.split(".");
@@ -149,7 +149,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       };
 
       // if caller provided a sortBy use generic resolver + type-aware comparison,
-      // otherwise fall back to numeric price sorting (final_price > price)
+      // otherwise fall back to numeric price sorting (sale_price > price)
       if (sortBy) {
         result.sort((a, b) => {
           const va = resolveValue(a, sortBy);
@@ -186,8 +186,8 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       } else {
         // default: numeric price sort (preserve previous behaviour)
         result.sort((a, b) => {
-          const pa = typeof a.final_price === "number" ? a.final_price : (typeof a.price === "number" ? a.price : 0);
-          const pb = typeof b.final_price === "number" ? b.final_price : (typeof b.price === "number" ? b.price : 0);
+          const pa = typeof a.sale_price === "number" ? a.sale_price : (typeof a.price === "number" ? a.price : 0);
+          const pb = typeof b.sale_price === "number" ? b.sale_price : (typeof b.price === "number" ? b.price : 0);
           return sortOrder === "asc" ? pa - pb : pb - pa;
         });
       }

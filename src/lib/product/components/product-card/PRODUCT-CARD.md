@@ -139,7 +139,7 @@ Displays price, original price (strikethrough), and discount percentage.
 | Prop | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
 | `price` | `number \| null` | `null` | Base / original price. If null it's treated as absent. |
-| `finalPrice` | `number \| null` | `null` | Actual selling price. If null `price` is used as fallback. |
+| `salePrice` | `number \| null` | `null` | Actual selling price. If null `price` is used as fallback. |
 | `discountType` | `string \| null` | `null` | `"percentage"` or `"fixed"` (backend hint). If omitted the component will infer discount from price difference. |
 | `discountValue` | `number \| null` | `null` | Value of discount: percent when `discountType === "percentage"`, fixed amount when `"fixed"`. |
 | `showOriginalPrice` | `boolean` | `true` | When true shows the original price as strikethrough if original > final. |
@@ -152,11 +152,11 @@ Displays price, original price (strikethrough), and discount percentage.
 | `discountClassName` | `string` | `"text-red-600 font-semibold"` | Class for the discount percentage label. |
 
 Notes:
-- If both `price` and `finalPrice` are numbers, the component considers a discount present when `price > finalPrice`.
+- If both `price` and `salePrice` are numbers, the component considers a discount present when `price > salePrice`.
 - `discountValue` + `discountType` take precedence for determining the displayed percentage:
   - `"percentage"`: display `discountValue` directly.
   - `"fixed"`: convert fixed amount to percent = round((discountValue / price) * 100) when `price` is available.
-  - If no explicit discount fields, percentage is computed from `price` and `finalPrice`.
+  - If no explicit discount fields, percentage is computed from `price` and `salePrice`.
 - Null values are handled gracefully — the UI displays `---` for missing final price and hides elements that cannot be computed.
 
 Example
@@ -164,18 +164,18 @@ Example
 import { PriceCard } from "./components/price-card";
 
 // explicit percentage from backend
-<PriceCard price={100} finalPrice={75} discountType="percentage" discountValue={25} />
+<PriceCard price={100} salePrice={75} discountType="percentage" discountValue={25} />
 
 // fixed discount (backend provided fixed amount)
-<PriceCard price={120} finalPrice={90} discountType="fixed" discountValue={30} />
+<PriceCard price={120} salePrice={90} discountType="fixed" discountValue={30} />
 
 // backend omitted discount, inferred from prices
-<PriceCard price={200} finalPrice={150} />
+<PriceCard price={200} salePrice={150} />
 
 // customize styles / currency
 <PriceCard
   price={500}
-  finalPrice={450}
+  salePrice={450}
   currency="EUR"
   fractionDigits={2}
   wrapperClassName="flex items-baseline gap-3"
@@ -408,7 +408,7 @@ Example
   </div>
 
   <div className="pointer-events-auto">
-    <PriceCard finalPrice={product.final_price ?? product.price ?? 0} />
+    <PriceCard salePrice={product.final_price ?? product.price ?? 0} />
   </div>
 </ProductImage>
 ```
