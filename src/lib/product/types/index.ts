@@ -2,15 +2,21 @@ export interface Brand {
   id: number;
   name: string;
   slug: string;
+  description: string | null;
   logo: string | null;
+  is_active: boolean;
+  product_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProductImage {
+  id: number;
   product_id: number;
-  url: string;
+  image_url: string;
   alt_text: string | null;
   is_primary: boolean;
-  order: number;
+  sort_order: number;
 }
 
 export interface Category {
@@ -18,7 +24,11 @@ export interface Category {
   parent_id?: number | null;
   name: string;
   slug: string;
+  description: string | null;
   children?: Category[];
+  products_count?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TaxonomyType {
@@ -26,6 +36,9 @@ export interface TaxonomyType {
   name: string;
   slug: string;
   description: string | null;
+  is_active: boolean;
+  taxonomies_count: number;
+  taxonomies?: Taxonomy[];
   created_at: string;
   updated_at: string;
 }
@@ -39,40 +52,42 @@ export interface Taxonomy {
   description: string | null;
   sort_order: number;
   meta: Record<string, any> | null;
-  created_at: string;
-  updated_at: string;
+  is_active: boolean;
   type?: TaxonomyType | null;
   parent?: Taxonomy | null;
   children?: Taxonomy[];
+  products_count?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProductTaxonomy{
   product_id: number;
   taxonomy_id: number;
+  product?: Product | null;
+  taxonomy?: Taxonomy | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {
   id: number;
-  brand_id: number | null;
   name: string;
+  slug: string;
   description: string | null;
-  sku: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
   price: number | null;
   discount_type: string | null;
   discount_value: number | null;
+  sale_price: number | null;
+  has_discount: boolean;
+  sku: string | null;
   quantity: number | null;
-  final_price: number | null;
-  categories: Category[] | null;
+  is_active: boolean;
   brand: Brand | null;
+  categories: Category[] | null;
+  taxonomies: Taxonomy[] | null;
   images: ProductImage[] | null;
-  taxonomies: any[] | null;
-  colors: ProductColor[] | null;
-}
-
-export interface ProductColor {
-  name: string;
-  hex_code: string; // e.g., "#FF0000"
+  primary_image: ProductImage | null;
+  created_at: string;
+  updated_at: string;
 }

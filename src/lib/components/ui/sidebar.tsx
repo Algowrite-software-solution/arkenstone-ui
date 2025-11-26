@@ -1,9 +1,16 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
+<<<<<<< HEAD
 import { cva, type VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+=======
+import { VariantProps, cva } from "class-variance-authority"
+import { PanelLeftIcon } from "lucide-react"
+
+import { useIsMobile } from "@core/hooks/use-mobile"
+>>>>>>> feature/product
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,7 +37,11 @@ const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
+<<<<<<< HEAD
 type SidebarContextProps = {
+=======
+type SidebarContext = {
+>>>>>>> feature/product
   state: "expanded" | "collapsed"
   open: boolean
   setOpen: (open: boolean) => void
@@ -40,7 +51,11 @@ type SidebarContextProps = {
   toggleSidebar: () => void
 }
 
+<<<<<<< HEAD
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
+=======
+const SidebarContext = React.createContext<SidebarContext | null>(null)
+>>>>>>> feature/product
 
 function useSidebar() {
   const context = React.useContext(SidebarContext)
@@ -111,7 +126,11 @@ function SidebarProvider({
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
 
+<<<<<<< HEAD
   const contextValue = React.useMemo<SidebarContextProps>(
+=======
+  const contextValue = React.useMemo<SidebarContext>(
+>>>>>>> feature/product
     () => ({
       state,
       open,
@@ -181,6 +200,13 @@ function Sidebar({
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+<<<<<<< HEAD
+=======
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+        </SheetHeader>
+>>>>>>> feature/product
         <SheetContent
           data-sidebar="sidebar"
           data-slot="sidebar"
@@ -193,10 +219,13 @@ function Sidebar({
           }
           side={side}
         >
+<<<<<<< HEAD
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
+=======
+>>>>>>> feature/product
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
@@ -214,9 +243,14 @@ function Sidebar({
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
+<<<<<<< HEAD
         data-slot="sidebar-gap"
         className={cn(
           "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+=======
+        className={cn(
+          "relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+>>>>>>> feature/product
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
@@ -225,7 +259,10 @@ function Sidebar({
         )}
       />
       <div
+<<<<<<< HEAD
         data-slot="sidebar-container"
+=======
+>>>>>>> feature/product
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
@@ -241,7 +278,10 @@ function Sidebar({
       >
         <div
           data-sidebar="sidebar"
+<<<<<<< HEAD
           data-slot="sidebar-inner"
+=======
+>>>>>>> feature/product
           className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
@@ -264,7 +304,11 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
+<<<<<<< HEAD
       className={cn("size-7", className)}
+=======
+      className={cn("h-7 w-7", className)}
+>>>>>>> feature/product
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -307,8 +351,13 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
+<<<<<<< HEAD
         "bg-background relative flex w-full flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+=======
+        "bg-background relative flex max-w-full min-h-svh flex-1 flex-col",
+        "peer-data-[variant=inset]:min-h-[calc(100svh-(--spacing(4)))] md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0",
+>>>>>>> feature/product
         className
       )}
       {...props}
