@@ -50,6 +50,7 @@ export const useACLStore = createGenericStore<ACLState, ACLActions>(
                 const state = get();
                 const requirements = Array.isArray(accessor) ? accessor : [accessor];
 
+                console.log("ACL: Checking access for", userRoles, accessor, matchAll);
                 if (!state.isReady) return false;
 
                 // Helper: Evaluate a single requirement against user roles

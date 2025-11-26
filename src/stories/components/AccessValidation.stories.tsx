@@ -10,7 +10,8 @@ const meta = {
   tags: ['autodocs'],
   argTypes: {
     accessor: {
-      control: 'text',
+      control: 'select',
+      options: ['admin', 'manager', 'editor', 'guest'],
     },
     matchAll: {
       control: 'boolean',
@@ -28,7 +29,7 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
     args: {
         userRoles: ["admin"],
-        accessor: "admin",
+        accessor: "man",
         matchAll: false,
         behavior: "hide",
         fallback: <div className="px-3 py-1 rounded-lg bg-red-500">Access Denied</div>,
