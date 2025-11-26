@@ -2,4 +2,4 @@ export function DefaultButton({children, className, active}: {children: React.Re
     return (
             <button className={className}>{children}</button>
     )
-}|
+}
