@@ -5,8 +5,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { BreadcrumbItemType, Breadcrumbs } from "@/components/breadcrumb/breadcrumb";
+import { ThemeProvider } from "@/provider/theme-provider";
+import { BreadcrumbItemType, Breadcrumbs } from "@/components/custom/breadcrumb";
 
 
 export default function DefaultPanelLayout({

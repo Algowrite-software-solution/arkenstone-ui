@@ -1,7 +1,5 @@
 import { useACLStore } from "../stores/acl.store";
-import { Accessor, Role, ACLState, ACLActions } from "../types/acl";
-
-type ACLStore = ACLState & ACLActions
+import { Accessor, Role } from "../types/acl";
 
 export const useAccess = (userRoles: Role[] = []) => {
     const {check, isReady} = useACLStore();
