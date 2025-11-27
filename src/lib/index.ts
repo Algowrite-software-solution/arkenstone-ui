@@ -1,4 +1,6 @@
 import "./css/app.css";
 
-export * from './components/button/button';
-export * from './components/zustund-store-preview';
+export * from './product/components/catelog';
+export * from './product/components/product-card';
+
+export * from './product/types';
