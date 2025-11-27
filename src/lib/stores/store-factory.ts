@@ -5,7 +5,7 @@ import { immer } from "zustand/middleware/immer";
 /**
  * Define Base Actions for the factory
  */
-interface BaseActions<T> {
+export interface BaseActions<T> {
   update: (fn: (state: T) => void) => void;
   reset: () => void;
 }

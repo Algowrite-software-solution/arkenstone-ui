@@ -17,6 +17,6 @@
       "@/*": ["./src/lib/*"]
     }
   },
-  "include": ["src/lib/**/*"],
+  "include": ["src/lib/**/*", "src/test/zustund-store-preview.tsx", "src/test/access-validation-preview.tsx", "src/lib/data", "src/test/mock/products.ts", "src/test/test-components.tsx"],
   "exclude": ["dist", "node_modules"]
 }
