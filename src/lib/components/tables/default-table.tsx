@@ -18,7 +18,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import ErrorBoundary from '../error-boundaries/something-went-wrong';
+
 
 export type SearchComponent = {
     column: string;
@@ -200,4 +200,8 @@ export default function DefaultTable({
             </div>
         </ErrorBoundary>
     );
+}
+
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
 }
