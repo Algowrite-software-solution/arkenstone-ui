@@ -1,10 +1,8 @@
-// resources/js/lib/api.js
 import axios from 'axios';
 import { toast } from 'sonner';
 
-
 const api = axios.create({
-    baseURL: `/api/v1`, // Optional if you prefix all endpoints
+    baseURL: `/api/v1`,
     headers: {
         'X-Requested-With': 'XMLHttpRequest',
         Accept: 'application/json',
@@ -24,6 +22,50 @@ export interface ApiOptions {
     onSuccess?: (data: any) => void;
     onError?: (error: any) => void;
 }
+
+/**
+ * Helper to parse your specific Backend Error Patterns
+ * Returns a formatted string for the Toast
+ */
+const getDisplayErrorMessage = (message: string | null, errors: any): string => {
+    // 1. If message exists, use it immediately (per protocol)
+    if (message) return message;
+
+    // 2. If no message, try to parse 'errors'
+    if (!errors) return 'Something went wrong';
+
+    let firstMsg = '';
+    let otherCount = 0;
+
+    if (Array.isArray(errors)) {
+        // PATTERN 2: Simple Array ["Error 1", "Error 2"]
+        if (errors.length === 0) return 'Request failed';
+        firstMsg = String(errors[0]);
+        otherCount = errors.length - 1;
+    } else if (typeof errors === 'object') {
+        // PATTERN 1: Object { email: ["Msg"], mobile: ["Msg"] }
+        const keys = Object.keys(errors);
+        if (keys.length === 0) return 'Request failed';
+
+        const firstKey = keys[0];
+        const firstVal = errors[firstKey];
+
+        // Laravel usually sends array of strings for each field
+        firstMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+        otherCount = keys.length - 1;
+    } else {
+        // Fallback for unexpected string/number
+        firstMsg = String(errors);
+    }
+
+    // 3. Format: "First error (and X other errors)"
+    if (otherCount > 0) {
+        return `${firstMsg} (and ${otherCount} other error${otherCount > 1 ? 's' : ''})`;
+    }
+
+    return firstMsg;
+};
+
 const request = async (method: string, url: string, options: ApiOptions = {}) => {
     const { data = {}, params = {}, headers = {}, displayError = true, displaySuccess = false, isMultipart = false, onSuccess, onError } = options;
 
@@ -39,43 +81,61 @@ const request = async (method: string, url: string, options: ApiOptions = {}) =>
             },
         };
 
-        // add data as params if request is GET
         if (method === 'get') {
-            config.params = {
-                ...params,
-                ...data,
-            };
+            config.params = { ...params, ...data };
         }
 
         const res: any = await api(config);
-        const { status, message, errors }: { status: string; message?: string; errors?: any } = res.data;
-        let responseData = res.data?.data ?? null;
+        
+        // Destructure Protocol Response
+        const { status, message, errors, data: responseData } = res.data || {};
 
-        if (status !== 'success') {
-            if (displayError) toast.error(errors || message || 'Something went wrong');
-            onError?.(errors);
-            throw { message, errors };
+        // --- CHECK FOR LOGICAL FAILURES (200 OK but status="error") ---
+        if (status && status !== 'success') {
+            const errorPayload = {
+                response: {
+                    data: { status, message, errors } // Mimic axios structure for the catch block
+                }
+            };
+            throw errorPayload;
         }
 
-        if (displaySuccess && (errors || message)) {
-            toast.success(errors || message);
+        // --- SUCCESS ---
+        if (displaySuccess && message) {
+            toast.success(message);
         }
 
-        onSuccess?.(responseData); // Call the onSuccess callback if it exists
+        onSuccess?.(responseData ?? null);
+        return responseData ?? null;
 
-        return responseData;
     } catch (err: any) {
-        const msg = err?.response?.data?.message || err?.message || 'Request failed';
-        const errs = err?.response?.data?.errors || {};
-        let errStr = '';
-        if (errs && errs.length && typeof errs === 'object') {
-            errs.forEach((error: any) => {
-                errStr += error + '\n';
-            });
+        // --- UNIFIED ERROR HANDLING ---
+        
+        const response = err.response;
+        const serverData = response?.data || {}; // The backend JSON
+        
+        // 1. Extract raw values
+        const serverMessage = serverData.message || null;
+        const serverErrors = serverData.errors || null; // This gets passed to onError
+
+        // 2. Generate Toast Message
+        // Logic: Use serverMessage if present; otherwise parse errors to find first + count
+        const displayMsg = getDisplayErrorMessage(serverMessage, serverErrors) || err.message || 'Request failed';
+
+        if (displayError) {
+            toast.error(displayMsg);
         }
-        if (displayError) toast.error(errStr || msg);
-        onError?.(errs); // Call the onError callback if it exists
-        throw { message: msg, errors: errs };
+
+        // 3. Callback
+        // Pass the RAW 'errors' object so your forms can map "email" => "error msg"
+        onError?.(serverErrors); 
+        
+        // 4. Throw structured data
+        throw { 
+            message: displayMsg, 
+            errors: serverErrors, 
+            status: response?.status 
+        };
     }
 };
 

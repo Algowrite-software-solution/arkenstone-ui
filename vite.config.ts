@@ -19,6 +19,11 @@ export default defineConfig({
     insertTypesEntry: true,
     copyDtsFiles: true
   })],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src/lib"),
+    },
+  },
   build: {
     lib: {
       entry: resolve(__dirname, "src/lib/index.ts"),
