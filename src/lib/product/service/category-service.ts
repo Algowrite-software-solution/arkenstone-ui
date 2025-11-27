@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, ApiOptions } from '../../util/api';
+import { apiGet, apiPost, apiPut, apiDelete, ApiOptions } from '../../hooks/api';
 import { Category } from '../types';
 
 // --- TYPE DEFINITIONS ---

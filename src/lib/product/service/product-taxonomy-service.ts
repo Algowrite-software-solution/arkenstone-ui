@@ -1,4 +1,4 @@
-import { apiPost, apiPut, apiDelete, ApiOptions } from '../../util/api';
+import { apiPost, apiPut, apiDelete, ApiOptions } from '../../hooks/api';
 import { ProductTaxonomy } from '../types';
 
 // --- TYPE DEFINITIONS ---
