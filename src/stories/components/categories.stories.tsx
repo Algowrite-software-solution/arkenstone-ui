@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { CategoriesBadgeList } from '../../lib/product/components/product-card/components/categories';
+import { CategoriesBadgeList } from '../../lib/e-commerce/product/components/product-card/components/categories';
 
 const meta: Meta<typeof CategoriesBadgeList> = {
   title: 'Components/CategoriesBadgeList',

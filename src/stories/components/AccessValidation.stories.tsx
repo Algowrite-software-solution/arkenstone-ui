@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {AccessValidation} from '../../lib/components/access-validation';
+import {AccessValidation} from '../../test/access-validation-preview';
 
 const meta = {
   title: 'Example/Access Validation',

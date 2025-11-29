@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { WishlistButton } from '../../lib/product/components/product-card/components/wishlist-button';
+import { WishlistButton } from '../../lib/e-commerce/product/components/product-card/components/wishlist-button';
 
 const meta: Meta<typeof WishlistButton> = {
   title: 'Components/WishlistButton',
