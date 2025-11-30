@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import  TestComponents  from "../../lib/test/components/test-components";
+import  TestComponents  from "../../test/test-components";
 
 
 const meta = {

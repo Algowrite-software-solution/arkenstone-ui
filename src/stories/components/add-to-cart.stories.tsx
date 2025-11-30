@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { AddToCart } from '../../lib/product/components/product-card/components/add-to-cart-button';
+import { AddToCart } from '../../lib/e-commerce/product/components/product-card/components/add-to-cart-button';
 
 const meta: Meta<typeof AddToCart> = {
   title: 'Components/ProductCardAddToCart',

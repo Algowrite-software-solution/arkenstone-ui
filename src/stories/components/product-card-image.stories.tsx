@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ProductCardListing } from '../../lib/product/components/product-card/page/product-card-listing';
+import { ProductCardListing } from '../../lib/e-commerce/product/components/product-card/page/product-card-listing';
 
 const meta: Meta<typeof ProductCardListing> = {
   title: 'Components/DefaultProductImage',

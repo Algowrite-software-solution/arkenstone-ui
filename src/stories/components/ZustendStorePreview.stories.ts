@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ZustendStorePreview } from '../../lib/components/zustund-store-preview';
+import { ZustendStorePreview } from '../../test/zustund-store-preview';
 
 const meta = {
   title: 'Example/Zustend Store Preview',

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { WishlistButton } from '../../lib/e-commerce/product/components/product-card/components/wishlist-button';
+import { SolarSystemPreview } from '../../test/solar-system-preview';
 
-const meta: Meta<typeof WishlistButton> = {
-  title: 'Components/WishlistButton',
-  component: WishlistButton,
+const meta: Meta<typeof SolarSystemPreview> = {
+  title: 'Components/SolarSystemPreview',
+  component: SolarSystemPreview,
   parameters: {
     layout: 'padded',
   },

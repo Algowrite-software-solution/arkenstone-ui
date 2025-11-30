@@ -32,12 +32,13 @@ export default defineConfig({
       formats: ["es", "umd"]
     },
     rollupOptions: {
-      external: ["react", "react-dom", "tailwindcss"],
+      external: ["react", "react-dom"],
       output: {
         globals: {
           react: "React",
           "react-dom": "ReactDOM"
-        }
+        }, 
+        assetFileNames: "assets/[name][extname]" 
       }
     }
   },

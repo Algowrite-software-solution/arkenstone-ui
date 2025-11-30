@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import Filters from "../../lib/product/components/catelog/components/filter";
+import Filters from "../../lib/e-commerce/product/components/catelog/components/filter";
 import { Star, Heart, Image as ImageIcon } from "lucide-react";
 
 const meta: Meta<typeof Filters> = {

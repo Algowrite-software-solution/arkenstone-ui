@@ -9,4 +9,9 @@ export interface AppConfig {
         wishlistEnabled: boolean;
         productZoom: boolean;
     };
+    api?: {
+        url?: string;
+        isSameOrigin?: boolean;
+        withCredentials?: boolean;
+    };
 }

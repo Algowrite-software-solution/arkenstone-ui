@@ -1,15 +1,8 @@
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useConfigStore } from '@/stores';
 
-const api = axios.create({
-    baseURL: `/api/v1`,
-    headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-    withCredentials: true,
-});
+let api = null; // Lazy initialization 
 
 export interface ApiOptions {
     data?: any;
@@ -19,6 +12,7 @@ export interface ApiOptions {
     displaySuccess?: boolean;
     isMultipart?: boolean;
     isDownload?: boolean;
+    withCredentials?: boolean;
     onSuccess?: (data: any) => void;
     onError?: (error: any) => void;
 }
@@ -67,7 +61,17 @@ const getDisplayErrorMessage = (message: string | null, errors: any): string => 
 };
 
 const request = async (method: string, url: string, options: ApiOptions = {}) => {
-    const { data = {}, params = {}, headers = {}, displayError = true, displaySuccess = false, isMultipart = false, onSuccess, onError } = options;
+    const { data = {}, params = {}, headers = {}, displayError = true, displaySuccess = false, isMultipart = false, onSuccess, onError, withCredentials } = options;
+
+    api = axios.create({
+    baseURL: useConfigStore.getState().api?.url ?? '/api/v1',
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    },
+    withCredentials: withCredentials ?? useConfigStore.getState().api?.withCredentials ?? true,
+});
 
     try {
         const config = {
