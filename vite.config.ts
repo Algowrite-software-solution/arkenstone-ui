@@ -26,6 +26,7 @@ export default defineConfig({
     },
   },
   build: {
+    cssTarget: "chrome96", 
     lib: {
       entry: resolve(__dirname, "src/lib/index.ts"),
       name: "arkenstone-ui",
