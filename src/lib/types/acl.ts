@@ -9,6 +9,14 @@ export interface ACLConfig {
      * Example: { "staff": ["admin", "manager"], "public": ["guest"] }
      */
     groups?: Record<string, Role[]>;
+
+    /**
+     * API Configuration for remote mode
+     */
+    api?: {
+        url: string;
+        isSameOrigin?: boolean;
+    };
     
     /**
      * Permission definitions.

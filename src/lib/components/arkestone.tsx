@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useACLStore } from "../stores/acl.store";
 import { ACLConfig } from "@/types/acl";
+import { useConfigStore } from "@/stores";
+import { AppConfig } from "@/types";
 
 
 /**
@@ -11,6 +13,7 @@ import { ACLConfig } from "@/types/acl";
  */
 interface ArkenstoneConfig {
    aclConfig: ACLConfig;
+   api?: AppConfig["api"];
 }
 
 
@@ -27,6 +30,7 @@ interface ArkenstoneConfig {
 export function Arkenstone({ children , config }: { children: React.ReactNode , config?: ArkenstoneConfig }) {
 
     const { configure } = useACLStore();
+    const { setApi, api } = useConfigStore();
 
     useEffect(() => {
         configure(config?.aclConfig ?? {
@@ -43,6 +47,12 @@ export function Arkenstone({ children , config }: { children: React.ReactNode , 
                 'editor': ['product.edit'],
                 'guest': ['product.view']
             }
+        });
+
+        setApi(config?.api ?? {
+            url: '/api/v1',
+            isSameOrigin: true,
+            withCredentials: false,
         });
     }, []);
 

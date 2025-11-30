@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import Search from '../../lib/components/custom/search';
+import { SolarSystemPreview } from '../../test/solar-system-preview';
 
-const meta: Meta<typeof Search> = {
-  title: 'Components/Search',
-  component: Search,
+const meta: Meta<typeof SolarSystemPreview> = {
+  title: 'Components/SolarSystemPreview',
+  component: SolarSystemPreview,
   parameters: {
     layout: 'padded',
   },

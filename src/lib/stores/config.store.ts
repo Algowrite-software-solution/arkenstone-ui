@@ -9,11 +9,17 @@ const initialConfig: AppConfig = {
     wishlistEnabled: true,
     productZoom: false,
   },
+  api: {
+    url: '/api/v1',
+    isSameOrigin: false,
+    withCredentials: false,
+  },
 };
 
 interface ConfigActions {
   toggleTheme: (theme?: AppConfig["theme"]) => void;
   toggleFeature: (key: keyof AppConfig["features"]) => void;
+  setApi: (api: AppConfig["api"]) => void;
 }
 
 export const useConfigStore = createGenericStore<AppConfig, ConfigActions>(
@@ -28,6 +34,11 @@ export const useConfigStore = createGenericStore<AppConfig, ConfigActions>(
       toggleFeature: (key: keyof AppConfig["features"]) =>
         set((state) => {
           state.features[key] = !state.features[key];
+        }),
+
+      setApi: (api: AppConfig["api"]) =>
+        set((state) => {
+          state.api = api;
         }),
     }),
   }
