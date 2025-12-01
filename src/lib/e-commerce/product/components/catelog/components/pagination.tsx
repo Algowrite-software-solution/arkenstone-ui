@@ -1,4 +1,4 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface PaginationProps {
   /** Current page number (1-indexed) */
@@ -60,19 +60,7 @@ export function Pagination({
     renderPage: undefined,
     renderPageSize: undefined,
   },
-
-  // styling props with sensible defaults
-  className = {
-    container : "flex items-center justify-center gap-2 p-3",
-    summary : "text-sm text-gray-600 mr-3",
-    page : "px-3 py-1 border rounded",
-    activePage : "bg-gray-200 font-semibold",
-    prevNext : "px-3 py-1 border rounded disabled:opacity-40",
-    pageSizeSelect : "border rounded px-2 py-1 text-sm mr-3",
-    pageButton : "", // extra wrapper for page button if needed
-    disabled : "opacity-40",
-  }
-  
+  className = {},
 }: PaginationProps) {
   const totalPages = Math.max(0, Math.ceil(total / pageSize));
 
@@ -80,7 +68,7 @@ export function Pagination({
     <button
       key={pageNum}
       onClick={() => onChange(pageNum)}
-      className={`${className.page} ${isActive ? className.activePage : ""} ${className.pageButton}`.trim()}
+      className={cn("px-3 py-1 border rounded",className.page, isActive ? cn(`bg-gray-200 font-semibold`, className.activePage) : "", cn("px-3 py-1 border rounded disabled:opacity-40", className.pageButton))}
       aria-current={isActive ? "page" : undefined}
     >
       {pageNum}
@@ -88,10 +76,10 @@ export function Pagination({
   );
 
   return (
-    <div className={className.container}>
+    <div className={cn("flex items-center justify-center gap-2 p-3", className.container)}>
       {/* Summary */}
       {show?.summary && (
-        <span className={className.summary}>
+        <span className={cn(className.summary, "text-sm text-gray-600 mr-3")}>
           Showing {(page - 1) * pageSize + 1}–
           {Math.min(page * pageSize, total)} of {total}
         </span>
@@ -101,7 +89,7 @@ export function Pagination({
       {show?.pageSize && (
         customRender.renderPageSize || (
           <select
-            className={className.pageSizeSelect}
+            className={cn("border rounded px-2 py-1 text-sm mr-3", className.pageSizeSelect)}
             aria-label="Select page size"
             // NOTE: this is UI only; handle changes externally if you wire up a handler
             onChange={() => {}}
@@ -118,7 +106,7 @@ export function Pagination({
       {show?.arrows &&
         (customRender.renderPrev || (
           <button
-            className={`${className.prevNext} ${page === 1 ? className.disabled : ""}`.trim()}
+            className={cn(`${className.prevNext} ${page === 1 ? cn("opacity-40", className.disabled) : ""}`.trim())}
             disabled={page === 1}
             onClick={() => onChange(Math.max(1, page - 1))}
             aria-label="Previous page"

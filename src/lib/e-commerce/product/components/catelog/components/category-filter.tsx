@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { ClassNamesMap } from "./filter";
+import { cn } from "@/lib/utils";
 
 export type CategoryNode = {
   label: string;
@@ -16,7 +17,7 @@ export interface CategoryFilterProps {
   classNames?: ClassNamesMap;
 }
 
-export default function CategoryFilter({
+export function CategoryFilter({
   options,
   selected,
   onToggle,
@@ -70,7 +71,7 @@ export default function CategoryFilter({
 
         return (
           <div key={key} style={indentStyle(level)} className={classNames?.treeNode ?? undefined}>
-            <div className={`flex items-center gap-2 ${classNames?.treeLabel ?? ""}`}>
+            <div className={cn("flex items-center gap-2", classNames?.treeLabel)}>
               {opt.children && opt.children.length > 0 && (
                 <button
                   className={classNames?.treeToggle ?? "p-1"}
@@ -81,7 +82,7 @@ export default function CategoryFilter({
                 </button>
               )}
 
-              <label className={`flex items-center gap-2 ${classNames?.option ?? ""}`}>
+              <label className={cn("flex items-center gap-2", classNames?.option)}>
                 <input
                   type="checkbox"
                   checked={hasAllChildren}
@@ -92,7 +93,7 @@ export default function CategoryFilter({
                   className={classNames?.checkbox ?? ""}
                 />
                 <span
-                  className={`cursor-pointer ${hasAllChildren ? "font-semibold" : ""}`}
+                  className={cn("cursor-pointer", hasAllChildren ? "font-semibold" : "")}
                   onClick={() => (opt.children && opt.children.length > 0 ? toggleNode(opt) : toggleLeaf(opt.value))}
                 >
                   {opt.label}
@@ -101,7 +102,7 @@ export default function CategoryFilter({
             </div>
 
             {opt.children && opt.children.length > 0 && expanded[key] && (
-              <div className={classNames?.treeChildren ?? "ml-6 mt-1"}>
+              <div className={cn("ml-6 mt-1", classNames?.treeChildren)}>
                 <CategoryFilter
                   options={opt.children}
                   selected={selected}

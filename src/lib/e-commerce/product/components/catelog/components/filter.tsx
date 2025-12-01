@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
-import CategoryFilter from "./category-filter";
+import { CategoryFilter } from "./category-filter";
+import { cn } from "@/lib/utils";
 
 export type ClassNamesMap = Partial<
   Record<"wrapper" | "item" | "title" | "collapseIcon" | "options" | "option" | "input" | "checkbox" | "radio" | "chip" | "toggle" | "color" | "image" | "rating" | "tag" | "icon" | "range" | "tree" | "treeNode" | "treeToggle" | "treeLabel" | "treeChildren" | "button",
@@ -122,9 +123,9 @@ export default function Filters({
 
   return (
     <div
-      className={`flex ${
-        direction === "vertical" ? `flex-col ${verticalFilterClassName}` : `flex-row ${horizontalFilterClassName}`
-      }`}
+      className={cn("flex", 
+        direction === "vertical" ? cn(`flex-col ${verticalFilterClassName}`) : cn(`flex-row ${horizontalFilterClassName}`)
+      )}
     >
       {flatFilters.map((filter) => (
         <FilterItem
@@ -178,15 +179,15 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
   return (
     <div className={options.filterItemsClassName}>
       <div
-        className={`${mergedClassNames.wrapper ?? "flex justify-between items-center cursor-pointer"}`}
+        className={cn(mergedClassNames.wrapper ?? "flex justify-between items-center cursor-pointer")}
         onClick={() => options.collapsible && setCollapsed(!collapsed)}
       >
-        <span className={mergedClassNames.title ?? "font-semibold"}>{options.title}</span>
-        {options.collapsible && <span className={mergedClassNames.collapseIcon ?? ""}>{collapsed ? collapsibleIconUp : collapsibleIconDown}</span>}
+        <span className={cn(mergedClassNames.title ?? "font-semibold")}>{options.title}</span>
+        {options.collapsible && <span className={cn(mergedClassNames.collapseIcon ?? "")}>{collapsed ? collapsibleIconUp : collapsibleIconDown}</span>}
       </div>
 
       {!collapsed && (
-        <div className={mergedClassNames.options ?? "mt-2"}>
+        <div className={cn(mergedClassNames.options ?? "mt-2")}>
           {/* if caller passed a render function for this filter item, use it */}
           {options.render ? (
             // pass mergedClassNames as `classNames` key (render expects classNames)
@@ -208,7 +209,7 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
               classNames={mergedClassNames}
             />
           ) : (
-            <div className={mergedClassNames.options ?? "flex flex-wrap gap-2"}>
+            <div className={cn(mergedClassNames.options ?? "flex flex-wrap gap-2")}>
               {options.options.map((opt) => (
                 <FilterOptionItem
                   key={String(opt.value)}
@@ -254,9 +255,9 @@ function FilterOptionItem({
   // CHECKBOX
   if (type === "checkbox")
     return (
-      <label className={`flex items-center gap-2 ${optClass}`}>
+      <label className={cn("flex items-center gap-2", optClass)}>
         <input
-          className={`${inputClass} ${checkboxClass}`.trim()}
+          className={cn(inputClass, checkboxClass)}
           type="checkbox"
           checked={Array.isArray(selected) ? selected.includes(value) : false}
           onChange={() => onCheckboxToggle(String(value))}
@@ -268,9 +269,9 @@ function FilterOptionItem({
   // RADIO
   if (type === "radio")
     return (
-      <label className={`flex items-center gap-2 ${optClass}`}>
+      <label className={cn("flex items-center gap-2", optClass)}>
         <input
-          className={`${inputClass} ${radioClass}`.trim()}
+          className={cn(inputClass, radioClass)}
           type="radio"
           checked={selected === value}
           onChange={() => onRadioSelect(value)}
@@ -283,7 +284,7 @@ function FilterOptionItem({
   if (type === "chip")
     return (
       <button
-        className={`${optClass} px-3 py-1 rounded-full border ${selected === value ? "bg-black text-white" : "bg-white text-black"}`}
+        className={cn("px-3 py-1 rounded-full border",optClass, selected === value ? "bg-black text-white" : "bg-white text-black")}
         onClick={() => onRadioSelect(value)}
       >
         {label}
@@ -293,12 +294,12 @@ function FilterOptionItem({
   // TOGGLE / SWITCH
   if (type === "toggle" || type === "switch")
     return (
-      <label className={`flex items-center gap-2 cursor-pointer ${optClass}`}>
+      <label className={cn("flex items-center gap-2 cursor-pointer", optClass)}>
         <div
-          className={`${classNames?.toggle ?? "w-10 h-5 flex items-center rounded-full p-1 transition"} ${selected ? "bg-black" : "bg-gray-300"}`}
+          className={cn("w-10 h-5 flex items-center rounded-full p-1 transition",classNames?.toggle , selected ? "bg-black" : "bg-gray-300")}
           onClick={() => onRadioSelect(!selected)}
         >
-          <div className={`bg-white w-4 h-4 rounded-full shadow transform transition ${selected ? "translate-x-5" : "translate-x-0"}`} />
+          <div className={cn("bg-white w-4 h-4 rounded-full shadow transform transition", selected ? "translate-x-5" : "translate-x-0")} />
         </div>
         {label}
       </label>
@@ -309,7 +310,7 @@ function FilterOptionItem({
     return (
       <div
         onClick={() => onRadioSelect(value)}
-        className={`${classNames?.color ?? "w-6 h-6 rounded-full border cursor-pointer"} ${selected === value ? "ring-2 ring-black" : ""} ${optClass}`}
+        className={cn("w-6 h-6 rounded-full border cursor-pointer", classNames?.color, selected === value ? "ring-2 ring-black" : "", optClass)}
         style={{ backgroundColor: color ?? String(value) }}
       />
     );
@@ -318,7 +319,7 @@ function FilterOptionItem({
   if (type === "image")
     return (
       <div
-        className={`${classNames?.image ?? "w-12 h-12 rounded-lg border overflow-hidden cursor-pointer"} ${selected === value ? "ring-2 ring-black" : ""} ${optClass}`}
+        className={cn("w-12 h-12 rounded-lg border overflow-hidden cursor-pointer",classNames?.image , selected === value ? "ring-2 ring-black" : "", optClass)}
         onClick={() => onRadioSelect(value)}
       >
         {image ? <img src={image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-gray-200">No Image</div>}
@@ -328,7 +329,7 @@ function FilterOptionItem({
   // RATING
   if (type === "rating")
     return (
-      <button onClick={() => onRadioSelect(value)} className={`${classNames?.rating ?? "text-xl"} ${selected === value ? "text-yellow-500" : "text-gray-400"} ${optClass}`}>
+      <button onClick={() => onRadioSelect(value)} className={cn(classNames?.rating ?? "text-xl", selected === value ? "text-yellow-500" : "text-gray-400", optClass)}>
         {"★".repeat(Number(rating ?? value))}
       </button>
     );
@@ -337,7 +338,7 @@ function FilterOptionItem({
   if (type === "tag")
     return (
       <button
-        className={`${classNames?.tag ?? "px-2 py-1 rounded-md text-xs border"} ${Array.isArray(selected) && selected.includes(value) ? "bg-black text-white" : "bg-white text-black"} ${optClass}`}
+        className={cn("px-2 py-1 rounded-md text-xs border",classNames?.tag , Array.isArray(selected) && selected.includes(value) ? "bg-black text-white" : "bg-white text-black", optClass)}
         onClick={() => onCheckboxToggle(String(value))}
       >
         {label}
@@ -347,7 +348,7 @@ function FilterOptionItem({
   // ICON
   if (type === "icon")
     return (
-      <button className={`${classNames?.icon ?? "p-2 rounded-md border"} ${selected === value ? "bg-black text-white" : "bg-white text-black"} ${optClass}`} onClick={() => onRadioSelect(value)}>
+      <button className={cn( "p-2 rounded-md border", classNames?.icon, selected === value ? "bg-black text-white" : "bg-white text-black", optClass)} onClick={() => onRadioSelect(value)}>
         {icon}
       </button>
     );
@@ -361,7 +362,7 @@ function FilterOptionItem({
     const curr = typeof selected === "number" ? selected : Number(selected || minVal);
 
     return (
-      <div className={`flex items-center gap-2 ${classNames?.range ?? ""} ${optClass}`}>
+      <div className={cn("flex items-center gap-2", classNames?.range ?? "", optClass)}>
         <input className={classNames?.input ?? ""} type="range" min={minVal} max={maxVal} step={stepVal} value={curr} onChange={(e) => onRadioSelect(Number(e.target.value))} />
         <span className="text-sm w-12 text-right">{curr}</span>
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { SortBar, SortBarProps } from "./sort-bar";
-import { ViewModeSwitcher, ViewMode, ViewModeSwitcherProps } from "./view-mode";
+import { ViewModeSwitcher, ViewModeSwitcherProps } from "./view-mode";
+import { cn } from "@/lib/utils";
 
 export interface ListingControlProps {
 
@@ -25,10 +26,10 @@ export function ListingControl({
 }: ListingControlProps) {
   return (
     <div
-      className={`
-        flex gap-3 w-full 
-        ${direction === "row" ? "flex-row items-center" : "flex-col"}
-      `}
+      className={cn(
+        "flex gap-3 w-full",
+        direction === "row" ? "flex-row items-center" : "flex-col"
+      )}
     >
       {/* Sort Bar (replaceable) */}
       {sortComponent ? (
