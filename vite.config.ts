@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import { resolve } from "path";
 import tailwindcss from '@tailwindcss/vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   plugins: [
@@ -14,6 +15,14 @@ export default defineConfig({
       copyDtsFiles: true
     }),
     tailwindcss(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: "src/lib/css/theme.css",
+          dest: "./css/"
+        }
+      ]
+    })
   ],
   resolve: {
     alias: {
