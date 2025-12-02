@@ -1,0 +1,49 @@
+/* src/lib/css/theme.css */
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/* 2. Define the Variables */
+:root {
+  /* --background: 0 0% 100%; */
+  /* --foreground: 222.2 84% 4.9%; */
+  /* --primary: 222.2 47.4% 11.2%; */
+  /* --primary-foreground: 210 40% 98%; */
+  /* --radius: 0.5rem; */
+  /* ... Add all other variables here ... */
+}
+
+.dark {
+  /* --background: 222.2 84% 4.9%; */
+  /* --foreground: 210 40% 98%; */
+  /* ... Add all other dark variables here ... */
+}
+
+/* 3. Configure the Theme (Map variables to Tailwind utilities) */
+@theme {
+  /* Colors */
+  /* --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground)); */
+  
+  /* --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground)); */
+
+  /* Add mappings for card, popover, secondary, muted, accent, destructive, border, input, ring... */
+
+  /* Border Radius */
+  /* --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px); */
+
+  /* Animations (If not fully covered by the plugin) */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0 }
+    to { height: var(--radix-accordion-content-height) }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height) }
+    to { height: 0 }
+  }
+}

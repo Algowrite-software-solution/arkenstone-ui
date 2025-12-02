@@ -1,4 +1,6 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import tailwindcss from '@tailwindcss/vite';
+import { mergeConfig } from 'vite';
 
 const config: StorybookConfig = {
   "stories": [
@@ -14,6 +16,13 @@ const config: StorybookConfig = {
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
-  }
+  },  // ✅ Add this block to inject Tailwind 4
+  async viteFinal(config) {
+    return mergeConfig(config, {
+      plugins: [
+        tailwindcss()
+      ],
+    });
+  },
 };
 export default config;
