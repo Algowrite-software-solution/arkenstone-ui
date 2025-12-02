@@ -7,6 +7,7 @@ import { ListingControl } from "../components/listing-controls";
 import { Pagination } from "../components/pagination";
 import { ProductCard } from "../../product-card/product-card";
 import { useCatalogStore } from "../../../../../stores/useStore";
+import { productService } from "@/e-commerce/product/service";
 
 const FILTER_CONFIG = [
   {
@@ -54,30 +55,40 @@ const FILTER_CONFIG = [
 ];
 
 export default function DefaultCatalogPage() {
-  const {
-    products,
-    total,
-    loading,
-    searchQuery,
-    filters,
-    sortOrder,
-    sortBy,
-    viewMode,
-    page,
-    pageSize,
-    setSearchQuery,
-    setFilters,
-    setSortOrder,
-    setSortBy,
-    setViewMode,
-    setPage,
-    fetchProducts,
-  } = useCatalogStore();
+  // const {
+  //   products,
+  //   total,
+  //   loading,
+  //   searchQuery,
+  //   filters,
+  //   sortOrder,
+  //   sortBy,
+  //   viewMode,
+  //   page,
+  //   pageSize,
+  //   setSearchQuery,
+  //   setFilters,
+  //   setSortOrder,
+  //   setSortBy,
+  //   setViewMode,
+  //   setPage,
+  // } = useCatalogStore();
+  
+
+  const fetchProducts = () => {
+    const response = productService.getAll({
+      search: searchQuery,
+      filters: filters,
+      page: page,
+      per_page: pageSize,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+    }, {displayError: true, displaySuccess: true});
+  };
 
   // initial fetch
   useEffect(() => {
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderProductList = () => {
@@ -137,7 +148,7 @@ export default function DefaultCatalogPage() {
     <div className="bg-white rounded-lg shadow-sm p-3">
       <div className="p-2 border-b font-semibold">Filters</div>
       <div className="p-3">
-        <Filters filters={FILTER_CONFIG} value={filters} onChange={(next) => setFilters(next)} />
+        <Filters filters={FILTER_CONFIG} value={{}} onChange={(next) => productService.useStore.setState({ filters: next })} />
       </div>
     </div>
   );
