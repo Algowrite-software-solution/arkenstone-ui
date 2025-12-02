@@ -1,8 +1,8 @@
 ## Frontend
 ### Common
-- api handler
-- generic Zustand store
-- generic service
+- api handler (✅)
+- generic Zustand store (✅)
+- generic service (✅)
 - config features
 
 ### Generic UI Components

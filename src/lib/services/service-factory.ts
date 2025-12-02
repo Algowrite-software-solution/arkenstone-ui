@@ -43,6 +43,11 @@ export interface ServiceConfig<TState extends object> {
     entityName?: string;
 
     /**
+     * Sync the store with the API.
+     */
+    syncWithStore?: boolean
+
+    /**
      * Store Configuration.
      * If provided, the service will create a singleton Zustand store.
      */
@@ -75,6 +80,7 @@ export class ServiceFactory<
 
     constructor(config: ServiceConfig<TState>) {
         this.config = config;
+        console.log("Service Factory Implimentation Instanciated");
     }
 
     // =========================================================================
@@ -91,6 +97,7 @@ export class ServiceFactory<
         }
 
         if (!this._store) {
+            console.log("Initiated the Generic Store Creation");
             this._store = createGenericStore<TState, any>(
                 this.config.store.initialState,
                 {
@@ -99,6 +106,9 @@ export class ServiceFactory<
                 }
             );
         }
+        
+        
+        console.log("Generic Store Found! Accessing the Store");
         return this._store;
     }
 
@@ -106,6 +116,7 @@ export class ServiceFactory<
      * Access the vanilla store state (non-hook) for usage outside React components.
      */
     public get storeApi() {
+        console.log("Accessing the Store API");
         return this.useStore.getState();
     }
 
@@ -144,7 +155,15 @@ export class ServiceFactory<
             ...options 
         });
 
-        return await apiGet(url, mergedOptions);
+        console.log("Fetching all data from the API");
+        const response =  await apiGet(url, mergedOptions);
+
+        if (this.config.syncWithStore) {
+            console.log("Syncing with the store from API Response");
+            this.useStore.setState({ list: response.data });
+        }        
+        
+        return response
     }
 
     /**
