@@ -29,7 +29,7 @@ export interface PaginationProps {
     renderPageSize?: React.ReactNode;
   }
   /** Styling */
-  className?: {
+  classNames?: {
     container?: string;
     summary?: string;
     page?: string;
@@ -60,7 +60,7 @@ export function Pagination({
     renderPage: undefined,
     renderPageSize: undefined,
   },
-  className = {},
+  classNames = {},
 }: PaginationProps) {
   const totalPages = Math.max(0, Math.ceil(total / pageSize));
 
@@ -68,7 +68,7 @@ export function Pagination({
     <button
       key={pageNum}
       onClick={() => onChange(pageNum)}
-      className={cn("px-3 py-1 border rounded",className.page, isActive ? cn(`bg-gray-200 font-semibold`, className.activePage) : "", cn("px-3 py-1 border rounded disabled:opacity-40", className.pageButton))}
+      className={cn("px-3 py-1 rounded",classNames.page, isActive ? cn(`bg-gray-200 font-semibold`, classNames.activePage) : "", cn("px-3 py-1 rounded disabled:opacity-40", classNames.pageButton))}
       aria-current={isActive ? "page" : undefined}
     >
       {pageNum}
@@ -76,10 +76,10 @@ export function Pagination({
   );
 
   return (
-    <div className={cn("flex items-center justify-center gap-2 p-3", className.container)}>
+    <div className={cn("flex items-center justify-center gap-2 p-3", classNames.container)}>
       {/* Summary */}
       {show?.summary && (
-        <span className={cn(className.summary, "text-sm text-gray-600 mr-3")}>
+        <span className={cn(classNames.summary, "text-sm text-gray-600 mr-3")}>
           Showing {(page - 1) * pageSize + 1}–
           {Math.min(page * pageSize, total)} of {total}
         </span>
@@ -89,7 +89,7 @@ export function Pagination({
       {show?.pageSize && (
         customRender.renderPageSize || (
           <select
-            className={cn("border rounded px-2 py-1 text-sm mr-3", className.pageSizeSelect)}
+            className={cn("rounded px-2 py-1 text-sm mr-3", classNames.pageSizeSelect)}
             aria-label="Select page size"
             // NOTE: this is UI only; handle changes externally if you wire up a handler
             onChange={() => {}}
@@ -106,7 +106,7 @@ export function Pagination({
       {show?.arrows &&
         (customRender.renderPrev || (
           <button
-            className={cn(`${className.prevNext} ${page === 1 ? cn("opacity-40", className.disabled) : ""}`.trim())}
+            className={cn(`${classNames.prevNext} ${page === 1 ? cn("opacity-40", classNames.disabled) : ""}`.trim())}
             disabled={page === 1}
             onClick={() => onChange(Math.max(1, page - 1))}
             aria-label="Previous page"
@@ -127,7 +127,7 @@ export function Pagination({
       {show?.arrows &&
         (customRender.renderNext || (
           <button
-            className={`${className.prevNext} ${page === totalPages ? className.disabled : ""}`.trim()}
+            className={`${classNames.prevNext} ${page === totalPages ? classNames.disabled : ""}`.trim()}
             disabled={page === totalPages}
             onClick={() => onChange(Math.min(totalPages || 1, page + 1))}
             aria-label="Next page"

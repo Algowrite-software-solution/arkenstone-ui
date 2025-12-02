@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface WishlistButtonProps {
 
@@ -11,7 +11,7 @@ export interface WishlistButtonProps {
   ariaLabel?: string;
   size?: number;
 
-  className?:{
+  classNames?:{
     button?: string;
     icon?: string;
   }
@@ -26,10 +26,7 @@ export function WishlistButton({
   activeIcon,
   ariaLabel = "Add to wishlist",
   size = 22,
-  className = {
-    button: "",
-    icon: "",
-  },
+  classNames = {},
   animationDuration = 200,
 }: WishlistButtonProps) {
   const handleClick = () => {
@@ -39,14 +36,14 @@ export function WishlistButton({
   const defaultIcon = (
     <Heart
       size={size}
-      className={`transition-all ${className?.icon}`}
+      className={cn("transition-all", classNames?.icon)}
     />
   );
 
   const defaultActiveIcon = (
     <Heart
       size={size}
-      className={`transition-all ${className?.icon}`}
+      className={cn("transition-all", classNames?.icon)}
       fill="currentColor"
     />
   );
@@ -55,7 +52,7 @@ export function WishlistButton({
     <button
       aria-label={ariaLabel}
       onClick={handleClick}
-      className={`group transition-all duration-${animationDuration} ${className?.button}`}
+      className={cn("group transition-all", `duration-${animationDuration}`, classNames?.button)}
     >
       {isWishlisted
         ? activeIcon || defaultActiveIcon

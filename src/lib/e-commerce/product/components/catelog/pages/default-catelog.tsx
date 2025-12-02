@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import CatalogContentLayout from "../layouts/catelog-content-layout";
-import Search from "../../../../../components/custom/search";
+import {Search} from "../../../../../components/custom/search";
 import Filters from "../components/filter";
 import { Listing } from "../layouts/listings-layout";
 import { ListingControl } from "../components/listing-controls";

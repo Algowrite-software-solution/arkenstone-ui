@@ -1,4 +1,5 @@
 import { LayoutGrid, List, Table } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type ViewMode = "card" | "list" | "table";
 
@@ -13,7 +14,7 @@ export interface ViewModeSwitcherProps {
   availableModes?: ViewMode[];
 
   /** Styles */
-  className?: {
+  classNames?: {
     container?: string;
     button?: string;
     selectedButton?: string;
@@ -32,46 +33,37 @@ export function ViewModeSwitcher({
   mode,
   onChange,
   availableModes = ["card", "list", "table"],
-  className = {
-    container : "flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",
-    button : "p-2 rounded-md border transition",
-    selectedButton : "bg-gray-200 border-gray-400",
-    unselectedButton : "border-gray-300",
-    cardButton : "",
-    listButton : "",
-    tableButton : "",
-    iconSize : 16,
-  }
+  classNames = {}
 }: ViewModeSwitcherProps) {
   const btnClasses = (isSelected: boolean, extra = "") =>
-    `${className.button} ${isSelected ? className.selectedButton : className.unselectedButton} ${extra}`.trim();
+    `${cn("p-2 rounded-md transition",classNames.button)} ${isSelected ? cn("bg-gray-200 border-gray-400",classNames.selectedButton) : cn("border-gray-300",classNames.unselectedButton)} ${extra}`.trim();
 
   return (
-    <div className={className.container}>
+    <div className={cn("flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",classNames.container)}>
       {availableModes.includes("card") && (
         <button
-          className={btnClasses(mode === "card", className.cardButton)}
+          className={btnClasses(mode === "card", cn(classNames.cardButton))}
           onClick={() => onChange("card")}
         >
-          <LayoutGrid size={className.iconSize} />
+          <LayoutGrid size={cn(classNames.iconSize)} />
         </button>
       )}
 
       {availableModes.includes("list") && (
         <button
-          className={btnClasses(mode === "list", className.listButton)}
+          className={btnClasses(mode === "list", cn(classNames.listButton))}
           onClick={() => onChange("list")}
         >
-          <List size={className.iconSize} />
+          <List size={cn(16,classNames.iconSize)} />
         </button>
       )}
 
       {availableModes.includes("table") && (
         <button
-          className={btnClasses(mode === "table", className.tableButton)}
+          className={btnClasses(mode === "table", cn(classNames.tableButton))}
           onClick={() => onChange("table")}
         >
-          <Table size={className.iconSize} />
+          <Table size={cn(classNames.iconSize)} />
         </button>
       )}
     </div>

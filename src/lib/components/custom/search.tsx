@@ -19,7 +19,7 @@ export interface SearchProps {
     searchButtonTextPosition?: "left" | "right";
 
     // STYLING
-    className?: {
+    classNames?: {
         form?: string;
         searchIcon?: string;
         searchButtonText?: string;
@@ -48,7 +48,7 @@ export function Search({
     searchButtonTextPosition = "right",
 
     // STYLING
-    className = {},
+    classNames = {},
 }: SearchProps) {
     const [internalValue, setInternalValue] = useState(value);
 
@@ -67,7 +67,7 @@ export function Search({
     }
 
     const renderIconButton = () => (
-        <button type="submit" className={cn("text-gray-600", className.searchIcon)}>
+        <button type="submit" className={cn("text-gray-600", classNames.searchIcon)}>
             <SearchIcon size={18} />
         </button>
     );
@@ -75,7 +75,7 @@ export function Search({
     const renderTextButton = () => (
         <button
             type="submit"
-            className={cn("max-h-full px-3 py-1 bg-gray-800 text-white rounded-sm text-sm", className.searchButtonText)}
+            className={cn("max-h-full px-3 py-1 bg-gray-800 text-white text-sm", classNames.searchButtonText)}
         >
             {buttonText}
         </button>
@@ -83,15 +83,15 @@ export function Search({
 
 
     return (
-        <form onSubmit={handleSubmit} className={cn("w-full", className.form)}>
+        <form onSubmit={handleSubmit} className={cn("w-full", classNames.form)}>
             {label && (
-                <label className={cn("text-sm font-medium mb-1 block", className.label)}>
+                <label className={cn("text-sm font-medium mb-1 block", classNames.label)}>
                     {label}
                 </label>
             )}
 
-            <div className={cn("flex items-center gap-2 border rounded-sm min-h-[40px] px-2 bg-white ",className.searchContainer)}>
-                {leftSlot && <div className={cn("flex items-center", className.leftSlot)}>{leftSlot}</div>}
+            <div className={cn("flex items-center gap-2 min-h-[40px] px-2 bg-white ",classNames.searchContainer)}>
+                {leftSlot && <div className={cn("flex items-center", classNames.leftSlot)}>{leftSlot}</div>}
             
                 {/* LEFT CONTROLS */}
                 {(buttonType === "icon" && searchIconPosition === "left") &&
@@ -103,7 +103,7 @@ export function Search({
                 {/* INPUT */}
                 <input
                     type="text"
-                    className={cn("flex-1 outline-none text-sm text-left", className.placeholderText)}
+                    className={cn("flex-1 outline-none text-sm text-left", classNames.placeholderText)}
                     placeholder={placeholder}
                     value={internalValue}
                     onChange={(e) => {
@@ -119,7 +119,7 @@ export function Search({
                 {(buttonType === "text" && searchButtonTextPosition === "right") &&
                     renderTextButton()}
 
-                {rightSlot && <div className={cn("flex items-center", className.rightSlot)}>{rightSlot}</div>}
+                {rightSlot && <div className={cn("flex items-center", classNames.rightSlot)}>{rightSlot}</div>}
             </div>
         </form>
     );

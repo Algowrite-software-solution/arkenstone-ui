@@ -1,4 +1,5 @@
 import { ShoppingCart } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface AddToCartButtonProps {
   /** Triggered when user clicks add-to-cart */
@@ -31,7 +32,7 @@ export function AddToCart({
   showIconWithText = true,
 
   icon = <ShoppingCart size={20} />,
-  className = "flex-1 bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2",
+  className,
 
   labels = {
     addToCartText: "Add to Cart",
@@ -54,7 +55,7 @@ export function AddToCart({
 
   return (
     <button
-      className={className}
+      className={cn("flex-1 bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2",className)}
       onClick={handleClick}
       disabled={disabled}
       aria-label={iconOnly ? (state.isInCart ? labels.inCartText : labels.addToCartText) : undefined}
