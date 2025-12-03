@@ -1,4 +1,4 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
 export type ProductLayoutType = "compact" | "detailed";
 
@@ -9,7 +9,7 @@ export interface ProductCardLayoutProps {
   DetailsComponent: React.ReactNode;
 
   /** granular class overrides */
-  className?: {
+  classNames?: {
     container?: string;
     compactWrapper?: string;
     detailedWrapper?: string;
@@ -22,33 +22,19 @@ export function ProductCardLayout({
   layout = "compact",
   ImageComponent,
   DetailsComponent,
-  className = {
-    container: "",
-    compactWrapper: "",
-    detailedWrapper: "",
-    imageContainer: "",
-    detailsContainer: "",
-  },
+  classNames = {},
 }: ProductCardLayoutProps) {
-  const rootClass = className.container ?? "product-card-layout rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden";
-
-  const compactWrapper = className.compactWrapper ?? "flex flex-col";
-  const detailedWrapper = className.detailedWrapper ?? "flex";
-
-  const imageClass = className.imageContainer ?? (layout === "compact" ? "image-container w-full" : "image-container w-1/3");
-  const detailsClass = className.detailsContainer ?? (layout === "compact" ? "details-container p-3" : "details-container w-2/3 p-4");
-
   return (
-    <div className={rootClass}>
+    <div className={cn("product-card-layout rounded-xl border-gray-200 bg-white shadow-sm overflow-hidden", classNames.container)}>
       {layout === "compact" ? (
-        <div className={compactWrapper}>
-          <div className={imageClass}>{ImageComponent}</div>
-          <div className={detailsClass}>{DetailsComponent}</div>
+        <div className={cn("flex flex-col", classNames.compactWrapper)}>
+          <div className={cn("image-container w-full", classNames.imageContainer)}>{ImageComponent}</div>
+          <div className={cn( "details-container p-3", classNames.detailsContainer)}>{DetailsComponent}</div>
         </div>
       ) : (
-        <div className={detailedWrapper}>
-          <div className={imageClass}>{ImageComponent}</div>
-          <div className={detailsClass}>{DetailsComponent}</div>
+        <div className={cn("flex flex-row",classNames.detailedWrapper)}>
+          <div className={cn("image-container w-1/3", classNames.imageContainer)}>{ImageComponent}</div>
+          <div className={cn("details-container w-2/3 p-4")}>{DetailsComponent}</div>
         </div>
       )}
     </div>

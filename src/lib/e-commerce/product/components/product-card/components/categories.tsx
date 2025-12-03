@@ -12,7 +12,7 @@ export interface CategoriesBadgeListProps {
   /** Show +X badge */
   showRemainingCount?: boolean;
 
-  className?: {
+  classNames?: {
     position?: string;
     category?: string;
     remaining?: string;
@@ -26,7 +26,7 @@ export function CategoriesBadgeList({
   categories = [{ id: 1, name: "test1" }, { id: 2, name: "test2" }, { id: 3, name: "test3" }],
   maxCategories = 1,
   showRemainingCount = true,
-  className = {
+  classNames = {
     position: "",
     category: "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full shadow",
     remaining: "bg-black text-white px-2 py-1 text-xs font-semibold rounded-full",
@@ -41,15 +41,15 @@ export function CategoriesBadgeList({
   const remainingCount = categories.length - maxCategories;
 
   return (
-    <div className={`absolute z-10 ${className.position}`}>
-      <div className={className.wrapper}>
+    <div className={`absolute z-10 ${classNames.position}`}>
+      <div className={classNames.wrapper}>
         {categoriesToShow.map((category) => {
           const isClickable = Boolean(onCategoryClick);
 
           return (
             <span
               key={category.id}
-              className={`inline-block cursor-${isClickable ? "pointer" : "default"} ${className.category}`}
+              className={`inline-block cursor-${isClickable ? "pointer" : "default"} ${classNames.category}`}
               onClick={() => isClickable && onCategoryClick?.(category)}
             >
               {category.name}
@@ -58,7 +58,7 @@ export function CategoriesBadgeList({
         })}
 
         {showRemainingCount && remainingCount > 0 && (
-          <span className={`inline-block ${className.remaining}`}>
+          <span className={`inline-block ${classNames.remaining}`}>
             +{remainingCount}
           </span>
         )}

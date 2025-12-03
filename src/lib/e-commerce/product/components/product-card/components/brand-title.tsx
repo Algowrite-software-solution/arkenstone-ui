@@ -11,7 +11,7 @@ export interface BrandTitleProps {
 
   brandPlacement?: "before" | "after" | "hidden" | "top" | "bottom";
 
-  className?:{
+  classNames?:{
     brand?: string;
     title?: string;
     wrapper?: string;
@@ -30,17 +30,17 @@ export function BrandTitle({
 
   brandPlacement = "before",
 
-  className = {
+  classNames = {
     separator : "px-2 opacity-60",
   },
 }: BrandTitleProps) {
   /** Convert brand + title into styled React elements */
   const BrandComponent = show.brand && brand ? (
-    <span className={className.brand}>{brand}</span>
+    <span className={classNames.brand}>{brand}</span>
   ) : null;
 
   const TitleComponent = show.title && title ? (
-    <span className={className.title}>{title}</span>
+    <span className={classNames.title}>{title}</span>
   ) : null;
 
   /** Render Logic */
@@ -48,10 +48,10 @@ export function BrandTitle({
     // A — Brand BEFORE Title (horizontal)
     if (brandPlacement === "before") {
       return (
-        <div className={cn("flex items-center flex-wrap", className.wrapper)}>
+        <div className={cn("flex items-center flex-wrap", classNames.wrapper)}>
           {BrandComponent}
           {BrandComponent && TitleComponent && (
-            <span className={className.separator}>-</span>
+            <span className={classNames.separator}>-</span>
           )}
           {TitleComponent}
         </div>
@@ -61,10 +61,10 @@ export function BrandTitle({
     // B — Brand AFTER Title (horizontal)
     if (brandPlacement === "after") {
       return (
-        <div className={`flex items-center flex-wrap ${className.wrapper}`}>
+        <div className={`flex items-center flex-wrap ${classNames.wrapper}`}>
           {TitleComponent}
           {BrandComponent && TitleComponent && (
-            <span className={className.separator}>-</span>
+            <span className={classNames.separator}>-</span>
           )}
           {BrandComponent}
         </div>
@@ -74,7 +74,7 @@ export function BrandTitle({
     // C — Brand on TOP, Title under
     if (brandPlacement === "top") {
       return (
-        <div className={`${className.wrapper} flex flex-col`}>
+        <div className={`${classNames.wrapper} flex flex-col`}>
           {BrandComponent}
           {TitleComponent}
         </div>
@@ -84,7 +84,7 @@ export function BrandTitle({
     // D — Title on TOP, Brand under
     if (brandPlacement === "bottom") {
       return (
-        <div className={`${className.wrapper} flex flex-col`}>
+        <div className={`${classNames.wrapper} flex flex-col`}>
           {TitleComponent}
           {BrandComponent}
         </div>
@@ -93,7 +93,7 @@ export function BrandTitle({
 
     // E — Brand hidden (only title)
     return (
-      <div className={`${className.wrapper}`}>
+      <div className={`${classNames.wrapper}`}>
         {TitleComponent}
       </div>
     );

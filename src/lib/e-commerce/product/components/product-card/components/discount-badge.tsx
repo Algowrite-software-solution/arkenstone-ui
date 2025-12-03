@@ -32,8 +32,8 @@ export function DiscountBadge({
   };
 
   const defaultLabel = () => {
-    if (discountType === "fixed") return `${formatCurrency(discount)} OFF`;
-    return `${discount}% OFF`;
+    if (discountType === "fixed") return `${formatCurrency(discount)} OFFs`;
+    return `${discount}% OFFs`;
   };
 
   const label = renderLabel ? renderLabel(discount, discountType) : defaultLabel();

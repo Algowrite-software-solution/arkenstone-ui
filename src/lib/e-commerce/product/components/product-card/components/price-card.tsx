@@ -1,4 +1,4 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface PriceCardProps {
   price: number | null;           // original/base price
@@ -15,7 +15,7 @@ export interface PriceCardProps {
   fractionDigits?: number;
 
   /** Styles */
-  className?: {
+  classNames?: {
     wrapper?: string;
     price?: string;
     originalPrice?: string;
@@ -38,12 +38,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
   currency = "USD",
   fractionDigits = 2,
 
-  className = {
-    wrapper : "flex items-center gap-2 flex-wrap",
-    price  : "text-lg font-semibold",
-    originalPrice : "line-through text-gray-500",
-    discount : "text-red-600 font-semibold",
-  }
+  classNames = {}
 }) => {
   const original = typeof price === "number" ? price : null;
   const finalP = typeof salePrice === "number" ? salePrice : original;
@@ -78,10 +73,10 @@ export const PriceCard: React.FC<PriceCardProps> = ({
   };
 
   return (
-    <div className={className.wrapper}>
+    <div className={cn("flex items-center gap-2 flex-wrap",classNames.wrapper)}>
       
       {/* Final Price */}
-      <span className={className.price}>
+      <span className={cn("text-lg font-semibold",classNames.price)}>
         {finalP !== null ? formatCurrency(finalP) : "---"}
       </span>
 
@@ -89,7 +84,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
       {showOriginalPrice &&
         hasDiscount &&
         original !== null && (
-          <span className={className.originalPrice}>
+          <span className={cn("line-through text-gray-500",classNames.originalPrice)}>
             {formatCurrency(original)}
           </span>
         )}
@@ -98,7 +93,7 @@ export const PriceCard: React.FC<PriceCardProps> = ({
       {showDiscountPercentage &&
         hasDiscount &&
         discountPercent > 0 && (
-          <span className={className.discount}>
+          <span className={cn("text-red-600 font-semibold",classNames.discount)}>
             {discountPercent}% OFF
           </span>
         )}

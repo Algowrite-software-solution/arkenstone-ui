@@ -1,6 +1,14 @@
-import { LayoutGrid, List, Table } from "lucide-react";
+import { Grid2x2Icon, Grid3x3Icon, Grip, LayoutGrid, List, Table } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export type ViewMode = "card" | "list" | "table";
+/** 
+ * Possible view modes 
+ * 
+ * "list" - Detailed list
+ * "grid" - Compact grid
+ * "gallery" - Large images
+*/
+export type ViewMode = "list" | "grid" | "gallery";
 
 export interface ViewModeSwitcherProps {
   /** Current selected view mode */
@@ -13,14 +21,14 @@ export interface ViewModeSwitcherProps {
   availableModes?: ViewMode[];
 
   /** Styles */
-  className?: {
+  classNames?: {
     container?: string;
     button?: string;
     selectedButton?: string;
     unselectedButton?: string;
-    cardButton?: string;
+    gridButton?: string;
     listButton?: string;
-    tableButton?: string;
+    galleryButton?: string;
 
     /** Icon size */
     iconSize?: number;
@@ -31,47 +39,38 @@ export interface ViewModeSwitcherProps {
 export function ViewModeSwitcher({
   mode,
   onChange,
-  availableModes = ["card", "list", "table"],
-  className = {
-    container : "flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",
-    button : "p-2 rounded-md border transition",
-    selectedButton : "bg-gray-200 border-gray-400",
-    unselectedButton : "border-gray-300",
-    cardButton : "",
-    listButton : "",
-    tableButton : "",
-    iconSize : 16,
-  }
+  availableModes = [],
+  classNames = {}
 }: ViewModeSwitcherProps) {
   const btnClasses = (isSelected: boolean, extra = "") =>
-    `${className.button} ${isSelected ? className.selectedButton : className.unselectedButton} ${extra}`.trim();
+    `${cn("p-1 rounded-md transition",classNames.button)} ${isSelected ? cn("bg-gray-200 ",classNames.selectedButton) : cn(classNames.unselectedButton)} ${extra}`.trim();
 
   return (
-    <div className={className.container}>
-      {availableModes.includes("card") && (
+    <div className={cn("flex items-center gap-2 p-2 rounded-lg shadow-sm",classNames.container)}>
+      {availableModes.includes("grid") && (
         <button
-          className={btnClasses(mode === "card", className.cardButton)}
-          onClick={() => onChange("card")}
+          className={btnClasses(mode === "grid", cn(classNames.gridButton))}
+          onClick={() => onChange("grid")}
         >
-          <LayoutGrid size={className.iconSize} />
+          <Grid3x3Icon size={cn(16,classNames.iconSize)} />
         </button>
       )}
 
       {availableModes.includes("list") && (
         <button
-          className={btnClasses(mode === "list", className.listButton)}
+          className={btnClasses(mode === "list", cn(classNames.listButton))}
           onClick={() => onChange("list")}
         >
-          <List size={className.iconSize} />
+          <List size={cn(16,classNames.iconSize)} />
         </button>
       )}
 
-      {availableModes.includes("table") && (
+      {availableModes.includes("gallery") && (
         <button
-          className={btnClasses(mode === "table", className.tableButton)}
-          onClick={() => onChange("table")}
+          className={btnClasses(mode === "gallery", cn(classNames.galleryButton))}
+          onClick={() => onChange("gallery")}
         >
-          <Table size={className.iconSize} />
+          <Grid2x2Icon size={cn(16,classNames.iconSize)} />
         </button>
       )}
     </div>

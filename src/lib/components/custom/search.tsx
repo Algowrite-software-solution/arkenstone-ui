@@ -1,5 +1,6 @@
 import { SearchIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export interface SearchProps {
     placeholder?: string;
@@ -18,17 +19,19 @@ export interface SearchProps {
     searchButtonTextPosition?: "left" | "right";
 
     // STYLING
-    formClassName?: string;
-    searchIconClassName?: string;
-    searchButtonTextClassName?: string;
-    placeholderTextClassName?: string;
-    labelClassName?: string;
-    leftSlotClassName?: string;
-    rightSlotClassName?: string;
-    searchContainerClassName?: string;
+    classNames?: {
+        form?: string;
+        searchIcon?: string;
+        searchButtonText?: string;
+        placeholderText?: string;
+        label?: string;
+        leftSlot?: string;
+        rightSlot?: string;
+        searchContainer?: string;
+    }
 }
 
-export default function Search({
+export function Search({
     placeholder = "Search...",
     value = "",
     onChange,
@@ -45,14 +48,7 @@ export default function Search({
     searchButtonTextPosition = "right",
 
     // STYLING
-    formClassName = "",
-    searchIconClassName = "text-gray-600",
-    searchButtonTextClassName = "max-h-full px-3 py-1 bg-gray-800 text-white rounded-sm text-sm",
-    placeholderTextClassName = "text-left",
-    labelClassName = "text-sm font-medium mb-1 block",
-    leftSlotClassName = "",
-    rightSlotClassName = "",
-    searchContainerClassName = "flex items-center gap-2 border rounded-sm min-h-[40px] px-2 bg-white ",
+    classNames = {},
 }: SearchProps) {
     const [internalValue, setInternalValue] = useState(value);
 
@@ -71,7 +67,7 @@ export default function Search({
     }
 
     const renderIconButton = () => (
-        <button type="submit" className={`${searchIconClassName}`}>
+        <button type="submit" className={cn("text-gray-600", classNames.searchIcon)}>
             <SearchIcon size={18} />
         </button>
     );
@@ -79,7 +75,7 @@ export default function Search({
     const renderTextButton = () => (
         <button
             type="submit"
-            className={`${searchButtonTextClassName}`}
+            className={cn("max-h-full px-3 py-1 bg-gray-800 text-white text-sm", classNames.searchButtonText)}
         >
             {buttonText}
         </button>
@@ -87,15 +83,15 @@ export default function Search({
 
 
     return (
-        <form onSubmit={handleSubmit} className={`w-full ${formClassName ?? ""}`}>
+        <form onSubmit={handleSubmit} className={cn("w-full", classNames.form)}>
             {label && (
-                <label className={labelClassName}>
+                <label className={cn("text-sm font-medium mb-1 block", classNames.label)}>
                     {label}
                 </label>
             )}
 
-            <div className={`${searchContainerClassName}`}>
-                {leftSlot && <div className={`flex items-center ${leftSlotClassName}`}>{leftSlot}</div>}
+            <div className={cn("flex items-center gap-2 min-h-[40px] px-2 bg-white ",classNames.searchContainer)}>
+                {leftSlot && <div className={cn("flex items-center", classNames.leftSlot)}>{leftSlot}</div>}
             
                 {/* LEFT CONTROLS */}
                 {(buttonType === "icon" && searchIconPosition === "left") &&
@@ -107,7 +103,7 @@ export default function Search({
                 {/* INPUT */}
                 <input
                     type="text"
-                    className={`flex-1 outline-none text-sm ${placeholderTextClassName}`}
+                    className={cn("flex-1 outline-none text-sm text-left", classNames.placeholderText)}
                     placeholder={placeholder}
                     value={internalValue}
                     onChange={(e) => {
@@ -123,7 +119,7 @@ export default function Search({
                 {(buttonType === "text" && searchButtonTextPosition === "right") &&
                     renderTextButton()}
 
-                {rightSlot && <div className={`flex items-center ${rightSlotClassName}`}>{rightSlot}</div>}
+                {rightSlot && <div className={cn("flex items-center", classNames.rightSlot)}>{rightSlot}</div>}
             </div>
         </form>
     );

@@ -34,7 +34,7 @@ function CustomPriceFilter({ filter, state, update }: any) {
           type="number"
           value={min}
           onChange={(e) => update(filter.id, { min: Number(e.target.value), max })}
-          className="w-full border rounded px-2 py-1 text-sm"
+          className="w-full rounded px-2 py-1 text-sm"
         />
       </label>
 
@@ -44,7 +44,7 @@ function CustomPriceFilter({ filter, state, update }: any) {
           type="number"
           value={max}
           onChange={(e) => update(filter.id, { min, max: Number(e.target.value) })}
-          className="w-full border rounded px-2 py-1 text-sm"
+          className="w-full rounded px-2 py-1 text-sm"
         />
       </label>
 
