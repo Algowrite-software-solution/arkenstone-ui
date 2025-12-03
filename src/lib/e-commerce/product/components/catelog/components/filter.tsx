@@ -30,7 +30,7 @@ export interface FilterOption {
 }
 
 export interface FilterOptionItemProps extends FilterOption {
-  type: "checkbox" | "radio" | "chip" | "toggle" | "switch" | "color" | "image" | "rating" | "tag" | "icon" | "range" | string;
+  type: "checkbox" | "checkbox-list" | "radio" | "chip" | "toggle" | "switch" | "color" | "image" | "rating" | "tag" | "icon" | "range" | string;
   selected: any;
 
   onCheckboxToggle: (value: string) => void;
@@ -64,6 +64,7 @@ export interface FilterItemProps {
   defaultCollapsed?: boolean;
   collapsibleIconUp?: React.ReactNode;
   collapsibleIconDown?: React.ReactNode;
+  itemsShown?: number;
 
   // default type: checkbox
   type?: string;
@@ -99,13 +100,13 @@ export interface FilterRenderProps {
 }
 
 // Main Filters Component
-export default function Filters({
+export function Filters({
   filters,
   direction = "vertical",
   value,
   onChange,
-  verticalFilterClassName = "gap-4 border p-2 rounded-sm ",
-  horizontalFilterClassName = "gap-6 border p-2 rounded-sm ",
+  verticalFilterClassName = "gap-4 p-2 rounded-sm ",
+  horizontalFilterClassName = "gap-6 p-2 rounded-sm ",
   customRenderers,
   globalClassNames,
 }: FiltersProps) {
@@ -124,7 +125,7 @@ export default function Filters({
   return (
     <div
       className={cn("flex", 
-        direction === "vertical" ? cn(`flex-col ${verticalFilterClassName}`) : cn(`flex-row ${horizontalFilterClassName}`)
+        direction === "vertical" ? cn(verticalFilterClassName, "flex-col") : cn(horizontalFilterClassName,"flex-row")
       )}
     >
       {flatFilters.map((filter) => (
@@ -150,7 +151,7 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
 
   // set sensible defaults depending on type
   let defaultSelected: any;
-  if (options.type === "checkbox" || options.type === "tag" || options.type === "tree") defaultSelected = [];
+  if (options.type === "checkbox" || options.type === "checkbox-list" || options.type === "tag" || options.type === "tree") defaultSelected = [];
   else if (options.type === "toggle" || options.type === "switch") defaultSelected = false;
   else if (options.type === "range")
     defaultSelected =
@@ -158,6 +159,18 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
   else defaultSelected = "";
 
   const selected = options.state[options.id] ?? defaultSelected;
+
+  // compute list scrolling behaviour
+  // itemsShown can be provided via options.customProps.itemsShown (preferred) or per-option itemsShown on the first option
+  const ITEM_HEIGHT_PX = 30; // adjust if your item height differs
+  const opts = options.options || [];
+  const itemsShownFromCustom = options.customProps?.itemsShown as number | undefined;
+  const itemsShownFromFirst = options.itemsShown as number | undefined;
+  const itemsShown = typeof itemsShownFromCustom === "number" ? itemsShownFromCustom : itemsShownFromFirst;
+  const shouldScroll = typeof itemsShown === "number" && itemsShown > 0 && opts.length > itemsShown;
+
+  // choose default container class depending on type
+  const defaultOptionsClass = options.type === "checkbox-list" ? "flex flex-col gap-2 w-full" : "flex flex-wrap gap-2";
 
   function toggleCheckbox(value: string) {
     const arr = new Set(Array.isArray(selected) ? selected : []);
@@ -179,12 +192,22 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
   return (
     <div className={options.filterItemsClassName}>
       <div
-        className={cn(mergedClassNames.wrapper ?? "flex justify-between items-center cursor-pointer")}
+        className={cn(
+          "flex justify-between items-center cursor-pointer",
+          mergedClassNames.wrapper
+        )}
         onClick={() => options.collapsible && setCollapsed(!collapsed)}
       >
-        <span className={cn(mergedClassNames.title ?? "font-semibold")}>{options.title}</span>
-        {options.collapsible && <span className={cn(mergedClassNames.collapseIcon ?? "")}>{collapsed ? collapsibleIconUp : collapsibleIconDown}</span>}
+        <span className={cn("font-semibold", mergedClassNames.title)}>
+          {options.title}
+        </span>
+        {options.collapsible && (
+          <span className={cn("ml-auto", mergedClassNames.collapseIcon)}>
+            {collapsed ? collapsibleIconUp : collapsibleIconDown}
+          </span>
+        )}
       </div>
+      <hr />
 
       {!collapsed && (
         <div className={cn(mergedClassNames.options ?? "mt-2")}>
@@ -192,14 +215,37 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
           {options.render ? (
             // pass mergedClassNames as `classNames` key (render expects classNames)
             options.render({
-              filter: { id: options.id, title: options.title, options: options.options, collapsible: options.collapsible, defaultCollapsed: options.defaultCollapsed, type: options.type, customProps: options.customProps, classNames: mergedClassNames },
+              filter: { 
+                id: options.id, 
+                title: options.title, 
+                options: options.options, 
+                collapsible: options.collapsible, 
+                defaultCollapsed: options.defaultCollapsed, 
+                type: options.type, 
+                customProps: options.customProps, 
+                classNames: mergedClassNames 
+              },
               state: options.state,
               update: options.update,
               classNames: mergedClassNames,
             })
           ) : Registered ? (
             // render registered/custom component
-            <Registered filter={{ id: options.id, title: options.title, options: options.options, collapsible: options.collapsible, defaultCollapsed: options.defaultCollapsed, type: options.type, customProps: options.customProps, classNames: mergedClassNames }} state={options.state} update={options.update} classNames={mergedClassNames} />
+            <Registered 
+              filter={{ 
+                id: options.id, 
+                title: options.title, 
+                options: options.options, 
+                collapsible: options.collapsible, 
+                defaultCollapsed: options.defaultCollapsed, 
+                type: options.type, 
+                customProps: options.customProps, 
+                classNames: mergedClassNames 
+              }} 
+              state={options.state} 
+              update={options.update} 
+              classNames={mergedClassNames} 
+            />
           ) : // built-in tree handling
           options.type === "tree" ? (
             <CategoryFilter
@@ -209,8 +255,12 @@ function FilterItem({options}: {options:FilterItemInternalProps}) {
               classNames={mergedClassNames}
             />
           ) : (
-            <div className={cn(mergedClassNames.options ?? "flex flex-wrap gap-2")}>
-              {options.options.map((opt) => (
+            // options list (supports scroll when items exceed itemsShown)
+            <div
+              className={cn(mergedClassNames.options ?? defaultOptionsClass)}
+              style={shouldScroll ? { maxHeight: `${itemsShown! * ITEM_HEIGHT_PX}px`, overflowY: "auto" } : undefined}
+            >
+              {opts.map((opt) => (
                 <FilterOptionItem
                   key={String(opt.value)}
                   {...opt}
@@ -253,6 +303,20 @@ function FilterOptionItem({
   const radioClass = classNames?.radio ?? "";
 
   // CHECKBOX
+  if(type === "checkbox-list")
+    return (
+      <div className={cn("flex flex-col w-full")}>
+        <label className={cn("flex items-center gap-2 w-full", optClass)}>
+          <input
+            className={cn(inputClass, checkboxClass)}
+            type="checkbox"
+            checked={Array.isArray(selected) ? selected.includes(value) : false}
+            onChange={() => onCheckboxToggle(String(value))}
+          />
+          <span className="truncate">{label}</span>
+        </label>
+      </div>
+    );
   if (type === "checkbox")
     return (
       <label className={cn("flex items-center gap-2", optClass)}>

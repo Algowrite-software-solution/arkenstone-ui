@@ -1,7 +1,14 @@
-import { LayoutGrid, List, Table } from "lucide-react";
+import { Grid2x2Icon, Grid3x3Icon, Grip, LayoutGrid, List, Table } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ViewMode = "card" | "list" | "table";
+/** 
+ * Possible view modes 
+ * 
+ * "list" - Detailed list
+ * "grid" - Compact grid
+ * "gallery" - Large images
+*/
+export type ViewMode = "list" | "grid" | "gallery";
 
 export interface ViewModeSwitcherProps {
   /** Current selected view mode */
@@ -19,9 +26,9 @@ export interface ViewModeSwitcherProps {
     button?: string;
     selectedButton?: string;
     unselectedButton?: string;
-    cardButton?: string;
+    gridButton?: string;
     listButton?: string;
-    tableButton?: string;
+    galleryButton?: string;
 
     /** Icon size */
     iconSize?: number;
@@ -32,20 +39,20 @@ export interface ViewModeSwitcherProps {
 export function ViewModeSwitcher({
   mode,
   onChange,
-  availableModes = ["card", "list", "table"],
+  availableModes = [],
   classNames = {}
 }: ViewModeSwitcherProps) {
   const btnClasses = (isSelected: boolean, extra = "") =>
-    `${cn("p-2 rounded-md transition",classNames.button)} ${isSelected ? cn("bg-gray-200 border-gray-400",classNames.selectedButton) : cn("border-gray-300",classNames.unselectedButton)} ${extra}`.trim();
+    `${cn("p-1 rounded-md transition",classNames.button)} ${isSelected ? cn("bg-gray-200 ",classNames.selectedButton) : cn(classNames.unselectedButton)} ${extra}`.trim();
 
   return (
-    <div className={cn("flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm",classNames.container)}>
-      {availableModes.includes("card") && (
+    <div className={cn("flex items-center gap-2 p-2 rounded-lg shadow-sm",classNames.container)}>
+      {availableModes.includes("grid") && (
         <button
-          className={btnClasses(mode === "card", cn(classNames.cardButton))}
-          onClick={() => onChange("card")}
+          className={btnClasses(mode === "grid", cn(classNames.gridButton))}
+          onClick={() => onChange("grid")}
         >
-          <LayoutGrid size={cn(classNames.iconSize)} />
+          <Grid3x3Icon size={cn(16,classNames.iconSize)} />
         </button>
       )}
 
@@ -58,12 +65,12 @@ export function ViewModeSwitcher({
         </button>
       )}
 
-      {availableModes.includes("table") && (
+      {availableModes.includes("gallery") && (
         <button
-          className={btnClasses(mode === "table", cn(classNames.tableButton))}
-          onClick={() => onChange("table")}
+          className={btnClasses(mode === "gallery", cn(classNames.galleryButton))}
+          onClick={() => onChange("gallery")}
         >
-          <Table size={cn(classNames.iconSize)} />
+          <Grid2x2Icon size={cn(16,classNames.iconSize)} />
         </button>
       )}
     </div>

@@ -63,7 +63,7 @@ export function SortBar({
   const currentLabel = sortOptions.find((o) => o.value === sortBy)?.label ?? "Default";
 
   return (
-    <div className={cn("w-full flex items-center justify-between bg-white rounded-lg shadow-sm p-3 mb-4",classNames.order)}>
+    <div className={cn("flex items-center justify-between ",classNames.order)}>
       
       {/* Sort dropdown */}
       <div className={cn("relative",classNames.orderDropdown)}>

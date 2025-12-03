@@ -15,6 +15,8 @@ export interface CategoryFilterProps {
   onToggle: (values: (string | number | boolean)[]) => void;
   level?: number;
   classNames?: ClassNamesMap;
+  collapsibleIconUp?: React.ReactNode;
+  collapsibleIconDown?: React.ReactNode;
 }
 
 export function CategoryFilter({
@@ -23,10 +25,15 @@ export function CategoryFilter({
   onToggle,
   level = 0,
   classNames,
+  collapsibleIconUp,
+  collapsibleIconDown,
 }: CategoryFilterProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const isSelectedArray = Array.isArray(selected);
+
+  const upIcon = collapsibleIconUp ?? <ChevronUp />;
+  const downIcon = collapsibleIconDown ?? <ChevronDown />;
 
   function getAllValues(node: CategoryNode): (string | number | boolean)[] {
     const vals: (string | number | boolean)[] = [node.value];
@@ -72,16 +79,6 @@ export function CategoryFilter({
         return (
           <div key={key} style={indentStyle(level)} className={classNames?.treeNode ?? undefined}>
             <div className={cn("flex items-center gap-2", classNames?.treeLabel)}>
-              {opt.children && opt.children.length > 0 && (
-                <button
-                  className={classNames?.treeToggle ?? "p-1"}
-                  onClick={() => setExpanded((s) => ({ ...s, [key]: !s[key] }))}
-                  aria-label="Toggle"
-                >
-                  {expanded[key] ? <ChevronUp /> : <ChevronDown />}
-                </button>
-              )}
-
               <label className={cn("flex items-center gap-2", classNames?.option)}>
                 <input
                   type="checkbox"
@@ -99,6 +96,19 @@ export function CategoryFilter({
                   {opt.label}
                 </span>
               </label>
+
+              {opt.children && opt.children.length > 0 && (
+                <button
+                  className={cn("ml-auto", classNames?.treeToggle ?? "p-1")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded((s) => ({ ...s, [key]: !s[key] }));
+                  }}
+                  aria-label="Toggle"
+                >
+                  {expanded[key] ? upIcon : downIcon}
+                </button>
+              )}
             </div>
 
             {opt.children && opt.children.length > 0 && expanded[key] && (

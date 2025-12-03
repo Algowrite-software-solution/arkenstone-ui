@@ -21,7 +21,7 @@ export type CatalogLayoutProps = {
     }
 };
 
-export default function CatalogContentLayout({
+export function CatalogContentLayout({
     top,
     left,
     listings,
