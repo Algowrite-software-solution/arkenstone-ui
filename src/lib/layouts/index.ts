@@ -1,3 +1,3 @@
-// #TODO - impliment this feature @janithnirmal
+// #TODO - implement this feature @janithnirmal
 
-// export * from './panels/default-panel-layout';
+export * from './panels';

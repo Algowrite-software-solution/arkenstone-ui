@@ -1,111 +1,109 @@
-import { DataManager } from '@/components/data-manager/data-manager';
-import { ServiceFactory } from '@/services/service-factory';
-import { ColumnDef } from '@tanstack/react-table';
+import { Arkenstone } from "@/components";
+import { DataManager } from "@/components/data-manager/data-manager";
+import { DefaultPanelLayout } from "@/layouts";
+import { ServiceFactory } from "@/services/service-factory";
+import { ColumnDef } from "@tanstack/react-table";
 
 // 1. Interfaces
-interface Employee {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    avatar?: string;
-    departmentId?: string;
+interface ExampleData {
+  id: number;
+  name: string;
+  description: string;
 }
 
 // 2. Service
 // (Ideally this is in a separate file)
-const EmployeeService = new ServiceFactory<Employee>({
-    endpoint: '/employees',
-    entityName: 'Employee',
-    store: {
-        initialState: { list: [], selected: null, loading: false },
-        persistName: 'employees-store'
-    }
+const ExampleDataService = new ServiceFactory<ExampleData>({
+  endpoint: "/test-api",
+  entityName: "ExampleData",
+  store: {
+    initialState: { list: [], selected: null, loading: false },
+    persistName: "example-data-store",
+  },
+  syncWithStore: true,
 });
 
 // 3. Configuration
-const employeeColumns: ColumnDef<Employee>[] = [
-    { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'name', header: 'Full Name' },
-    { accessorKey: 'email', header: 'Email' },
-    { accessorKey: 'role', header: 'Role' },
+const exampleColumns: ColumnDef<ExampleData>[] = [
+  { accessorKey: "id", header: "ID" },
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "description", header: "Description" },
 ];
 
 export default function EmployeePage() {
-    return (
-        <DataManager<Employee> 
-            config={{
-                title: "Employee Directory",
-                description: "Manage system users and roles",
-                service: EmployeeService,
-                layout: 'split-view', // Try 'modal' to see the difference instantly
-                devMode: true,
-                
-                display: {
-                    type: 'table',
-                    columns: employeeColumns,
-                    searchKeys: ['name', 'email']
-                },
-                
-                form: {
-                    fields: [
-                        { 
-                            name: 'name', 
-                            label: 'Full Name', 
-                            type: 'text', 
-                            validation: { required: true, min: 2 } 
-                        },
-                        { 
-                            name: 'email', 
-                            label: 'Email Address', 
-                            type: 'email', 
-                            validation: { required: true, pattern: /\S+@\S+\.\S+/ } 
-                        },
-                        { 
-                            name: 'role', 
-                            label: 'Job Role', 
-                            type: 'select', 
-                            options: [
-                                { label: 'Developer', value: 'dev' },
-                                { label: 'Manager', value: 'manager' },
-                                { label: 'Designer', value: 'designer' },
-                            ] 
-                        },
-                        { 
-                            name: 'departmentId', 
-                            label: 'Department', 
-                            type: 'select',
-                            // Dynamically fetch options from another API
-                            fetchOptions: async () => {
-                                // Simulate API call
-                                await new Promise(r => setTimeout(r, 500)); 
-                                return [
-                                    { label: 'Engineering', value: 1 },
-                                    { label: 'HR', value: 2 }
-                                ];
-                            } 
-                        },
-                        {
-                            name: 'bio',
-                            label: 'Biography',
-                            type: 'textarea',
-                            validation: { max: 500 }
-                        },
-                        {
-                            name: 'isActive',
-                            label: 'Active Account',
-                            type: 'checkbox',
-                            defaultValue: true
-                        },
-                        {
-                            name: 'avatar',
-                            label: 'Profile Picture',
-                            type: 'image',
-                            uploadEndpoint: '/api/upload' // Optional auto-upload
-                        }
-                    ]
-                }
-            }}
-        />
-    );
+  return (
+    <Arkenstone
+      config={{
+        aclConfig: {
+          mode: "local",
+        },
+        api: {
+          isSameOrigin: false,
+          url: "http://localhost:8000/api/v1",
+          withCredentials: false
+        },
+      }}
+    >
+      <DefaultPanelLayout>
+        <DataManager<ExampleData>
+        config={{
+          title: "Example Data Manager",
+          description: "Manage example data entries",
+          service: ExampleDataService,
+          layout: "split-view", // Try 'modal' to see the difference instantly
+          devMode: true,
+
+          display: {
+            type: "table",
+            columns: exampleColumns,
+            searchKeys: ["name", "description"],
+          },
+
+          form: {
+            fields: [
+              {
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },
+              {
+                name: "description",
+                label: "Description",
+                type: "text",
+                validation: { required: true, min: 5 },
+              }, {
+                name: "boolean_value",
+                label: "Boolean Field",
+                type: "checkbox",
+                validation: { required: true },
+              },
+              {
+                name: "selected_item_id",
+                label: "Select Item",
+                type: "select",
+                options: [
+                  {
+                    label: "Option 1",
+                    value: "1"
+                  },
+                  {
+                    label: "Option 2",
+                    value: "2"
+                  }
+                ]
+              },
+               {
+                name: "image",
+                label: "Image",
+                type: "image",
+                validation: { required: true },
+              },
+            ],
+          },
+        }}
+      />
+      </DefaultPanelLayout>
+    </Arkenstone>
+  );
 }

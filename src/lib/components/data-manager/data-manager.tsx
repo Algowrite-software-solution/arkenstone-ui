@@ -21,6 +21,7 @@ import { DataManagerConfig } from './types';
 import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
+import { ApiOptions } from '@/hooks';
 
 export function DataManager<T extends { id: string | number }>({ 
     config 
@@ -35,8 +36,8 @@ export function DataManager<T extends { id: string | number }>({
     
     // Access the Singleton Store from the Factory
     // We assume the factory provides { list, loading, update, reset }
-    const store = service.useStore(); 
-    const { list: data, loading, update: updateStore } = store((state: any) => state); 
+    const { list: data, loading, update: updateStore } = service.useStore(); 
+    
 
     // Local UI State
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
@@ -90,6 +91,10 @@ export function DataManager<T extends { id: string | number }>({
         return () => { isMounted = false; };
     }, [service]); // Dependency on service ensures correct instance
 
+
+    // Check Image Inputs
+    const isImageInputExists = config.form?.fields?.some((field: any) => field.type === 'image');
+
     // =========================================================================
     // 3. CRUD HANDLERS
     // =========================================================================
@@ -97,7 +102,8 @@ export function DataManager<T extends { id: string | number }>({
     const handleCreate = async (values: any) => {
         log("Creating Item", values);
         try {
-            const res = await service.create(values);
+            const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+            const res = await service.create(values, options);
             if (res) {
                 toast.success(`${config.title} created successfully`);
                 
@@ -180,7 +186,7 @@ export function DataManager<T extends { id: string | number }>({
                     <Button 
                         size="icon" 
                         variant="ghost" 
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation(); // Prevent row click
                             setIsCreating(false);
@@ -192,7 +198,7 @@ export function DataManager<T extends { id: string | number }>({
                     <Button 
                         size="icon" 
                         variant="ghost"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(row.original.id);
@@ -221,7 +227,7 @@ export function DataManager<T extends { id: string | number }>({
                     <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setSelectedId(item.id)}>
                         <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500" onClick={() => handleDelete(item.id)}>
+                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => handleDelete(item.id)}>
                         <Trash2 className="h-3 w-3" />
                     </Button>
                 </div>
@@ -234,10 +240,10 @@ export function DataManager<T extends { id: string | number }>({
     // =========================================================================
 
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden bg-background/50">
+        <div className="w-full flex flex-col overflow-hidden  bg-sidebar rounded-2xl">
             
             {/* --- HEADER --- */}
-            <div className="flex-none p-4 md:p-6 border-b bg-background flex justify-between items-start md:items-center">
+            <div className="flex-none p-4 md:p-6 border-b  flex justify-between items-start md:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}

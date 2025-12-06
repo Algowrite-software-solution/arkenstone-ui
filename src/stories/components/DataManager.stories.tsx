@@ -5,7 +5,7 @@ const meta = {
   title: 'Example/Data Manager',
   component: EmployeePage,
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
   },
   tags: ['autodocs'],
   argTypes: {
@@ -26,4 +26,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = { };
+export const Primary: Story = {
+  args: {
+    behavior: "hide"
+  }
+};

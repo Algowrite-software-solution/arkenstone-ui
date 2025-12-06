@@ -102,7 +102,7 @@ export function NavUser({ user, logout }: NavUserProps) {
               <DropdownMenuGroup>
                 {user.menuItems?.map((item) => (
                   <DropdownMenuItem key={item.name} className="cursor-pointer">
-                    {item.icon && <item.icon />}
+                    {item.icon && (typeof item.icon === 'function' ? <item.icon /> : <span>{item.icon}</span>)}
                     <span>{item.name}</span>
                   </DropdownMenuItem>
                 ))}
@@ -113,8 +113,9 @@ export function NavUser({ user, logout }: NavUserProps) {
 
             {logout && (
               <DropdownMenuItem>
-                {(logout.icon && <logout.icon />) || <LogOut />}
-                {logout.name || "Log out"}
+                {logout.icon && (typeof logout.icon === 'function' ? <logout.icon /> : <span>{logout.icon}</span>)}
+                {!logout.icon && <LogOut />}
+                <span>{logout.name || "Log out"}</span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

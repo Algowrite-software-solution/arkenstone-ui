@@ -303,13 +303,13 @@ export const DisplayEngine = <T extends object>({
     if (loading) {
         return (
             <div className="flex h-64 w-full items-center justify-center">
-                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                 <div className="h-8 w-8 animate-spin p-4 rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
         );
     }
 
     return (
-        <div className={cn("w-full transition-all duration-300 animate-in fade-in", className)}>
+        <div className={cn("w-full transition-all p-4 duration-300 animate-in fade-in", className)}>
             
             {/* TABLE View */}
             {type === 'table' && Array.isArray(data) && columns && (

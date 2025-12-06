@@ -1,49 +1,164 @@
-/* src/lib/css/theme.css */
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* 2. Define the Variables */
+/* -------------------------------------------------------
+   PURE HEX COLOR VARIABLES
+------------------------------------------------------- */
 :root {
-  /* --background: 0 0% 100%; */
-  /* --foreground: 222.2 84% 4.9%; */
-  /* --primary: 222.2 47.4% 11.2%; */
-  /* --primary-foreground: 210 40% 98%; */
-  /* --radius: 0.5rem; */
-  /* ... Add all other variables here ... */
+  /* Matte white + matte black */
+  --background: #F7F7F7;
+  --foreground: #1A1A1A;
+
+  /* Primary (#0287FE) + lighter shades */
+  --primary: #0287FE;
+  --primary-foreground: #FFFFFF;
+
+  --primary-light: #57AEFF;
+  --primary-lighter: #9DD2FF;
+  --primary-lightest: #D0EAFF;
+
+  /* Secondary / muted / accent (matching the palette) */
+  --muted: #EBEBEB;
+  --muted-foreground: #666666;
+
+  --secondary: #E9F4FF;
+  --secondary-foreground: #1666A9;
+
+  --accent: #DCEEFF;
+  --accent-foreground: #165A96;
+
+  /* Destructive */
+  --destructive: #ff524f;
+  --destructive-foreground: #FFFFFF;
+
+  /* Border / input */
+  --border: #4d4d4d;
+  --input: #E0E0E0;
+
+  /* Ring highlight */
+  --ring: #0287FE;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Sidebar */
+  --sidebar: #F3F3F3;
+  --sidebar-foreground: #1A1A1A;
+
+  --sidebar-primary: #0287FE;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  --sidebar-accent: #DCEEFF;
+  --sidebar-accent-foreground: #165A96;
+
+  --sidebar-border: #D6D6D6;
+  --sidebar-ring: #0287FE;
+
+
+  --popover: #87c7ff;
+  --popover-foreground: #000000;
 }
 
+/* DARK MODE */
 .dark {
-  /* --background: 222.2 84% 4.9%; */
-  /* --foreground: 210 40% 98%; */
-  /* ... Add all other dark variables here ... */
+  --background: #1A1A1A;
+  --foreground: #F7F7F7;
+
+  --primary: #2B9CFF;
+  --primary-foreground: #FFFFFF;
+
+  --muted: #232323;
+  --muted-foreground: #A6A6A6;
+
+  --secondary: #0A3352;
+  --secondary-foreground: #F7F7F7;
+
+  --accent: #0F4170;
+  --accent-foreground: #F7F7F7;
+
+  --destructive: #ff6060;
+  --destructive-foreground: #F7F7F7;
+
+  --border: #3D3D3D;
+  --input: #3D3D3D;
+
+  --ring: #2B9CFF;
+
+  --sidebar: #1F1F1F;
+  --sidebar-foreground: #F7F7F7;
+
+  --sidebar-primary: #2B9CFF;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  --sidebar-accent: #0F4170;
+  --sidebar-accent-foreground: #FFFFFF;
+
+  --sidebar-border: #2D2D2D;
+  --sidebar-ring: #2B9CFF;
+
+  --popover: #00396b;
+  --popover-foreground: #eaeaea;
 }
 
-/* 3. Configure the Theme (Map variables to Tailwind utilities) */
+/* -------------------------------------------------------
+   TAILWIND THEME (PURE HEX MAPPING)
+------------------------------------------------------- */
 @theme {
-  /* Colors */
-  /* --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground)); */
-  
-  /* --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground)); */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  /* Add mappings for card, popover, secondary, muted, accent, destructive, border, input, ring... */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-  /* Border Radius */
-  /* --radius-lg: var(--radius);
+  --color-primary-light: var(--primary-light);
+  --color-primary-lighter: var(--primary-lighter);
+  --color-primary-lightest: var(--primary-lightest);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radii */
+  --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px); */
+  --radius-sm: calc(var(--radius) - 4px);
 
-  /* Animations (If not fully covered by the plugin) */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  @keyframes accordion-down {
-    from { height: 0 }
-    to { height: var(--radix-accordion-content-height) }
-  }
-  @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height) }
-    to { height: 0 }
-  }
+  
 }
+
+
+@layer base {
+  body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+}
+

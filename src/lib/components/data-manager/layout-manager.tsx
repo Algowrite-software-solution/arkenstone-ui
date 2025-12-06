@@ -29,11 +29,11 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     // --- LAYOUT: SPLIT VIEW (Sidebar List, Main Details) ---
     if (type === 'split-view') {
         return (
-            <div className="flex h-[calc(100vh-100px)] w-full gap-4 overflow-hidden">
+            <div className="flex h-max w-full gap-4 overflow-hidden">
                 {/* Left Panel: List - Collapses on mobile if details open */}
                 <div className={cn(
                     "flex-1 overflow-y-auto border rounded-xl transition-all duration-300",
-                    isDetailsOpen ? "hidden md:block md:w-1/3 md:flex-none" : "w-full"
+                    isDetailsOpen ? "hidden md:block md:w-1/2 md:flex-none" : "w-full"
                 )}>
                     {children}
                 </div>

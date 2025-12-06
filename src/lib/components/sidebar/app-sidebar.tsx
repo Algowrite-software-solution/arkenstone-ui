@@ -1,26 +1,12 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  LogOut,
-  LucideIcon,
-  Map,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
-  User,
-} from "lucide-react"
+import * as React from "react";
+import data from "./mock-sidebar-data.json";
 
-import { NavMain } from "@/components/sidebar/nav-main"
-import { NavSlot2 } from "@/components/sidebar/nav-slot2"
-import { NavSecondary } from "@/components/sidebar/nav-secondary"
-import { NavUser } from "@/components/sidebar/nav-user"
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavSlot2 } from "@/components/sidebar/nav-slot2";
+import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -29,18 +15,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-
-interface AppData {
-  name: string;
-  textSlot1: string;
+export interface AppData {
+  name?: string;
+  textSlot1?: string;
   url: string;
-  icon: LucideIcon | any;
+  icon: React.ReactNode | any;
   logo?: string;
+  sidebarComponent?: React.ReactNode;
 }
 
-interface UserData {
+export interface UserData {
   name: string;
   email: string;
   avatar: string;
@@ -48,14 +34,14 @@ interface UserData {
   menuItems?: {
     name: string;
     url: string;
-    icon: LucideIcon | any;
+    icon: React.ReactNode | any;
   }[];
 }
 
-interface NavMainData {
+export interface NavMainData {
   title: string;
   url: string;
-  icon: LucideIcon | any;
+  icon: React.ReactNode | any;
   isActive?: boolean;
   items?: {
     title: string;
@@ -63,211 +49,98 @@ interface NavMainData {
   }[];
 }
 
-interface NavSlot2Data {
+export interface NavSlot2Data {
   name: string;
   url: string;
-  icon: LucideIcon | any;
+  icon: React.ReactNode | any;
 }
 
-interface NavSecondaryData {
+export interface NavSecondaryData {
   title: string;
   url: string;
-  icon: LucideIcon | any;
+  icon: React.ReactNode | any;
 }
 
-interface NavbarProps {
+export interface NavbarProps {
   app: AppData;
   user: UserData;
-  navMain: NavMainData[];
-  navSecondary: NavSecondaryData[];
-  slot2: NavSlot2Data[];
+  navMain?: NavMainData[];
+  navSecondary?: NavSecondaryData[];
+  slot2?: NavSlot2Data[];
   logout?: {
     name: string;
     url: string;
-    icon: LucideIcon | any;
+    icon: React.ReactNode | any;
   };
 }
 
-// default Data
-const data: NavbarProps = {
-  app: {
-    name: "Example App",
-    textSlot1: "Enterprise",
-    url: "#",
-    icon: Command,
-  },
-  user: {
-    name: "Example User",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-    url: "#",
-    menuItems: [
-      {
-        name: "Profile",
-        url: "#",
-        icon: User,
-      },
-      {
-        name: "Settings",
-        url: "#",
-        icon: Settings2,
-      },
-      {
-        name: "Logout",
-        url: "#",
-        icon: LogOut,
-      },
-    ],
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  slot2: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-      
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-  logout: { name: "Logout", url: "#", icon: LogOut }
-}
+export function AppSidebar({
+  navbarProps = data,
+  ...props
+}: { navbarProps?: NavbarProps } & React.ComponentProps<typeof Sidebar>) {
+  const sidebarTitleExists = navbarProps.app.name && navbarProps.app.textSlot1;
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  {data.app.logo && <img src={data.app.logo} alt={data.app.name} />}
-                  {data.app.icon && !data.app.logo && <data.app.icon className="size-4" />}
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{data.app.name}</span>
-                  <span className="truncate text-xs">{data.app.textSlot1}</span>
-                </div>
-              </a>
+              {navbarProps.app.sidebarComponent ?? (
+                <a href="#">
+                  <div
+                    className={`${
+                      !sidebarTitleExists ? "w-full" : ""
+                    } text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg bg-transparent`}
+                  >
+                    {navbarProps.app.logo && (
+                      <img
+                        src={navbarProps.app.logo}
+                        alt={navbarProps.app.name}
+                        className="object-contain"
+                      />
+                    )}
+                    {navbarProps.app.icon && !navbarProps.app.logo && (
+                      <navbarProps.app.icon className="size-4" />
+                    )}
+                  </div>
+                  {sidebarTitleExists && (
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">
+                        {navbarProps.app.name}
+                      </span>
+                      <span className="truncate text-xs">
+                        {navbarProps.app.textSlot1}
+                      </span>
+                    </div>
+                  )}
+                </a>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSlot2 slot2={data.slot2} dropdownItems={data.slot2} label="Slot2" />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {navbarProps.navMain && <NavMain items={navbarProps.navMain || []} />}
+
+        {navbarProps.slot2 && (
+          <NavSlot2
+            slot2={navbarProps.slot2 || []}
+            dropdownItems={navbarProps.slot2 || []}
+            label="Slot2"
+          />
+        )}
+
+        {navbarProps.navSecondary && (
+          <NavSecondary
+            items={navbarProps.navSecondary || []}
+            className="mt-auto"
+          />
+        )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} logout={data.logout} />
+        <NavUser user={navbarProps.user} logout={navbarProps.logout} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

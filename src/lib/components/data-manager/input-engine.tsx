@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FieldConfig, InputOption } from './types';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
+import { DatePicker } from '../ui/date-picker';
 
 /**
  * Custom Hook for Debouncing
@@ -129,8 +130,8 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
                 return (
                     <div key={field.name} className={cn("flex flex-col gap-1.5", field.className)}>
-                        <Label className={cn(error && "text-red-500")}>
-                            {field.label} {field.validation?.required && <span className="text-red-500">*</span>}
+                        <Label className={cn(error && "text-destructive")}>
+                            {field.label} {field.validation?.required && <span className="text-destructive">*</span>}
                         </Label>
                         
                         {/* INPUT: TEXT / EMAIL / NUMBER */}
@@ -140,7 +141,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                                 value={val}
                                 placeholder={field.placeholder}
                                 onChange={e => handleChange(field.name, field.type === 'number' ? Number(e.target.value) : e.target.value)}
-                                className={cn(error && "border-red-500")}
+                                className={cn(error && "border-destructive")}
                                 disabled={field.disabled}
                             />
                         )}
@@ -151,7 +152,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                                 value={val}
                                 placeholder={field.placeholder}
                                 onChange={e => handleChange(field.name, e.target.value)}
-                                className={cn(error && "border-red-500")}
+                                className={cn(error && "border-destructive")}
                                 disabled={field.disabled}
                             />
                         )}
@@ -161,7 +162,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                             <select
                                 className={cn(
                                     "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                                    error && "border-red-500"
+                                    error && "border-destructive"
                                 )}
                                 value={val}
                                 onChange={e => handleChange(field.name, e.target.value)}
@@ -186,6 +187,18 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                             </div>
                         )}
 
+
+                        {/* INPUT: DATE */}
+                        {field.type === 'date' && (
+                            <div className="flex items-center space-x-2">
+                                <DatePicker 
+                                    value={val as Date | undefined} 
+                                    onChange={(date) => handleChange(field.name, date ?? null)} 
+                                />
+                                <span className="text-sm text-muted-foreground">{field.placeholder || "Select date"}</span>
+                            </div>
+                        )}
+
                         {/* INPUT: CUSTOM */}
                         {field.type === 'custom' && field.renderCustom && (
                             field.renderCustom({ 
@@ -204,7 +217,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                                         <button 
                                             type="button"
                                             onClick={() => handleChange(field.name, null)}
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs"
+                                            className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 text-xs"
                                         >X</button>
                                     </div>
                                 ) : (
@@ -225,7 +238,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                         )}
 
                         {/* VALIDATION MESSAGE */}
-                        {error && <span className="text-xs text-red-500">{error}</span>}
+                        {error && <span className="text-xs text-destructive">{error}</span>}
                     </div>
                 );
             })}
