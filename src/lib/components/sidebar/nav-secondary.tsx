@@ -13,21 +13,21 @@ export function NavSecondary({
   items,
   ...props
 }: {
-  items: {
+  items?: {
     title: string
     url: string
-    icon: LucideIcon
+    icon: LucideIcon | any
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {items?.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild size="sm">
                 <a href={item.url}>
-                  <item.icon />
+                  {typeof item.icon === 'function' ? <item.icon /> : <span>{item.icon}</span>}
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>

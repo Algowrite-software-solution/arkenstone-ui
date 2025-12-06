@@ -1,4 +1,4 @@
-import DefaultPanelLayout from "@/layouts/panels/default-panel-layout";
+import {DefaultPanelLayout} from "@/layouts/panels/default-panel-layout";
 
 // use Generic CRUD Manager
 

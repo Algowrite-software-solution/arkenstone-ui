@@ -112,7 +112,7 @@ export function ProductCard({
           <CategoriesBadgeList 
             categories={product.categories || []}
             onCategoryClick={(category) => setSelectedCategory(category)}
-            className={{ position: "bottom-3 left-3" }}
+            classNames={{ position: "bottom-3 left-3" }}
           />
       }
     />
@@ -137,7 +137,7 @@ export function ProductCard({
       layout={layout}
       ImageComponent={imageComponent}
       DetailsComponent={detailsComponent}
-      className={{ container: containerClassName }}
+      classNames={{ container: containerClassName }}
     />
   );
 }

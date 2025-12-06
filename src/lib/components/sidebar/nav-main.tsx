@@ -21,10 +21,10 @@ export function NavMain({
   items,
   label = "Panels"
 }: {
-  items: {
+  items?: {
     title: string
     url: string
-    icon: LucideIcon
+    icon: LucideIcon | any
     isActive?: boolean
     items?: {
       title: string
@@ -36,12 +36,12 @@ export function NavMain({
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+        {items?.map((item) => (
+          <Collapsible key={item.title} asChild defaultOpen={item.isActive} >
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
-                  <item.icon />
+                <a href={item.url} className={item.isActive ? "bg-primary/50" : ""}>
+                  {typeof item.icon === 'function' ? <item.icon /> : item.icon}
                   <span>{item.title}</span>
                 </a>
               </SidebarMenuButton>

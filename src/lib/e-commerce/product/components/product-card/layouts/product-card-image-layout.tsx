@@ -1,5 +1,4 @@
-import React from "react";
-
+import { cn } from "@/lib/utils";
 
 export interface ProductImageLayoutProps {
   imageUrl?: string;
@@ -11,7 +10,7 @@ export interface ProductImageLayoutProps {
   background?: React.ReactNode;
 
   // Classname overrides
-  className?: {
+  classNames?: {
     container?: string;
     image?: string;
     overlay?: string;
@@ -32,7 +31,7 @@ export interface ProductImageLayoutProps {
   topPlaceholder?: React.ReactNode;
   bottomPlaceholder?: React.ReactNode;
 
-  placeholderClassName?: {
+  placeholderClassNames?: {
     top?: string;
     bottom?: string;
   }
@@ -51,15 +50,7 @@ export function ProductImageLayout({
   width = "100%",
   height = 280,
   background,
-  className = {
-    container: "relative rounded-lg overflow-hidden bg-gray-100",
-    image: "absolute inset-0 bg-center bg-cover z-0",
-    overlay: "absolute inset-0 pointer-events-none z-10",
-    corner: "p-2 pointer-events-auto",
-    center: "absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto",
-    background: "absolute inset-0 z-0",
-    backgroundWrapper: "absolute inset-0 overflow-hidden z-0",
-  },
+  classNames = {},
 
   topLeft,
   topRight,
@@ -70,10 +61,7 @@ export function ProductImageLayout({
   topPlaceholder,
   bottomPlaceholder,
 
-  placeholderClassName = {
-    top: "absolute left-0 right-0 top-2 px-2 flex items-center",
-    bottom: "absolute left-0 right-0 bottom-2 px-2 flex items-center",
-  },
+  placeholderClassNames = {},
 }: ProductImageLayoutProps) {
   const placeholder =
     "linear-gradient(135deg,#f3f4f6 0%, #e5e7eb 50%, #f8fafc 100%)";
@@ -92,10 +80,10 @@ export function ProductImageLayout({
     return (
       <>
         <div className="flex-1 flex items-start">
-          {topLeft ? <div className={className.corner}>{topLeft}</div> : null}
+          {topLeft ? <div className={cn("p-2 pointer-events-auto",classNames.corner)}>{topLeft}</div> : null}
         </div>
         <div className="flex-1 flex items-end justify-end">
-          {topRight ? <div className={className.corner}>{topRight}</div> : null}
+          {topRight ? <div className={cn("p-2 pointer-events-auto",classNames.corner)}>{topRight}</div> : null}
         </div>
       </>
     );
@@ -110,24 +98,24 @@ export function ProductImageLayout({
     return (
       <>
         <div className="flex-1 flex items-start">
-          {bottomLeft ? <div className={className.corner}>{bottomLeft}</div> : null}
+          {bottomLeft ? <div className={cn("p-2 pointer-events-auto",classNames.corner)}>{bottomLeft}</div> : null}
         </div>
         <div className="flex-1 flex items-end justify-end">
-          {bottomRight ? <div className={className.corner}>{bottomRight}</div> : null}
+          {bottomRight ? <div className={cn("p-2 pointer-events-auto",classNames.corner)}>{bottomRight}</div> : null}
         </div>
       </>
     );
   };
 
   return (
-    <div className={className.container} style={rootStyle}>
+    <div className={cn("relative rounded-lg overflow-hidden bg-gray-100",classNames.container)} style={rootStyle}>
       {/* background slot: if provided render it; otherwise render built-in background image */}
-      <div className={className.backgroundWrapper} aria-hidden>
+      <div className={cn("absolute inset-0 overflow-hidden z-0",classNames.backgroundWrapper)} aria-hidden>
         {background ? (
-          <div className={className.background}>{background}</div>
+          <div className={cn("absolute inset-0 z-0",classNames.background)}>{background}</div>
         ) : (
           <div
-            className={className.image}
+            className={cn("absolute inset-0 bg-center bg-cover z-0",classNames.image)}
             style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : placeholder }}
             role="img"
             aria-label={imageAlt}
@@ -136,14 +124,14 @@ export function ProductImageLayout({
       </div>
 
       {/* Overlay container (above background) */}
-      <div className={className.overlay}>
+      <div className={cn("absolute inset-0 pointer-events-none z-10",classNames.overlay)}>
         {/* Top row: shows left & right; if both missing uses topPlaceholder centered */}
-        <div className={placeholderClassName.top}>{renderTopRow()}</div>
+        <div className={cn("absolute left-0 right-0 top-2 px-2 flex items-center",placeholderClassNames.top)}>{renderTopRow()}</div>
 
         {/* Bottom row: shows left & right; if both missing uses bottomPlaceholder centered */}
-        <div className={placeholderClassName.bottom}>{renderBottomRow()}</div>
+        <div className={cn("absolute left-0 right-0 bottom-2 px-2 flex items-center",placeholderClassNames.bottom)}>{renderBottomRow()}</div>
 
-        {center && <div className={className.center}>{center}</div>}
+        {center && <div className={cn("absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto",classNames.center)}>{center}</div>}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { ClassNamesMap } from "./filter";
+import { cn } from "@/lib/utils";
 
 export type CategoryNode = {
   label: string;
@@ -14,18 +15,25 @@ export interface CategoryFilterProps {
   onToggle: (values: (string | number | boolean)[]) => void;
   level?: number;
   classNames?: ClassNamesMap;
+  collapsibleIconUp?: React.ReactNode;
+  collapsibleIconDown?: React.ReactNode;
 }
 
-export default function CategoryFilter({
+export function CategoryFilter({
   options,
   selected,
   onToggle,
   level = 0,
   classNames,
+  collapsibleIconUp,
+  collapsibleIconDown,
 }: CategoryFilterProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const isSelectedArray = Array.isArray(selected);
+
+  const upIcon = collapsibleIconUp ?? <ChevronUp />;
+  const downIcon = collapsibleIconDown ?? <ChevronDown />;
 
   function getAllValues(node: CategoryNode): (string | number | boolean)[] {
     const vals: (string | number | boolean)[] = [node.value];
@@ -70,18 +78,8 @@ export default function CategoryFilter({
 
         return (
           <div key={key} style={indentStyle(level)} className={classNames?.treeNode ?? undefined}>
-            <div className={`flex items-center gap-2 ${classNames?.treeLabel ?? ""}`}>
-              {opt.children && opt.children.length > 0 && (
-                <button
-                  className={classNames?.treeToggle ?? "p-1"}
-                  onClick={() => setExpanded((s) => ({ ...s, [key]: !s[key] }))}
-                  aria-label="Toggle"
-                >
-                  {expanded[key] ? <ChevronUp /> : <ChevronDown />}
-                </button>
-              )}
-
-              <label className={`flex items-center gap-2 ${classNames?.option ?? ""}`}>
+            <div className={cn("flex items-center gap-2", classNames?.treeLabel)}>
+              <label className={cn("flex items-center gap-2", classNames?.option)}>
                 <input
                   type="checkbox"
                   checked={hasAllChildren}
@@ -92,16 +90,29 @@ export default function CategoryFilter({
                   className={classNames?.checkbox ?? ""}
                 />
                 <span
-                  className={`cursor-pointer ${hasAllChildren ? "font-semibold" : ""}`}
+                  className={cn("cursor-pointer", hasAllChildren ? "font-semibold" : "")}
                   onClick={() => (opt.children && opt.children.length > 0 ? toggleNode(opt) : toggleLeaf(opt.value))}
                 >
                   {opt.label}
                 </span>
               </label>
+
+              {opt.children && opt.children.length > 0 && (
+                <button
+                  className={cn("ml-auto", classNames?.treeToggle ?? "p-1")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded((s) => ({ ...s, [key]: !s[key] }));
+                  }}
+                  aria-label="Toggle"
+                >
+                  {expanded[key] ? upIcon : downIcon}
+                </button>
+              )}
             </div>
 
             {opt.children && opt.children.length > 0 && expanded[key] && (
-              <div className={classNames?.treeChildren ?? "ml-6 mt-1"}>
+              <div className={cn("ml-6 mt-1", classNames?.treeChildren)}>
                 <CategoryFilter
                   options={opt.children}
                   selected={selected}

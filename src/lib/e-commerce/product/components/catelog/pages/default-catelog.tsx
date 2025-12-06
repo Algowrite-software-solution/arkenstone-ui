@@ -1,12 +1,13 @@
-import { useEffect } from "react";
-import CatalogContentLayout from "../layouts/catelog-content-layout";
-import Search from "../../../../../components/custom/search";
-import Filters from "../components/filter";
+import { useEffect, useState } from "react";
+import {CatalogContentLayout} from "../layouts/catelog-content-layout";
+import {Search} from "../../../../../components/custom/search";
+import {Filters} from "../components/filter";
 import { Listing } from "../layouts/listings-layout";
 import { ListingControl } from "../components/listing-controls";
 import { Pagination } from "../components/pagination";
 import { ProductCard } from "../../product-card/product-card";
-import { useCatalogStore } from "../../../../../stores/useStore";
+import { Product } from "../../../types";
+import { productService } from "@/e-commerce/product/service";
 
 const FILTER_CONFIG = [
   {
@@ -46,6 +47,19 @@ const FILTER_CONFIG = [
     ],
   },
   {
+    id: "sizes",
+    title: "Sizes",
+    type: "checkbox-list",
+    options: [
+      { label: "XS", value: "xs" },
+      { label: "S", value: "s" },
+      { label: "M", value: "m" },
+      { label: "L", value: "l" },
+      { label: "XL", value: "xl" },
+    ],
+    itemsShown: 3,
+  },
+  {
     id: "price_custom",
     title: "Price",
     type: "price_custom",
@@ -53,69 +67,92 @@ const FILTER_CONFIG = [
   },
 ];
 
-export default function DefaultCatalogPage() {
-  const {
-    products,
-    total,
-    loading,
-    searchQuery,
-    filters,
-    sortOrder,
-    sortBy,
-    viewMode,
-    page,
-    pageSize,
-    setSearchQuery,
-    setFilters,
-    setSortOrder,
-    setSortBy,
-    setViewMode,
-    setPage,
-    fetchProducts,
-  } = useCatalogStore();
+export default function DefaultCatalogPage() { 
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const filters = productService.useStore((state) => state.filters) || {};
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState("price");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "gallery">("grid");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    
+    try {
+      // await the promise returned by getAll so `response` is the resolved value (array | ListResponse | null)
+      const response = await productService.getAll({
+        search: searchQuery,
+        filters: filters,
+        page: page,
+        per_page: pageSize,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      }, { displayError: true, displaySuccess: true }) as Product[] |null;
+
+      if (!response) {
+        setProducts([]);
+        setTotal(0);
+      } else if (Array.isArray(response)) {
+        // service returned a plain array of products
+        setProducts(response);
+        setTotal(response.length);
+      }
+
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
+    
+  };
 
   // initial fetch
   useEffect(() => {
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchQuery, filters, page, pageSize, sortBy, sortOrder]);
 
   const renderProductList = () => {
-    if (loading) return <div className="p-10 text-center text-gray-500">Loading...</div>;
-    if (!products || products.length === 0) return <div className="p-10 text-center">No products found.</div>;
-
-    if (viewMode === "table") {
-      return (
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th className="p-2">Name</th>
-              <th className="p-2">Category</th>
-              <th className="p-2 text-right">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-b">
-                <td className="p-2">{p.name}</td>
-                <td className="p-2">{(p.categories || []).map((c: any) => c.name).join(", ")}</td>
-                <td className="p-2 text-right">{typeof p.sale_price === "number" ? `$${p.sale_price}` : `$${p.price ?? "0"}`}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
+    if (loading) {
+      return <div className="p-10 text-center text-gray-500">Loading...</div>;
     }
 
-    const gridClass = viewMode === "card" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4";
+    if (!products || products.length === 0) {
+      return <div className="p-10 text-center">No products found.</div>;
+    }
 
-    return (
-      <div className={gridClass}>
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-    );
+    if (viewMode === "gallery"){
+      // Gallery view: large images
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product: any) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      );
+    } else if (viewMode === "list"){
+      // List view: detailed list
+      return (
+        <div className="flex flex-col gap-4">
+          {products.map((product: any) => (
+            <ProductCard key={product.id} product={product} layout="detailed" />
+          ))}
+        </div>
+      );
+    } else {
+      // Grid view: compact grid
+      return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {products.map((product: any) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      );
+    }
   };
 
   // basic derived UI (keeps a small search area)
@@ -126,6 +163,7 @@ export default function DefaultCatalogPage() {
         value={searchQuery}
         onChange={(q) => {
           setSearchQuery(q);
+          setPage(1);
         }}
         debounce={300}
         buttonType="icon"
@@ -137,24 +175,40 @@ export default function DefaultCatalogPage() {
     <div className="bg-white rounded-lg shadow-sm p-3">
       <div className="p-2 border-b font-semibold">Filters</div>
       <div className="p-3">
-        <Filters filters={FILTER_CONFIG} value={filters} onChange={(next) => setFilters(next)} />
+        <Filters 
+          filters={FILTER_CONFIG} 
+          value={filters} 
+          onChange={(next) => {
+            productService.useStore.setState({ filters: next }); 
+            setPage(1);
+          }} 
+        />
       </div>
     </div>
   );
 
   const controls = (
+    <div className="h-24"> 
     <ListingControl
       sortProps={{
-        sortOrder: sortOrder ?? "desc",
-        sortBy: sortBy ?? "price",
-        onSortChange: (order) => setSortOrder(order),
-        onSortByChange: (by) => setSortBy(by),
+        sortOrder: sortOrder,
+        sortBy: sortBy,
+        onSortChange: (order) => {
+          setSortOrder(order);
+          setPage(1); // Reset to first page
+        },
+        onSortByChange: (by) => {
+          setSortBy(by);
+          setPage(1); // Reset to first page
+        },
       }}
       viewModeProps={{
         mode: viewMode,
         onChange: (m) => setViewMode(m),
+        availableModes: ["grid", "list", "gallery"], 
       }}
     />
+    </div>
   );
 
   const pagination = (
@@ -162,14 +216,23 @@ export default function DefaultCatalogPage() {
       page={page}
       total={total}
       pageSize={pageSize}
-      onChange={(p) => setPage(p)}
-      show={{ summary: true }}
+      onChange={(newPage)=> setPage(newPage)}
     />
   );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <CatalogContentLayout top={top} left={left} listings={<Listing controls={controls} list={renderProductList()} pagination={pagination} />} />
+      <CatalogContentLayout
+        top={top}
+        left={left}
+        listings={
+          <Listing
+            controls={controls}
+            list={renderProductList()}
+            pagination={pagination}
+          />
+        }
+      />
     </div>
   );
 }
