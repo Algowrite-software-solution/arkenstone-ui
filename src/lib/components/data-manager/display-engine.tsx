@@ -144,8 +144,8 @@ function DataTable<T>({
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id}>
+                                    {headerGroup.headers.map((header, index) => (
+                                        <TableHead key={header.id} className={`bg-secondary text-secondary-foreground ${index === headerGroup.headers.length - 1 ? 'text-end' : ''}`}>
                                             {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                         </TableHead>
                                     ))}
