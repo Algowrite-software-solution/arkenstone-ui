@@ -4,22 +4,24 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { AppSidebar, NavbarProps } from "@/components/sidebar/app-sidebar";
 import { ThemeProvider } from "@/provider/theme-provider";
 import { BreadcrumbItemType, Breadcrumbs } from "@/components/custom/breadcrumb";
 
 
-export default function DefaultPanelLayout({
+export function DefaultPanelLayout({
   children,
   breadcrumbs,
+  navbarProps
 }: {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbItemType[];
+  navbarProps?: NavbarProps;
 }) {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar navbarProps={navbarProps} />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2">
             <div className="flex items-center gap-2 px-4">

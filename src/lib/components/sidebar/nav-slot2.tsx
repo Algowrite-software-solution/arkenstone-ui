@@ -31,15 +31,15 @@ export function NavSlot2({
   label = "Slot2",
   viewMoreButton = null,
 }: {
-  slot2: {
+  slot2?: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    icon: LucideIcon | any;
   }[];
   dropdownItems?: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    icon: LucideIcon | any;
   }[];
   label?: string;
   viewMoreButton?: React.ReactNode;
@@ -50,11 +50,11 @@ export function NavSlot2({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
-        {slot2.map((item) => (
+        {slot2?.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <item.icon />
+                {typeof item.icon === 'function' ? <item.icon /> : <span>{item.icon}</span>}
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
@@ -71,9 +71,9 @@ export function NavSlot2({
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
-                  {dropdownItems.map((item) => (
+                  {dropdownItems?.map((item) => (
                     <DropdownMenuItem key={item.name}>
-                      <item.icon />
+                      {typeof item.icon === 'function' ? <item.icon /> : <span>{item.icon}</span>}
                       <span>{item.name}</span>
                     </DropdownMenuItem>
                   ))}
