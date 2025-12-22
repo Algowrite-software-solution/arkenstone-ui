@@ -12,16 +12,18 @@ import { BreadcrumbItemType, Breadcrumbs } from "@/components/custom/breadcrumb"
 export function DefaultPanelLayout({
   children,
   breadcrumbs,
-  navbarProps
+  navbarProps,
+  navbarUserComponent = null
 }: {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbItemType[];
   navbarProps?: NavbarProps;
+  navbarUserComponent?: React.ReactNode;
 }) {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <SidebarProvider>
-        <AppSidebar navbarProps={navbarProps} />
+        <AppSidebar navbarProps={navbarProps} navbarUserComponent={navbarUserComponent} />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2">
             <div className="flex items-center gap-2 px-4">
