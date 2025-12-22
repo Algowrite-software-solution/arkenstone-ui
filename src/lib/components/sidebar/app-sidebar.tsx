@@ -76,8 +76,9 @@ export interface NavbarProps {
 
 export function AppSidebar({
   navbarProps = data,
+  navbarUserComponent = null,
   ...props
-}: { navbarProps?: NavbarProps } & React.ComponentProps<typeof Sidebar>) {
+}: { navbarProps?: NavbarProps; navbarUserComponent?: React.ReactNode } & React.ComponentProps<typeof Sidebar>) {
   const sidebarTitleExists = navbarProps.app.name && navbarProps.app.textSlot1;
 
   return (
@@ -139,7 +140,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={navbarProps.user} logout={navbarProps.logout} />
+        {navbarUserComponent ?? <NavUser user={navbarProps.user} logout={navbarProps.logout} />}
       </SidebarFooter>
     </Sidebar>
   );
