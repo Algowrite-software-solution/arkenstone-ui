@@ -47,7 +47,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
     // Watch for initial value changes (e.g. when an item is selected from list)
     useEffect(() => {
-        setValues(initialValues);
+        setValues(initialValues || {}); 
         setErrors({});
     }, [initialValues]);
 
@@ -124,6 +124,8 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 if (field.hidden && (typeof field.hidden === 'function' ? field.hidden(values) : field.hidden)) {
                     return null;
                 }
+
+                console.log('Field:', field.name, 'Value:', values[field.name]);
 
                 const error = errors[field.name];
                 const val = values[field.name] ?? field.defaultValue ?? '';

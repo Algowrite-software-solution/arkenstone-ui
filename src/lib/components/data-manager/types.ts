@@ -55,13 +55,19 @@ export interface DataManagerConfig<T extends object> {
     
     // Layout
     layout: LayoutType;
+    // for modals - default is 'md'
+    modalSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full'; 
     
     // Data Display Configuration
     display: {
         type: 'table' | 'list' | 'grid';
-        columns: ColumnDef<T>[]; // For Table
+        
+        // For Table
+        columns: ColumnDef<T>[];
         searchKeys?: string[]; // Fields to enable search on
-        renderItem?: (item: T) => React.ReactNode; // For List/Grid view
+
+        // For List/Grid view
+        renderItem?: (item: T) => React.ReactNode;
     };
     
     // Input/Form Configuration
