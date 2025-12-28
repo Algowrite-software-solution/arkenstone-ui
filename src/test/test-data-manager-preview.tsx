@@ -50,7 +50,8 @@ export default function EmployeePage() {
           title: "Example Data Manager",
           description: "Manage example data entries",
           service: ExampleDataService,
-          layout: "split-view", // Try 'modal' to see the difference instantly
+          layout: "modal", // Try 'modal' to see the difference instantly
+          modalSize: "full",
           devMode: true,
 
           display: {
@@ -62,6 +63,51 @@ export default function EmployeePage() {
           form: {
             fields: [
               {
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
+                name: "name",
+                label: "Full Name",
+                type: "text",
+                validation: { required: true, min: 2 },
+              },{
                 name: "name",
                 label: "Full Name",
                 type: "text",

@@ -15,6 +15,7 @@ interface LayoutManagerProps {
     isDetailsOpen: boolean;
     onCloseDetails: () => void;
     title?: string;
+    modalSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full'; 
 }
 
 export const LayoutManager: React.FC<LayoutManagerProps> = ({
@@ -23,7 +24,8 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     detailsPanel,
     isDetailsOpen,
     onCloseDetails,
-    title
+    title,
+    modalSize = 'md'
 }) => {
     
     // --- LAYOUT: SPLIT VIEW (Sidebar List, Main Details) ---
@@ -56,15 +58,36 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
 
     // --- LAYOUT: MODAL (List Full Width, Details in Popup) ---
     if (type === 'modal') {
+
+         // Map sizes to Tailwind classes that override your default Dialog styles
+        const sizeClasses = {
+            sm: "sm:max-w-sm max-h-[80vh]",
+            md: "sm:max-w-lg max-h-[80vh]", // Default shadcn size
+            lg: "sm:max-w-2xl max-h-[80vh]",
+            xl: "sm:max-w-4xl max-h-[80vh]", // Wider
+            full: "w-[95vw] h-[95vh] max-w-none sm:max-w-none" // Almost full screen
+        };
+
+
         return (
             <div className="w-full h-full">
                 {children}
                 <Dialog open={isDetailsOpen} onOpenChange={(open) => !open && onCloseDetails()}>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent 
+                        className={cn(
+                            "overflow-auto flex flex-col", // Ensure internal scrolling works
+                            sizeClasses[modalSize], // Apply size override
+                            modalSize === 'full' && "h-[95vh]" // Ensure height for full mode
+                        )}
+                    >
                         <DialogHeader>
                             <DialogTitle>{title || "Details"}</DialogTitle>
                         </DialogHeader>
-                        {detailsPanel}
+                        
+                        {/* Container to handle scrolling for long forms */}
+                        <div className="flex-1 overflow-y-auto -mr-6 pr-6">
+                            {detailsPanel}
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>

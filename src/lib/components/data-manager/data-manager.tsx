@@ -2,18 +2,11 @@
  * DataManager.tsx
  * 
  * The "Brain" of the Generic Service Architecture.
- * 
- * Responsibilities:
- * 1. Connects to the ServiceFactory to manage Data State (Fetch, Create, Update, Delete).
- * 2. Manages UI State (Selection, Creation Mode, Loading).
- * 3. Wires the "DisplayEngine" (Table/List) with the "InputEngine" (Form).
- * 4. Controls the Layout (SplitView vs Modal) via "LayoutManager".
- * 5. Handles Optimistic Updates and User Feedback (Toasts).
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // --- Internal Modules ---
@@ -21,7 +14,6 @@ import { DataManagerConfig } from './types';
 import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
-import { ApiOptions } from '@/hooks';
 
 export function DataManager<T extends { id: string | number }>({ 
     config 
@@ -34,15 +26,23 @@ export function DataManager<T extends { id: string | number }>({
     // 1. STATE MANAGEMENT
     // =========================================================================
     
-    // Access the Singleton Store from the Factory
-    // We assume the factory provides { list, loading, update, reset }
     const { list: data, loading, update: updateStore } = service.useStore(); 
-    
 
     // Local UI State
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
-    
+
+    // --- CONFIRMATION DIALOG STATE ---
+    const [confirmState, setConfirmState] = useState<{
+        isOpen: boolean;
+        message: string;
+        resolver: ((value: boolean) => void) | null;
+    }>({
+        isOpen: false,
+        message: "",
+        resolver: null
+    });
+
     // Derived State
     const activeItem = useMemo(() => 
         selectedId ? data.find((i: T) => i.id === selectedId) : null, 
@@ -50,28 +50,52 @@ export function DataManager<T extends { id: string | number }>({
 
     const isPanelOpen = !!selectedId || isCreating;
 
-    // Helper: Developer Logging
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
     };
 
     // =========================================================================
-    // 2. EFFECTS & DATA LOADING
+    // 2. CONFIRMATION LOGIC
+    // =========================================================================
+
+    /**
+     * Creates a Promise that resolves only when the user interacts 
+     * with the dialog UI.
+     */
+    const requestConfirmation = useCallback((message: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+            setConfirmState({
+                isOpen: true,
+                message,
+                resolver: resolve
+            });
+        });
+    }, []);
+
+    const onConfirmDialog = () => {
+        if (confirmState.resolver) confirmState.resolver(true);
+        setConfirmState((prev) => ({ ...prev, isOpen: false }));
+    };
+
+    const onCancelDialog = () => {
+        if (confirmState.resolver) confirmState.resolver(false);
+        setConfirmState((prev) => ({ ...prev, isOpen: false }));
+    };
+
+    // =========================================================================
+    // 3. EFFECTS & DATA LOADING
     // =========================================================================
 
     useEffect(() => {
         let isMounted = true;
         
         const loadData = async () => {
-            // Only fetch if data is empty or we want to force refresh on mount
-            // For now, we fetch on mount to ensure freshness
             try {
                 log("Fetching Data...");
                 const response = await service.getAll();
                 
                 if (!isMounted) return;
 
-                // Handle both Array response and Paginated response ({ data: [] })
                 const listData = Array.isArray(response) ? response : (response as any)?.data || [];
                 
                 updateStore((state: any) => { 
@@ -79,24 +103,22 @@ export function DataManager<T extends { id: string | number }>({
                     state.loading = false;
                 });
                 
-                log("Data Loaded", listData);
             } catch (error) {
                 console.error("Failed to load data", error);
-                // The ServiceFactory default error handler will show the Toast
             }
         };
 
         loadData();
 
         return () => { isMounted = false; };
-    }, [service]); // Dependency on service ensures correct instance
+    }, [service]);
 
 
-    // Check Image Inputs
     const isImageInputExists = config.form?.fields?.some((field: any) => field.type === 'image');
 
+
     // =========================================================================
-    // 3. CRUD HANDLERS
+    // 4. CRUD HANDLERS
     // =========================================================================
 
     const handleCreate = async (values: any) => {
@@ -106,14 +128,10 @@ export function DataManager<T extends { id: string | number }>({
             const res = await service.create(values, options);
             if (res) {
                 toast.success(`${config.title} created successfully`);
-                
-                // Optimistic Update: Add to top of list
                 updateStore((state: any) => { state.list.unshift(res); });
-                
                 setIsCreating(false);
             }
         } catch (e) {
-            // Error handled by ServiceFactory
             log("Create Error", e);
         }
     };
@@ -123,17 +141,15 @@ export function DataManager<T extends { id: string | number }>({
         log("Updating Item", selectedId, values);
         
         try {
-            const res = await service.update(selectedId, values);
+            const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+            const res = await service.update(selectedId, values, options);
             if (res) {
                 toast.success(`${config.title} updated successfully`);
-                
-                // Optimistic Update: Replace item in list
                 updateStore((state: any) => {
                     const idx = state.list.findIndex((i: T) => i.id === selectedId);
                     if (idx !== -1) state.list[idx] = res;
                 });
-                
-                setSelectedId(null); // Close panel/modal on success
+                setSelectedId(null); 
             }
         } catch (e) {
             log("Update Error", e);
@@ -141,19 +157,20 @@ export function DataManager<T extends { id: string | number }>({
     };
 
     const handleDelete = async (id: string | number) => {
-        if(!window.confirm("Are you sure you want to delete this item?")) return;
+        // Await the custom confirmation dialog
+        const isConfirmed = await requestConfirmation("Are you sure you want to delete this item? This action cannot be undone.");
+        
+        if (!isConfirmed) return;
         
         log("Deleting Item", id);
         try {
             await service.delete(id);
             toast.success("Item deleted");
             
-            // Optimistic Update: Remove from list
             updateStore((state: any) => {
                 state.list = state.list.filter((i: T) => i.id !== id);
             });
             
-            // Close panel if the deleted item was selected
             if (selectedId === id) {
                 setSelectedId(null);
             }
@@ -168,16 +185,14 @@ export function DataManager<T extends { id: string | number }>({
     };
 
     // =========================================================================
-    // 4. DISPLAY CONFIGURATION
+    // 5. DISPLAY CONFIGURATION
     // =========================================================================
 
-    // Inject "Actions" column if using Table View
     const tableColumns = useMemo(() => {
         if (config.display.type !== 'table') return [];
         
         const baseColumns = [...config.display.columns];
         
-        // Add Action Column
         baseColumns.push({
             id: 'actions',
             header: 'Actions',
@@ -188,7 +203,7 @@ export function DataManager<T extends { id: string | number }>({
                         variant="ghost" 
                         className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
                         onClick={(e) => {
-                            e.stopPropagation(); // Prevent row click
+                            e.stopPropagation();
                             setIsCreating(false);
                             setSelectedId(row.original.id);
                         }}
@@ -213,16 +228,12 @@ export function DataManager<T extends { id: string | number }>({
         return baseColumns;
     }, [config.display.columns, selectedId]);
 
-    // Wrapper for List/Grid item rendering to inject actions
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
         
         return (
             <div className="group relative">
-                {/* Render the user's custom component */}
                 {config.display.renderItem(item)}
-                
-                {/* Overlay Actions (Visible on Hover for Grid/List) */}
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border">
                     <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setSelectedId(item.id)}>
                         <Pencil className="h-3 w-3" />
@@ -236,14 +247,14 @@ export function DataManager<T extends { id: string | number }>({
     };
 
     // =========================================================================
-    // 5. RENDER
+    // 6. RENDER
     // =========================================================================
 
     return (
-        <div className="w-full flex flex-col overflow-hidden  bg-sidebar rounded-2xl">
+        <div className="w-full flex flex-col overflow-hidden bg-sidebar rounded-2xl relative">
             
             {/* --- HEADER --- */}
-            <div className="flex-none p-4 md:p-6 border-b  flex justify-between items-start md:items-center">
+            <div className="flex-none p-4 md:p-6 border-b flex justify-between items-start md:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
@@ -257,19 +268,18 @@ export function DataManager<T extends { id: string | number }>({
                 )}
             </div>
 
-            {/* --- BODY (Layout Manager) --- */}
+            {/* --- BODY --- */}
             <div className="flex-1 overflow-hidden p-4 md:p-6">
                 <LayoutManager
                     type={config.layout}
+                    modalSize={config.modalSize} 
                     isDetailsOpen={isPanelOpen}
                     onCloseDetails={handleClose}
                     title={isCreating ? `Create ${config.title || 'Item'}` : `Edit ${config.title || 'Item'}`}
-                    
-                    // --- RIGHT PANEL / MODAL CONTENT (FORM) ---
                     detailsPanel={
                         <GenericForm 
                             fields={config.form.fields}
-                            initialValues={isCreating ? {} : activeItem}
+                            initialValues={isCreating ? {} : (activeItem ?? {})} 
                             onSubmit={isCreating ? handleCreate : handleUpdate}
                             submitLabel={isCreating ? "Create" : "Save Changes"}
                             liveUpdate={config.form.liveUpdate}
@@ -277,19 +287,57 @@ export function DataManager<T extends { id: string | number }>({
                         />
                     }
                 >
-                    {/* --- LEFT PANEL / MAIN CONTENT (DISPLAY) --- */}
                     <DisplayEngine 
                         type={config.display.type === 'grid' ? 'grid' : 
                               config.display.type === 'list' ? 'list' : 'table'}
-                        
                         data={data}
                         loading={loading}
                         columns={tableColumns}
                         searchKeys={config.display.searchKeys}
                         renderItem={renderWrapper}
-                        className="h-full overflow-auto" // Ensure table scrolls independently
+                        className="h-full overflow-auto"
                     />
                 </LayoutManager>
+            </div>
+
+            {/* --- CONFIRMATION DIALOG --- */}
+            <ConfirmationDialog 
+                isOpen={confirmState.isOpen}
+                message={confirmState.message}
+                onConfirm={onConfirmDialog}
+                onCancel={onCancelDialog}
+            />
+        </div>
+    );
+}
+
+// =========================================================================
+// HELPER COMPONENT
+// =========================================================================
+
+interface ConfirmationDialogProps {
+    isOpen: boolean;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+export function ConfirmationDialog({ isOpen, message, onConfirm, onCancel }: ConfirmationDialogProps) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-background text-foreground border p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+                <h3 className="text-lg font-semibold mb-2">Confirm Action</h3>
+                <p className="text-muted-foreground text-sm mb-6">{message}</p>
+                <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={onCancel}>
+                        Cancel
+                    </Button>
+                    <Button variant="destructive" onClick={onConfirm}>
+                        Confirm
+                    </Button>
+                </div>
             </div>
         </div>
     );
