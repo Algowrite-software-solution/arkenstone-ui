@@ -20,10 +20,19 @@ export interface InputOption {
 
 export interface FieldConfig {
     name: string; // Key in the data object
+    
+    // loading current data for update state from custom response pattern
+    currentDataLoadConfig?: {
+        useObjectKey?: string;
+        transform?: (data: any) => any;
+    }
+
+
     label: string;
     type: InputType;
     placeholder?: string;
     defaultValue?: any;
+    onChange?: (value: any) => void;
     
     // For Selects/Radios
     options?: InputOption[];
