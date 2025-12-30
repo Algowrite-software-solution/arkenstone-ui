@@ -278,6 +278,7 @@ export function DataManager<T extends { id: string | number }>({
                     title={isCreating ? `Create ${config.title || 'Item'}` : `Edit ${config.title || 'Item'}`}
                     detailsPanel={
                         <GenericForm 
+                            isCreating={isCreating}
                             fields={config.form.fields}
                             initialValues={isCreating ? {} : (activeItem ?? {})} 
                             onSubmit={isCreating ? handleCreate : handleUpdate}

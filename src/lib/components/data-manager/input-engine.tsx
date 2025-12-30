@@ -26,6 +26,7 @@ interface GenericFormProps {
   initialValues?: any;
   onSubmit: (values: any) => void;
   isLoading?: boolean;
+  isCreating: boolean;
   submitLabel?: string;
   liveUpdate?: boolean;
   className?: string;
@@ -36,6 +37,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
   initialValues = {},
   onSubmit,
   isLoading,
+  isCreating,
   submitLabel = "Save",
   liveUpdate = false,
   className,
@@ -68,6 +70,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
       }
     });
   }, [fields]);
+
 
   // Validation Logic
   const validateField = (
@@ -155,13 +158,13 @@ export const GenericForm: React.FC<GenericFormProps> = ({
         }
 
         const error = errors[field.name];
-        let val = values[field.name] ?? field.defaultValue ?? "";
+        let fieldValue = values[field.name] ?? field.defaultValue ?? "";
 
-        if (field.currentDataLoadConfig) {
+        if (field.currentDataLoadConfig && !isCreating) {
           if (field.currentDataLoadConfig.useObjectKey) {
-            val = getValue(values, field.currentDataLoadConfig.useObjectKey);
+            fieldValue = getValue(values, field.currentDataLoadConfig.useObjectKey);
           } else if (field.currentDataLoadConfig.transform) {
-            val = field.currentDataLoadConfig.transform(values);
+            fieldValue = field.currentDataLoadConfig.transform(values);
           }
         }
 
@@ -196,7 +199,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {["text", "email", "number", "password"].includes(field.type) && (
               <Input
                 type={field.type}
-                value={val}
+                value={fieldValue}
                 placeholder={field.placeholder}
                 onChange={(e) => {
                   if (field.onChange) {
@@ -217,7 +220,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {/* INPUT: TEXTAREA */}
             {field.type === "textarea" && (
               <Textarea
-                value={val}
+                value={fieldValue}
                 placeholder={field.placeholder}
                 onChange={(e) => {
                   if (field.onChange) {
@@ -237,7 +240,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                   "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   error && "border-destructive"
                 )}
-                value={val?.id ?? null}
+                value={fieldValue?.id ?? null}
                 onChange={(e) => {
                   if (field.onChange) {
                     field.onChange(e);
@@ -263,7 +266,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {field.type === "checkbox" && (
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  checked={!!val}
+                  checked={!!fieldValue}
                   onCheckedChange={(checked) => {
                     if (field.onChange) {
                       field.onChange(checked);
@@ -282,7 +285,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {field.type === "date" && (
               <div className="flex items-center space-x-2">
                 <DatePicker
-                  value={val as Date | undefined}
+                  value={fieldValue as Date | undefined}
                   onChange={(date) => {
                     if (field.onChange) {
                       field.onChange(date);
@@ -300,7 +303,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {field.type === "custom" &&
               field.renderCustom &&
               field.renderCustom({
-                value: val,
+                value: fieldValue,
                 onChange: (v) => handleChange(field.name, v),
                 error,
               })}
@@ -308,11 +311,13 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             {/* INPUT: IMAGE (Simplified for brevity - Add Drag/Drop here as needed) */}
             {field.type === "image" && (
               <div className="border border-dashed p-4 rounded-md text-center">
-                {val ? (
+                {fieldValue ? (
                   <div className="relative w-full h-32 bg-gray-100 mb-2 rounded-md overflow-hidden">
                     <img
                       src={
-                        typeof val === "string" ? val : URL.createObjectURL(val)
+                        typeof fieldValue === "string"
+                          ? fieldValue
+                          : URL.createObjectURL(fieldValue)
                       }
                       alt="preview"
                       className="object-contain h-full w-full"
