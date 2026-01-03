@@ -81,6 +81,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     if (!rules) return null;
     if (
       rules.required &&
+      isCreating &&
       (value === "" || value === null || value === undefined)
     )
       return rules.message || "Required";
@@ -166,6 +167,8 @@ export const GenericForm: React.FC<GenericFormProps> = ({
           } else if (field.currentDataLoadConfig.transform) {
             fieldValue = field.currentDataLoadConfig.transform(values);
           }
+
+          console.log("fieldValue fresh",values);
         }
 
         // test
@@ -182,6 +185,8 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             );
           }
         }
+
+        console.log("fieldValue",fieldValue);
 
         return (
           <div
@@ -240,7 +245,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                   "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   error && "border-destructive"
                 )}
-                value={fieldValue?.id ?? null}
+                value={fieldValue ?? null}
                 onChange={(e) => {
                   if (field.onChange) {
                     field.onChange(e);
@@ -249,9 +254,9 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 }}
                 disabled={field.disabled}
               >
-                <option value="" disabled>
-                  Select...
-                </option>
+                {field.defaultOption && <option value={typeof field.defaultOption === "function" ? field.defaultOption().value : field.defaultOption.value} disabled={field.enableDefaultOption ? false :  true}>
+                  {typeof field.defaultOption === "function" ? field.defaultOption().label : field.defaultOption.label}
+                </option>}
                 {(field.options || dynamicOptions[field.name] || []).map(
                   (opt) => (
                     <option key={opt.value} value={opt.value}>

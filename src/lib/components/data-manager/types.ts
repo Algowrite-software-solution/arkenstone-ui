@@ -37,6 +37,8 @@ export interface FieldConfig {
     // For Selects/Radios
     options?: InputOption[];
     fetchOptions?: () => Promise<InputOption[]>; // Dynamic data source
+    defaultOption?: InputOption | (() => InputOption);
+    enableDefaultOption?: boolean;
     
     // For Images
     uploadEndpoint?: string; // If present, uploads immediately. If not, keeps File object.
