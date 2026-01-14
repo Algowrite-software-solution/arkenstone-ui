@@ -138,16 +138,77 @@ export function DataManager<T extends { id: string | number }>({
 
     const handleUpdate = async (values: any) => {
         if (!selectedId) return;
-        log("Updating Item", selectedId, values);
         
+        let payload = values;
+
+        // ---------------------------------------------------------------------
+        // LOGIC: PARTIAL UPDATE VS FULL UPDATE
+        // ---------------------------------------------------------------------
+        const shouldPartialUpdate = !!config.form.disablePartialUpdate; // #TODO : need to be fixed in final releases to mek it false by default. (remove one !)
+
+        if (shouldPartialUpdate && activeItem) {
+            const dirtyValues: any = {};
+            let hasChanges = false;
+
+            config.form.fields.forEach((field) => {
+                const key = field.name;
+                const newValue = values[key];
+                const oldValue = (activeItem as any)[key];
+
+                // Check for changes (Basic equality)
+                // We check newValue !== undefined so we don't accidentally send nulls for fields not in form
+                if (newValue !== undefined && newValue != oldValue) {
+                    dirtyValues[key] = newValue;
+                    hasChanges = true;
+                }
+            });
+
+            if (!hasChanges) {
+                toast.info("No changes detected.");
+                return;
+            }
+
+            payload = dirtyValues;
+            log("Updating with Partial Payload", payload);
+        } else {
+            log("Updating with Full Payload (Legacy Mode)", payload);
+        }
+
+        // ---------------------------------------------------------------------
+        // API CALL
+        // ---------------------------------------------------------------------
         try {
-            const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-            const res = await service.update(selectedId, values, options);
+            // Check if we need FormData (for images) or JSON
+            let finalData = payload;
+            let options = {};
+
+            if (isImageInputExists) {
+                options = { headers: { 'Content-Type': 'multipart/form-data' } };
+                const formData = new FormData();
+                
+                Object.keys(payload).forEach(key => {
+                    const val = payload[key];
+                    // Append logic
+                    if (val instanceof File) {
+                         formData.append(key, val);
+                    } else if (val !== null && val !== undefined) {
+                         formData.append(key, String(val));
+                    }
+                });
+                finalData = formData;
+            }
+
+            const res = await service.update(selectedId, finalData, options);
+            
             if (res) {
                 toast.success(`${config.title} updated successfully`);
                 updateStore((state: any) => {
                     const idx = state.list.findIndex((i: T) => i.id === selectedId);
-                    if (idx !== -1) state.list[idx] = res;
+                    if (idx !== -1) {
+                        // If partial update, we merge result; if full, we usually replace.
+                        // Best practice: backend returns the full updated object.
+                        state.list[idx] = res; 
+                    }
                 });
                 setSelectedId(null); 
             }

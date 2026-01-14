@@ -93,14 +93,9 @@ export default function EmployeePage() {
                     label: category.name,
                   })));
                 },
-                currentDataLoadConfig: {
-                  transform(data) {
-                    return data.category_id
-                  },
-                },
                 enableDefaultOption: true,
                 defaultOption: {
-                  value: 0,
+                  value: "",
                   label: "Select Category",
                 },
               },

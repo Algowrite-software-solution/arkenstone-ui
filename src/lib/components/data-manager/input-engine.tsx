@@ -55,18 +55,39 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     setErrors({});
   }, [initialValues]);
 
-  // Fetch Dynamic Options for Selects
+  // Fetch Dynamic Options & Auto-Select First Option Logic
   useEffect(() => {
     fields.forEach((field) => {
+      // 1. Handle Dynamic Options
       if (field.type === "select" && field.fetchOptions) {
-        field
-          .fetchOptions()
+        field.fetchOptions()
           .then((opts) => {
             setDynamicOptions((prev) => ({ ...prev, [field.name]: opts }));
+            
+            // Check if we need to auto-select the first value after fetching
+            setValues((prevValues: any) => {
+              const currentValue = prevValues[field.name];
+              // If no value is selected, and we have options, and no "placeholder" (defaultOption) is enabled
+              if ((currentValue === undefined || currentValue === null || currentValue === "") && opts.length > 0 && !field.defaultOption) {
+                 return { ...prevValues, [field.name]: opts[0].value };
+              }
+              return prevValues;
+            });
           })
           .catch((err) =>
             console.error(`Failed to load options for ${field.name}`, err)
           );
+      }
+
+      // 2. Handle Static Options (Auto-select first if empty)
+      if (field.type === 'select' && field.options && field.options.length > 0) {
+         setValues((prevValues: any) => {
+            const currentValue = prevValues[field.name];
+            if ((currentValue === undefined || currentValue === null || currentValue === "") && !field.defaultOption) {
+               return { ...prevValues, [field.name]: field.options![0].value };
+            }
+            return prevValues;
+         });
       }
     });
   }, [fields]);
@@ -159,34 +180,16 @@ export const GenericForm: React.FC<GenericFormProps> = ({
         }
 
         const error = errors[field.name];
-        let fieldValue = values[field.name] ?? field.defaultValue ?? "";
+        let fieldValue = values[field.name] ?? field.defaultValue ?? ""; // normal behavirou for direct key based vaue getting from object
 
+        // uses these when the response is not a regular response or the field keys are different. 
         if (field.currentDataLoadConfig && !isCreating) {
           if (field.currentDataLoadConfig.useObjectKey) {
-            fieldValue = getValue(values, field.currentDataLoadConfig.useObjectKey);
+            fieldValue = getValue(values, field.currentDataLoadConfig.useObjectKey); // complex data retreval
           } else if (field.currentDataLoadConfig.transform) {
-            fieldValue = field.currentDataLoadConfig.transform(values);
-          }
-
-          console.log("fieldValue fresh",values);
-        }
-
-        // test
-        if (field.currentDataLoadConfig) {
-          if (field.currentDataLoadConfig.useObjectKey) {
-            console.log(
-              "Temp Val:",
-              getValue(values, field.currentDataLoadConfig.useObjectKey)
-            );
-          } else if (field.currentDataLoadConfig.transform) {
-            console.log(
-              "Temp Val:",
-              field.currentDataLoadConfig.transform(values)
-            );
+            fieldValue = field.currentDataLoadConfig.transform(values); // transform data retreval from any complex data
           }
         }
-
-        console.log("fieldValue",fieldValue);
 
         return (
           <div
@@ -245,7 +248,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                   "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   error && "border-destructive"
                 )}
-                value={fieldValue ?? null}
+                value={fieldValue ?? ""}
                 onChange={(e) => {
                   if (field.onChange) {
                     field.onChange(e);

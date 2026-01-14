@@ -24,7 +24,9 @@ export interface FieldConfig {
     // loading current data for update state from custom response pattern
     currentDataLoadConfig?: {
         useObjectKey?: string;
-        transform?: (data: any) => any;
+        /** it must return the actual value for the field */
+        transform?: (data: any) => any; 
+        useObjectIdProperty?: boolean;
     }
 
 
@@ -87,6 +89,13 @@ export interface DataManagerConfig<T extends object> {
         submitLabel?: string;
         // If true, form updates live (for settings pages), else waits for save button
         liveUpdate?: boolean; 
+
+        /** 
+         * If true, skips dirty checking and sends all form values on update.
+         * Useful for legacy APIs that expect the full object.
+         * @default false
+         */
+        disablePartialUpdate?: boolean; 
     };
 
     // Developer Settings
