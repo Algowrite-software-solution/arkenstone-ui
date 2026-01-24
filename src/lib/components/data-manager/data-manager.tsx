@@ -341,6 +341,7 @@ export function DataManager<T extends { id: string | number }>({
                         <GenericForm 
                             isCreating={isCreating}
                             fields={config.form.fields}
+                            updateFormValues={config.updateFormValues}
                             initialValues={isCreating ? {} : (activeItem ?? {})} 
                             onSubmit={isCreating ? handleCreate : handleUpdate}
                             submitLabel={isCreating ? "Create" : "Save Changes"}

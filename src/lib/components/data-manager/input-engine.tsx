@@ -27,7 +27,7 @@ interface GenericFormProps {
   updateFormValues?: {
     data: any;
     loadData: boolean;
-  }
+  };
   onSubmit: (values: any) => void;
   isLoading?: boolean;
   isCreating: boolean;
