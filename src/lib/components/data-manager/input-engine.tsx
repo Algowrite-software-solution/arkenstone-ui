@@ -24,6 +24,10 @@ function useDebounce<T>(value: T, delay: number): T {
 interface GenericFormProps {
   fields: FieldConfig[];
   initialValues?: any;
+  updateFormValues?: {
+    data: any;
+    loadData: boolean;
+  }
   onSubmit: (values: any) => void;
   isLoading?: boolean;
   isCreating: boolean;
@@ -35,6 +39,10 @@ interface GenericFormProps {
 export const GenericForm: React.FC<GenericFormProps> = ({
   fields,
   initialValues = {},
+  updateFormValues = {
+    data: {},
+    loadData: false,
+  },
   onSubmit,
   isLoading,
   isCreating,
@@ -48,6 +56,15 @@ export const GenericForm: React.FC<GenericFormProps> = ({
   const [dynamicOptions, setDynamicOptions] = useState<
     Record<string, InputOption[]>
   >({});
+
+
+  // update the form inputs only when the updateFormInputs is manually changed. not when the inital load
+  useEffect(() => {
+    if (updateFormValues.loadData) {
+      // update only the props existing in updateFormValues.data into values
+      setValues((prev: any) => ({ ...prev, ...updateFormValues.data }));
+    }
+  }, [updateFormValues.loadData]);
 
   // Watch for initial value changes (e.g. when an item is selected from list)
   useEffect(() => {
