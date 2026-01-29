@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { DatePicker } from "../ui/date-picker";
+import { MediaInput } from "./media-input";
 
 /**
  * Custom Hook for Debouncing
@@ -57,7 +58,6 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     Record<string, InputOption[]>
   >({});
 
-
   // update the form inputs only when the updateFormInputs is manually changed. not when the inital load
   useEffect(() => {
     if (updateFormValues.loadData) {
@@ -68,53 +68,91 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
   // Watch for initial value changes (e.g. when an item is selected from list)
   useEffect(() => {
-    setValues(initialValues || {});
+    const nextValues = { ...(initialValues || {}) };
+
+    // Pre-populate fields based on configuration (Flattening logic)
+    if (!isCreating) {
+      fields.forEach(field => {
+        if (field.currentDataLoadConfig) {
+          let val = undefined;
+          if (field.currentDataLoadConfig.useObjectKey) {
+            val = getValue(nextValues, field.currentDataLoadConfig.useObjectKey);
+          } else if (field.currentDataLoadConfig.transform) {
+            val = field.currentDataLoadConfig.transform(nextValues);
+          }
+
+          if (val !== undefined) {
+            nextValues[field.name] = val;
+          }
+        }
+      });
+    }
+
+    setValues(nextValues);
     setErrors({});
-  }, [initialValues]);
+  }, [initialValues, isCreating]);
+  // removed 'fields' from dependency array to prevent loops if fields is not memoized, 
+  // though generally it should be included if dynamic. 
+  // Assuming fields structure doesn't change drastically mid-editing without isCreating/initialValues change.
 
   // Fetch Dynamic Options & Auto-Select First Option Logic
   useEffect(() => {
     fields.forEach((field) => {
       // 1. Handle Dynamic Options
       if (field.type === "select" && field.fetchOptions) {
-        field.fetchOptions()
+        field
+          .fetchOptions()
           .then((opts) => {
             setDynamicOptions((prev) => ({ ...prev, [field.name]: opts }));
-            
+
             // Check if we need to auto-select the first value after fetching
             setValues((prevValues: any) => {
               const currentValue = prevValues[field.name];
               // If no value is selected, and we have options, and no "placeholder" (defaultOption) is enabled
-              if ((currentValue === undefined || currentValue === null || currentValue === "") && opts.length > 0 && !field.defaultOption) {
-                 return { ...prevValues, [field.name]: opts[0].value };
+              if (
+                (currentValue === undefined ||
+                  currentValue === null ||
+                  currentValue === "") &&
+                opts.length > 0 &&
+                !field.defaultOption
+              ) {
+                return { ...prevValues, [field.name]: opts[0].value };
               }
               return prevValues;
             });
           })
           .catch((err) =>
-            console.error(`Failed to load options for ${field.name}`, err)
+            console.error(`Failed to load options for ${field.name}`, err),
           );
       }
 
       // 2. Handle Static Options (Auto-select first if empty)
-      if (field.type === 'select' && field.options && field.options.length > 0) {
-         setValues((prevValues: any) => {
-            const currentValue = prevValues[field.name];
-            if ((currentValue === undefined || currentValue === null || currentValue === "") && !field.defaultOption) {
-               return { ...prevValues, [field.name]: field.options![0].value };
-            }
-            return prevValues;
-         });
+      if (
+        field.type === "select" &&
+        field.options &&
+        field.options.length > 0
+      ) {
+        setValues((prevValues: any) => {
+          const currentValue = prevValues[field.name];
+          if (
+            (currentValue === undefined ||
+              currentValue === null ||
+              currentValue === "") &&
+            !field.defaultOption
+          ) {
+            return { ...prevValues, [field.name]: field.options![0].value };
+          }
+          return prevValues;
+        });
       }
     });
   }, [fields]);
-
 
   // Validation Logic
   const validateField = (
     name: string,
     value: any,
-    rules?: any
+    rules?: any,
   ): string | null => {
     if (!rules) return null;
     if (
@@ -163,7 +201,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
       const error = validateField(
         field.name,
         values[field.name],
-        field.validation
+        field.validation,
       );
       if (error) {
         newErrors[field.name] = error;
@@ -199,15 +237,6 @@ export const GenericForm: React.FC<GenericFormProps> = ({
         const error = errors[field.name];
         let fieldValue = values[field.name] ?? field.defaultValue ?? ""; // normal behavirou for direct key based vaue getting from object
 
-        // uses these when the response is not a regular response or the field keys are different. 
-        if (field.currentDataLoadConfig && !isCreating) {
-          if (field.currentDataLoadConfig.useObjectKey) {
-            fieldValue = getValue(values, field.currentDataLoadConfig.useObjectKey); // complex data retreval
-          } else if (field.currentDataLoadConfig.transform) {
-            fieldValue = field.currentDataLoadConfig.transform(values); // transform data retreval from any complex data
-          }
-        }
-
         return (
           <div
             key={field.name}
@@ -234,7 +263,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                     field.name,
                     field.type === "number"
                       ? Number(e.target.value)
-                      : e.target.value
+                      : e.target.value,
                   );
                 }}
                 className={cn(error && "border-destructive")}
@@ -263,7 +292,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
               <select
                 className={cn(
                   "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                  error && "border-destructive"
+                  error && "border-destructive",
                 )}
                 value={fieldValue ?? ""}
                 onChange={(e) => {
@@ -274,15 +303,26 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 }}
                 disabled={field.disabled}
               >
-                {field.defaultOption && <option value={typeof field.defaultOption === "function" ? field.defaultOption().value : field.defaultOption.value} disabled={field.enableDefaultOption ? false :  true}>
-                  {typeof field.defaultOption === "function" ? field.defaultOption().label : field.defaultOption.label}
-                </option>}
+                {field.defaultOption && (
+                  <option
+                    value={
+                      typeof field.defaultOption === "function"
+                        ? field.defaultOption().value
+                        : field.defaultOption.value
+                    }
+                    disabled={field.enableDefaultOption ? false : true}
+                  >
+                    {typeof field.defaultOption === "function"
+                      ? field.defaultOption().label
+                      : field.defaultOption.label}
+                  </option>
+                )}
                 {(field.options || dynamicOptions[field.name] || []).map(
                   (opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
-                  )
+                  ),
                 )}
               </select>
             )}
@@ -333,47 +373,36 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 error,
               })}
 
-            {/* INPUT: IMAGE (Simplified for brevity - Add Drag/Drop here as needed) */}
+            {/* INPUT: IMAGE with Drag & Drop & Multi-support */}
             {field.type === "image" && (
-              <div className="border border-dashed p-4 rounded-md text-center">
-                {fieldValue ? (
-                  <div className="relative w-full h-32 bg-gray-100 mb-2 rounded-md overflow-hidden">
-                    <img
-                      src={
-                        typeof fieldValue === "string"
-                          ? fieldValue
-                          : URL.createObjectURL(fieldValue)
+              <Input
+                className="hidden" // Hidden input for form data if needed, but we mainy use the MediaInput
+                name={field.name}
+              />
+            )}
+            {field.type === "image" && (
+              <MediaInput
+                value={Array.isArray(fieldValue) ? fieldValue : (fieldValue ? [fieldValue] : [])}
+                onChange={(newFiles) => handleChange(field.name, newFiles)}
+                onRemove={(removedItem) => {
+                  // If it's a string (URL), track it as removed
+                  if (typeof removedItem === 'string') {
+                    const removedKey = field.removedImagesField || 'removed_images';
+                    setValues((prev: any) => {
+                      const currentRemoved = prev[removedKey] || [];
+                      // Add only if not already there
+                      if (!currentRemoved.includes(removedItem)) {
+                        return { ...prev, [removedKey]: [...currentRemoved, removedItem] };
                       }
-                      alt="preview"
-                      className="object-contain h-full w-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleChange(field.name, null)}
-                      className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 text-xs"
-                    >
-                      X
-                    </button>
-                  </div>
-                ) : (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (field.onChange) {
-                        field.onChange(e);
-                      }
-
-                      if (file) {
-                        // If uploadEndpoint exists, you would upload here and set URL
-                        // For now we set File object
-                        handleChange(field.name, file);
-                      }
-                    }}
-                  />
-                )}
-              </div>
+                      return prev;
+                    });
+                  }
+                }}
+                maxCount={field.maxCount}
+                maxSize={field.maxSize}
+                accept={field.accept}
+                disabled={field.disabled}
+              />
             )}
 
             {/* VALIDATION MESSAGE */}

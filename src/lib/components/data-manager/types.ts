@@ -53,6 +53,10 @@ export interface FieldConfig {
 
   // For Images
   uploadEndpoint?: string; // If present, uploads immediately. If not, keeps File object.
+  maxCount?: number; // Max number of images allowed
+  maxSize?: number; // Max size in MB
+  accept?: string; // File types to accept
+  removedImagesField?: string; // Key to use for sending removed image URLs/IDs
 
   // Logic
   validation?: ValidationRule;

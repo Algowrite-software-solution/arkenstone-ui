@@ -15,18 +15,18 @@ import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
 
-export function DataManager<T extends { id: string | number }>({ 
-    config 
-}: { 
-    config: DataManagerConfig<T> 
+export function DataManager<T extends { id: string | number }>({
+    config
+}: {
+    config: DataManagerConfig<T>
 }) {
     const { service, devMode } = config;
-    
+
     // =========================================================================
     // 1. STATE MANAGEMENT
     // =========================================================================
-    
-    const { list: data, loading, update: updateStore } = service.useStore(); 
+
+    const { list: data, loading, update: updateStore } = service.useStore();
 
     // Local UI State
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
@@ -44,9 +44,9 @@ export function DataManager<T extends { id: string | number }>({
     });
 
     // Derived State
-    const activeItem = useMemo(() => 
-        selectedId ? data.find((i: T) => i.id === selectedId) : null, 
-    [selectedId, data]);
+    const activeItem = useMemo(() =>
+        selectedId ? data.find((i: T) => i.id === selectedId) : null,
+        [selectedId, data]);
 
     const isPanelOpen = !!selectedId || isCreating;
 
@@ -88,21 +88,21 @@ export function DataManager<T extends { id: string | number }>({
 
     useEffect(() => {
         let isMounted = true;
-        
+
         const loadData = async () => {
             try {
                 log("Fetching Data...");
                 const response = await service.getAll();
-                
+
                 if (!isMounted) return;
 
                 const listData = Array.isArray(response) ? response : (response as any)?.data || [];
-                
-                updateStore((state: any) => { 
-                    state.list = listData; 
+
+                updateStore((state: any) => {
+                    state.list = listData;
                     state.loading = false;
                 });
-                
+
             } catch (error) {
                 console.error("Failed to load data", error);
             }
@@ -125,7 +125,27 @@ export function DataManager<T extends { id: string | number }>({
         log("Creating Item", values);
         try {
             const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-            const res = await service.create(values, options);
+            let finalData = values;
+
+            if (isImageInputExists) {
+                const formData = new FormData();
+                Object.keys(values).forEach(key => {
+                    const val = values[key];
+                    if (Array.isArray(val)) {
+                        val.forEach(item => {
+                            if (item instanceof File) formData.append(`${key}[]`, item);
+                            else if (item !== null && item !== undefined && typeof item !== 'object') formData.append(`${key}[]`, String(item));
+                        });
+                    } else if (val instanceof File) {
+                        formData.append(key, val);
+                    } else if (val !== null && val !== undefined) {
+                        formData.append(key, String(val));
+                    }
+                });
+                finalData = formData;
+            }
+
+            const res = await service.create(finalData, options);
             if (res) {
                 toast.success(`${config.title} created successfully`);
                 updateStore((state: any) => { state.list.unshift(res); });
@@ -138,7 +158,7 @@ export function DataManager<T extends { id: string | number }>({
 
     const handleUpdate = async (values: any) => {
         if (!selectedId) return;
-        
+
         let payload = values;
 
         // ---------------------------------------------------------------------
@@ -185,32 +205,55 @@ export function DataManager<T extends { id: string | number }>({
             if (isImageInputExists) {
                 options = { headers: { 'Content-Type': 'multipart/form-data' } };
                 const formData = new FormData();
-                
+
                 Object.keys(payload).forEach(key => {
                     const val = payload[key];
-                    // Append logic
-                    if (val instanceof File) {
-                         formData.append(key, val);
-                    } else if (val !== null && val !== undefined) {
-                         formData.append(key, String(val));
+
+                    // Handle Arrays (e.g. MediaInput arrays, or removed_images)
+                    if (Array.isArray(val)) {
+                        val.forEach((item) => {
+                            if (item instanceof File) {
+                                // Append new files with array notation if backend expects it, or just key
+                                // Usually frameworks handle "images[]" automatically if same key is used
+                                formData.append(`${key}[]`, item);
+                            } else if (typeof item === 'string') {
+                                // For existing URLs in the main array, we usually DON'T send them back in the file field
+                                // unless the backend expects a mix.
+                                // Typically, we only send NEW files in the file field.
+                                // However, if this is 'removed_images', we send strings.
+                                if (key.includes('removed') || key === config.form.fields.find(f => f.removedImagesField === key)?.removedImagesField) {
+                                    formData.append(`${key}[]`, item);
+                                }
+                            } else if (item !== null && item !== undefined) {
+                                // Other array primitives
+                                formData.append(`${key}[]`, String(item));
+                            }
+                        });
+                    }
+                    // Handle Single File (legacy support)
+                    else if (val instanceof File) {
+                        formData.append(key, val);
+                    }
+                    // Handle Primitives
+                    else if (val !== null && val !== undefined) {
+                        formData.append(key, String(val));
                     }
                 });
                 finalData = formData;
             }
 
             const res = await service.update(selectedId, finalData, options);
-            
+
             if (res) {
                 toast.success(`${config.title} updated successfully`);
                 updateStore((state: any) => {
                     const idx = state.list.findIndex((i: T) => i.id === selectedId);
                     if (idx !== -1) {
-                        // If partial update, we merge result; if full, we usually replace.
-                        // Best practice: backend returns the full updated object.
-                        state.list[idx] = res; 
+                        // Update logic
+                        state.list[idx] = res;
                     }
                 });
-                setSelectedId(null); 
+                setSelectedId(null);
             }
         } catch (e) {
             log("Update Error", e);
@@ -220,18 +263,18 @@ export function DataManager<T extends { id: string | number }>({
     const handleDelete = async (id: string | number) => {
         // Await the custom confirmation dialog
         const isConfirmed = await requestConfirmation("Are you sure you want to delete this item? This action cannot be undone.");
-        
+
         if (!isConfirmed) return;
-        
+
         log("Deleting Item", id);
         try {
             await service.delete(id);
             toast.success("Item deleted");
-            
+
             updateStore((state: any) => {
                 state.list = state.list.filter((i: T) => i.id !== id);
             });
-            
+
             if (selectedId === id) {
                 setSelectedId(null);
             }
@@ -251,17 +294,17 @@ export function DataManager<T extends { id: string | number }>({
 
     const tableColumns = useMemo(() => {
         if (config.display.type !== 'table') return [];
-        
+
         const baseColumns = [...config.display.columns];
-        
+
         baseColumns.push({
             id: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
                 <div className="flex items-center justify-end gap-2">
-                    <Button 
-                        size="icon" 
-                        variant="ghost" 
+                    <Button
+                        size="icon"
+                        variant="ghost"
                         className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
@@ -271,8 +314,8 @@ export function DataManager<T extends { id: string | number }>({
                     >
                         <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button 
-                        size="icon" 
+                    <Button
+                        size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
                         onClick={(e) => {
@@ -291,7 +334,7 @@ export function DataManager<T extends { id: string | number }>({
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
-        
+
         return (
             <div className="group relative">
                 {config.display.renderItem(item)}
@@ -313,17 +356,17 @@ export function DataManager<T extends { id: string | number }>({
 
     return (
         <div className="w-full flex flex-col overflow-hidden bg-sidebar rounded-2xl relative">
-            
+
             {/* --- HEADER --- */}
             <div className="flex-none p-4 md:p-6 border-b flex justify-between items-start md:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
-                
+
                 {!isCreating && (
                     <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
-                        <Plus className="mr-2 h-4 w-4" /> 
+                        <Plus className="mr-2 h-4 w-4" />
                         Add {config.title || 'Item'}
                     </Button>
                 )}
@@ -333,16 +376,16 @@ export function DataManager<T extends { id: string | number }>({
             <div className="flex-1 overflow-hidden p-4 md:p-6">
                 <LayoutManager
                     type={config.layout}
-                    modalSize={config.modalSize} 
+                    modalSize={config.modalSize}
                     isDetailsOpen={isPanelOpen}
                     onCloseDetails={handleClose}
                     title={isCreating ? `Create ${config.title || 'Item'}` : `Edit ${config.title || 'Item'}`}
                     detailsPanel={
-                        <GenericForm 
+                        <GenericForm
                             isCreating={isCreating}
                             fields={config.form.fields}
                             updateFormValues={config.updateFormValues}
-                            initialValues={isCreating ? {} : (activeItem ?? {})} 
+                            initialValues={isCreating ? {} : (activeItem ?? {})}
                             onSubmit={isCreating ? handleCreate : handleUpdate}
                             submitLabel={isCreating ? "Create" : "Save Changes"}
                             liveUpdate={config.form.liveUpdate}
@@ -350,9 +393,9 @@ export function DataManager<T extends { id: string | number }>({
                         />
                     }
                 >
-                    <DisplayEngine 
-                        type={config.display.type === 'grid' ? 'grid' : 
-                              config.display.type === 'list' ? 'list' : 'table'}
+                    <DisplayEngine
+                        type={config.display.type === 'grid' ? 'grid' :
+                            config.display.type === 'list' ? 'list' : 'table'}
                         data={data}
                         loading={loading}
                         columns={tableColumns}
@@ -364,7 +407,7 @@ export function DataManager<T extends { id: string | number }>({
             </div>
 
             {/* --- CONFIRMATION DIALOG --- */}
-            <ConfirmationDialog 
+            <ConfirmationDialog
                 isOpen={confirmState.isOpen}
                 message={confirmState.message}
                 onConfirm={onConfirmDialog}
