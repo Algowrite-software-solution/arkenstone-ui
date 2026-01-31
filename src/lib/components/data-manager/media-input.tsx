@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { X, Upload, File as FileIcon, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface MediaInputProps {
     value?: (File | string)[];
@@ -13,6 +14,10 @@ interface MediaInputProps {
     accept?: string;
     disabled?: boolean;
     className?: string;
+    previewOptions?: {
+        key: string;
+        transform?: (file: any) => any;
+    };
 }
 
 export const MediaInput: React.FC<MediaInputProps> = ({
@@ -24,16 +29,29 @@ export const MediaInput: React.FC<MediaInputProps> = ({
     accept = "image/*",
     disabled = false,
     className,
+    previewOptions,
 }) => {
     const [previews, setPreviews] = useState<(string | null)[]>([]);
 
     // Generate previews for Files
     useEffect(() => {
-        const newPreviews = value.map((file) => {
-            if (typeof file === "string") return file;
-            if (file instanceof File) return URL.createObjectURL(file);
+
+        const newPreviews = value.map((file: any) => {
+            if (typeof file === "string") {
+                return file
+            };
+            if (file instanceof File) {
+                return URL.createObjectURL(file)
+            };
+            if (file instanceof Object && previewOptions?.transform) {
+                return previewOptions.transform(file);
+            }
+            if (file instanceof Object && previewOptions?.key) {
+                return file?.[previewOptions.key];
+            }
             return null;
         });
+
         setPreviews(newPreviews);
 
         // Cleanup object URLs to avoid memory leaks
@@ -90,7 +108,8 @@ export const MediaInput: React.FC<MediaInputProps> = ({
         const itemToRemove = value[index];
         const newValue = [...value];
         newValue.splice(index, 1);
-        onChange(newValue);
+        const imageFiles = newValue.filter(f => !(typeof f === 'string'));
+        onChange(imageFiles);
         if (onRemove) onRemove(itemToRemove);
     };
 
@@ -136,11 +155,7 @@ export const MediaInput: React.FC<MediaInputProps> = ({
                                 className="relative group aspect-square rounded-lg border bg-background overflow-hidden"
                             >
                                 {previewUrl ? (
-                                    <img
-                                        src={previewUrl}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                    />
+                                    <ImageModal image={previewUrl} />
                                 ) : (
                                     <div className="flex items-center justify-center h-full bg-muted">
                                         <ImageIcon className="h-8 w-8 text-muted-foreground" />
@@ -166,5 +181,42 @@ export const MediaInput: React.FC<MediaInputProps> = ({
                 </div>
             )}
         </div>
+    );
+};
+
+
+
+const ImageModal = ({ image }: { image: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <div
+                className="w-full h-full cursor-pointer"
+                onClick={(e) => {
+                    e.stopPropagation(); // Prevent duplicate triggers if inside other clickables
+                    setIsOpen(true);
+                }}
+            >
+                <img
+                    src={image}
+                    alt="Preview"
+                    className="h-full w-full object-cover rounded-lg"
+                />
+            </div>
+
+            <DialogContent className="max-w-screen-lg w-full max-h-[90vh] h-auto p-0 bg-transparent border-none shadow-none flex items-center justify-center">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Image Preview</DialogTitle>
+                </DialogHeader>
+                <div className="relative w-auto h-auto max-w-full max-h-full overflow-hidden rounded-md">
+                    <img
+                        src={image}
+                        alt="Preview"
+                        className="w-auto h-auto max-w-[85vw] max-h-[85vh] object-contain"
+                    />
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 };
