@@ -235,7 +235,12 @@ export const GenericForm: React.FC<GenericFormProps> = ({
         }
 
         const error = errors[field.name];
-        let fieldValue = values[field.name] ?? field.defaultValue ?? ""; // normal behavirou for direct key based vaue getting from object
+        if (field.currentDataLoadConfig && !isCreating) {
+          // Logic moved to initialization, so we just use the value from state
+          // No need to override fieldValue here anymore unless for display transformations not stored in state
+        }
+
+        const fieldValue = values[field.name] ?? field.defaultValue ?? "";
 
         return (
           <div
@@ -398,6 +403,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                     });
                   }
                 }}
+                previewKey={field.previewKey}
                 maxCount={field.maxCount}
                 maxSize={field.maxSize}
                 accept={field.accept}
