@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { DatePicker } from "../ui/date-picker";
 import { MediaInput } from "./media-input";
+import { apiDelete, apiPost } from "@/hooks";
 
 /**
  * Custom Hook for Debouncing
@@ -385,14 +386,18 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 name={field.name}
               />
             )}
+
             {field.type === "image" && (
               <MediaInput
                 value={Array.isArray(fieldValue) ? fieldValue : (fieldValue ? [fieldValue] : [])}
-                onChange={(newFiles) => handleChange(field.name, newFiles)}
+                onChange={(newFiles) => {
+                  handleChange(field.name, newFiles)
+                }}
                 onRemove={(removedItem) => {
+                  const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
+
                   // If it's a string (URL), track it as removed
                   if (typeof removedItem === 'string') {
-                    const removedKey = field.removedImagesField || 'removed_images';
                     setValues((prev: any) => {
                       const currentRemoved = prev[removedKey] || [];
                       // Add only if not already there
@@ -402,8 +407,17 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                       return prev;
                     });
                   }
+
+                  // if remove endpoint is provided, call it
+                  if (field.removeImageOptions?.removeEndpoint && typeof removedItem === 'string') {
+                    apiPost(field.removeImageOptions.removeEndpoint, {
+                      data: {
+                        removedKey: removedItem
+                      }
+                    });
+                  }
                 }}
-                previewKey={field.previewKey}
+                previewOptions={field.previewOptions}
                 maxCount={field.maxCount}
                 maxSize={field.maxSize}
                 accept={field.accept}

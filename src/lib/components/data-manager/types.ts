@@ -56,7 +56,12 @@ export interface FieldConfig {
   maxCount?: number; // Max number of images allowed
   maxSize?: number; // Max size in MB
   accept?: string; // File types to accept
-  removedImagesField?: string; // Key to use for sending removed image URLs/IDs
+
+  removeImageOptions?: {
+    removedImagesField?: string; // Key to use for sending removed image URLs/IDs
+    removeEndpoint?: string;
+  };
+
   previewOptions?: {
     key?: string;
     transform?: (file: any) => any;

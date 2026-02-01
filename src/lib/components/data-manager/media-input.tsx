@@ -15,7 +15,7 @@ interface MediaInputProps {
     disabled?: boolean;
     className?: string;
     previewOptions?: {
-        key: string;
+        key?: string;
         transform?: (file: any) => any;
     };
 }
@@ -35,6 +35,9 @@ export const MediaInput: React.FC<MediaInputProps> = ({
 
     // Generate previews for Files
     useEffect(() => {
+
+        console.log("verion 1");
+
 
         const newPreviews = value.map((file: any) => {
             if (typeof file === "string") {

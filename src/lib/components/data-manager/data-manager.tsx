@@ -194,6 +194,18 @@ export function DataManager<T extends { id: string | number }>({
             log("Updating with Full Payload (Legacy Mode)", payload);
         }
 
+
+        // on update remove the strings and keep only the Files on the payload of all image inputs
+        config.form.fields.forEach((field) => {
+            if (field.type === 'image') {
+                const key = field.name;
+                const value = payload[key];
+                if (Array.isArray(value)) {
+                    payload[key] = value.filter((item) => item instanceof File);
+                }
+            }
+        });
+
         // ---------------------------------------------------------------------
         // API CALL
         // ---------------------------------------------------------------------
