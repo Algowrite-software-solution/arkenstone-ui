@@ -393,8 +393,9 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 onChange={(newFiles) => {
                   handleChange(field.name, newFiles)
                 }}
-                onRemove={(removedItem) => {
+                onRemove={(removedItem : any) => {
                   const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
+                  console.log(removedItem);
 
                   // If it's a string (URL), track it as removed
                   if (typeof removedItem === 'string') {
@@ -414,6 +415,19 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                       data: {
                         removedKey: removedItem
                       }
+                    });
+                  }
+
+                  // if removed item is a object and if id property exists add id
+                  if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField) {
+                    const item = removedItem[field.removeImageOptions?.removedImagesField];
+                    setValues((prev: any) => {
+                      const currentRemoved = prev[removedKey] || [];
+                      // Add only if not already there
+                      if (!currentRemoved.includes(item)) {
+                        return { ...prev, [removedKey]: [...currentRemoved, item] };
+                      }
+                      return prev;
                     });
                   }
                 }}
