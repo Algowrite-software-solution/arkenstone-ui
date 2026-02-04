@@ -79,6 +79,7 @@ export interface FieldConfig {
     value: any;
     onChange: (v: any) => void;
     error?: string;
+    isCreating?: boolean;
   }) => React.ReactNode;
 }
 

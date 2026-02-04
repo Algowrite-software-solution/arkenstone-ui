@@ -377,6 +377,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 value: fieldValue,
                 onChange: (v) => handleChange(field.name, v),
                 error,
+                isCreating,
               })}
 
             {/* INPUT: IMAGE with Drag & Drop & Multi-support */}
