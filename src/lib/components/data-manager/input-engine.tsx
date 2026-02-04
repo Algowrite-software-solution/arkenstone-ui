@@ -397,38 +397,51 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                   const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
                   console.log(removedItem);
 
-                  // If it's a string (URL), track it as removed
-                  if (typeof removedItem === 'string') {
-                    setValues((prev: any) => {
-                      const currentRemoved = prev[removedKey] || [];
-                      // Add only if not already there
-                      if (!currentRemoved.includes(removedItem)) {
-                        return { ...prev, [removedKey]: [...currentRemoved, removedItem] };
-                      }
-                      return prev;
-                    });
-                  }
+                  // if remove endpoint is provided, call it for both string and object scenarios
+                  if (field.removeImageOptions?.removeEndpoint) {
+                    let itemToRemove;
+                    
+                    if (typeof removedItem === 'string') {
+                      itemToRemove = removedItem;
+                    } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
+                      itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
+                    }
+                    
+                    if (itemToRemove) {
+                      apiPost(field.removeImageOptions.removeEndpoint, {
+                        data: {
+                          [removedKey]: itemToRemove
+                        }
+                      });
+                    }
+                  } else {
+                    // Only update setValues if the endpoint does not exist
+                    
+                    // If it's a string (URL), track it as removed
+                    if (typeof removedItem === 'string') {
+                      setValues((prev: any) => {
+                        const currentRemoved = prev[removedKey] || [];
+                        // Add only if not already there
+                        if (!currentRemoved.includes(removedItem)) {
+                          return { ...prev, [removedKey]: [...currentRemoved, removedItem] };
+                        }
+                        return prev;
+                      });
+                    }
 
-                  // if remove endpoint is provided, call it
-                  if (field.removeImageOptions?.removeEndpoint && typeof removedItem === 'string') {
-                    apiPost(field.removeImageOptions.removeEndpoint, {
-                      data: {
-                        removedKey: removedItem
-                      }
-                    });
-                  }
-
-                  // if removed item is a object and if id property exists add id
-                  if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField) {
-                    const item = removedItem[field.removeImageOptions?.removedImagesField];
-                    setValues((prev: any) => {
-                      const currentRemoved = prev[removedKey] || [];
-                      // Add only if not already there
-                      if (!currentRemoved.includes(item)) {
-                        return { ...prev, [removedKey]: [...currentRemoved, item] };
-                      }
-                      return prev;
-                    });
+                    // if removed item is a object and if id property exists add id
+                    if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField && field.removeImageOptions?.removedImagesKey) {
+                      const item = removedItem[field.removeImageOptions?.removedImagesKey];
+                      console.log(item);
+                      setValues((prev: any) => {
+                        const currentRemoved = prev[removedKey] || [];
+                        // Add only if not already there
+                        if (!currentRemoved.includes(item)) {
+                          return { ...prev, [removedKey]: [...currentRemoved, item] };
+                        }
+                        return prev;
+                      });
+                    }
                   }
                 }}
                 previewOptions={field.previewOptions}

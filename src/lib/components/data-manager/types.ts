@@ -59,6 +59,7 @@ export interface FieldConfig {
 
   removeImageOptions?: {
     removedImagesField?: string; // Key to use for sending removed image URLs/IDs
+    removedImagesKey?: string; // Key to use for sending removed image URLs/IDs
     removeEndpoint?: string;
   };
 
