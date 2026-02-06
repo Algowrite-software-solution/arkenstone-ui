@@ -399,12 +399,16 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
                     if (typeof removedItem === 'string') {
                       itemToRemove = removedItem;
+                      console.log("removed item is a string");
+
                       apiPost(`${field.removeImageOptions.removeEndpoint}`, { data: { [removedKey]: itemToRemove } }); // for strings  uses Post method based request
                     } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
                       itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
+                      console.log("removed item is a object");
+
                       apiDelete(`${field.removeImageOptions.removeEndpoint}/${itemToRemove}`, {}); // Uses standard DELETE Method endpoints for object ID based remove
                     }
-
+                    return;
                   } else {
                     // Only update setValues if the endpoint does not exist
 
@@ -423,7 +427,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                     // if removed item is a object and if id property exists add id
                     if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField && field.removeImageOptions?.removedImagesKey) {
                       const item = removedItem[field.removeImageOptions?.removedImagesKey];
-                      console.log(item);
+                      console.log("item", item);
                       setValues((prev: any) => {
                         const currentRemoved = prev[removedKey] || [];
                         // Add only if not already there
