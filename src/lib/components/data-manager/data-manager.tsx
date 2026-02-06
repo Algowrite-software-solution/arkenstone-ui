@@ -159,6 +159,7 @@ export function DataManager<T extends { id: string | number }>({
     const handleUpdate = async (values: any) => {
         if (!selectedId) return;
 
+        log("Updating Item 123", values);
         let payload = values;
 
         // ---------------------------------------------------------------------
@@ -195,6 +196,7 @@ export function DataManager<T extends { id: string | number }>({
         }
 
 
+        // #TODO : need to be fixed in final releases. the image input should be Images
         // on update remove the strings and keep only the Files on the payload of all image inputs
         config.form.fields.forEach((field) => {
             if (field.type === 'image') {
@@ -233,7 +235,7 @@ export function DataManager<T extends { id: string | number }>({
                                 // unless the backend expects a mix.
                                 // Typically, we only send NEW files in the file field.
                                 // However, if this is 'removed_images', we send strings.
-                                if (key.includes('removed') || key === config.form.fields.find(f => f.removedImagesField === key)?.removedImagesField) {
+                                if (key.includes('removed') || key === config.form.fields.find(f => f.removeImageOptions?.removedImagesField === key)?.removeImageOptions?.removedImagesField) {
                                     formData.append(`${key}[]`, item);
                                 }
                             } else if (item !== null && item !== undefined) {

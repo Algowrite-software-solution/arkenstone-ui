@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { DatePicker } from "../ui/date-picker";
 import { MediaInput } from "./media-input";
+import { SingleMediaInput } from "./single-media-input";
 import { apiDelete, apiPost } from "@/hooks";
 
 /**
@@ -381,12 +382,6 @@ export const GenericForm: React.FC<GenericFormProps> = ({
               })}
 
             {/* INPUT: IMAGE with Drag & Drop & Multi-support */}
-            {field.type === "image" && (
-              <Input
-                className="hidden" // Hidden input for form data if needed, but we mainy use the MediaInput
-                name={field.name}
-              />
-            )}
 
             {field.type === "image" && (
               <MediaInput
@@ -394,30 +389,25 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 onChange={(newFiles) => {
                   handleChange(field.name, newFiles)
                 }}
-                onRemove={(removedItem : any) => {
+                onRemove={(removedItem: any) => {
                   const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
                   console.log(removedItem);
 
                   // if remove endpoint is provided, call it for both string and object scenarios
                   if (field.removeImageOptions?.removeEndpoint) {
                     let itemToRemove;
-                    
+
                     if (typeof removedItem === 'string') {
                       itemToRemove = removedItem;
+                      apiPost(`${field.removeImageOptions.removeEndpoint}`, { data: { [removedKey]: itemToRemove } }); // for strings  uses Post method based request
                     } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
                       itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
+                      apiDelete(`${field.removeImageOptions.removeEndpoint}/${itemToRemove}`, {}); // Uses standard DELETE Method endpoints for object ID based remove
                     }
-                    
-                    if (itemToRemove) {
-                      apiPost(field.removeImageOptions.removeEndpoint, {
-                        data: {
-                          [removedKey]: itemToRemove
-                        }
-                      });
-                    }
+
                   } else {
                     // Only update setValues if the endpoint does not exist
-                    
+
                     // If it's a string (URL), track it as removed
                     if (typeof removedItem === 'string') {
                       setValues((prev: any) => {
@@ -450,6 +440,18 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 maxSize={field.maxSize}
                 accept={field.accept}
                 disabled={field.disabled}
+              />
+            )}
+
+            {/* INPUT: SINGLE IMAGE */}
+            {field.type === "single_image" && (
+              <SingleMediaInput
+                value={fieldValue}
+                onChange={(file) => handleChange(field.name, file)}
+                maxSize={field.maxSize}
+                accept={field.accept}
+                disabled={field.disabled}
+                previewOptions={field.previewOptions}
               />
             )}
 

@@ -11,6 +11,7 @@ export type InputType =
   | "select"
   | "checkbox"
   | "date"
+  | "single_image"
   | "image"
   | "custom";
 
@@ -61,6 +62,7 @@ export interface FieldConfig {
     removedImagesField?: string; // Key to use for sending removed image URLs/IDs
     removedImagesKey?: string; // Key to use for sending removed image URLs/IDs
     removeEndpoint?: string;
+    useParams?: boolean;
   };
 
   previewOptions?: {
