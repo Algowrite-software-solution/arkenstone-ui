@@ -467,7 +467,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
       {!liveUpdate && (
         <div className="pt-4 flex justify-end">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className={isLoading ? "cursor-not-allowed" : "cursor-pointer"}>
             {isLoading ? "Processing..." : submitLabel}
           </Button>
         </div>
