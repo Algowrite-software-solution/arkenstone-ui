@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // --- Internal Modules ---
@@ -31,6 +31,7 @@ export function DataManager<T extends { id: string | number }>({
     // Local UI State
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+    const [isViewing, setIsViewing] = useState(false);
 
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
@@ -92,7 +93,7 @@ export function DataManager<T extends { id: string | number }>({
         const loadData = async () => {
             try {
                 log("Fetching Data...");
-                const response = await service.getAll();
+                const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
 
                 if (!isMounted) return;
 
@@ -124,7 +125,19 @@ export function DataManager<T extends { id: string | number }>({
     const handleCreate = async (values: any) => {
         log("Creating Item", values);
         try {
-            const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+            let options: any = {}
+
+            if (isImageInputExists) {
+                options = {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                }
+            }
+
+            options = {
+                ...options,
+                data: config.serviceConfig?.create?.params ?? {}
+            };
+
             let finalData = values;
 
             if (isImageInputExists) {
@@ -214,10 +227,15 @@ export function DataManager<T extends { id: string | number }>({
         try {
             // Check if we need FormData (for images) or JSON
             let finalData = payload;
-            let options = {};
+            let options: any = {
+                data: config.serviceConfig?.update?.params ?? {}
+            };
 
             if (isImageInputExists) {
-                options = { headers: { 'Content-Type': 'multipart/form-data' } };
+                options = {
+                    ...options,
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                };
                 const formData = new FormData();
 
                 Object.keys(payload).forEach(key => {
@@ -282,7 +300,9 @@ export function DataManager<T extends { id: string | number }>({
 
         log("Deleting Item", id);
         try {
-            await service.delete(id);
+            await service.delete(id, {
+                data: config.serviceConfig?.delete?.params ?? {}
+            });
             toast.success("Item deleted");
 
             updateStore((state: any) => {
@@ -316,29 +336,50 @@ export function DataManager<T extends { id: string | number }>({
             header: 'Actions',
             cell: ({ row }: any) => (
                 <div className="flex items-center justify-end gap-2">
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsCreating(false);
-                            setSelectedId(row.original.id);
-                        }}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(row.original.id);
-                        }}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+
+                    {config.display.actions?.view && (
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsViewing(true);
+                                setSelectedId(row.original.id);
+                            }}
+                        >
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    )}
+
+                    {config.display.actions?.edit && (
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsCreating(false);
+                                setSelectedId(row.original.id);
+                            }}
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                    )}
+
+                    {config.display.actions?.delete && (
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(row.original.id);
+                            }}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             ),
         });
@@ -427,6 +468,13 @@ export function DataManager<T extends { id: string | number }>({
                 onConfirm={onConfirmDialog}
                 onCancel={onCancelDialog}
             />
+
+            <ViewDialog
+                isOpen={isViewing}
+                data={activeItem}
+                onClose={() => setIsViewing(false)}
+                config={config.display?.viewModalConfig}
+            />
         </div>
     );
 }
@@ -456,6 +504,64 @@ export function ConfirmationDialog({ isOpen, message, onConfirm, onCancel }: Con
                     </Button>
                     <Button variant="destructive" onClick={onConfirm}>
                         Confirm
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+// =========================================================================
+// VIEW MODAL
+// =========================================================================
+
+
+
+interface ViewDialogProps {
+    isOpen: boolean;
+    data: any;
+    onClose: () => void;
+    config?: {
+        title?: string;
+        description?: string;
+        renderItem?: (item: any) => React.ReactNode;
+    };
+}
+
+export function ViewDialog({ isOpen, data, onClose, config }: ViewDialogProps) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-background text-foreground border p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+                <h3 className="text-lg font-semibold mb-2">{config?.title || 'View Details'}</h3>
+                {config?.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
+                <hr />
+                <div className="flex flex-col space-y-2">
+                    {/* if the data property is a simple object then disply the keys and values in a simple list with lables and values */}
+                    {typeof data === 'object' && data !== null && Object.keys(data).map((key) => (
+                        <div key={key} className="flex flex-col space-y-2">
+                            <p className="text-muted-foreground text-sm">{key}</p>
+                            <p>{data[key]}</p>
+                        </div>
+                    ))}
+
+                    {typeof data === 'string' && (
+                        <div className="flex flex-col space-y-2">
+                            <p className="text-muted-foreground text-sm">Data</p>
+                            <p>{data}</p>
+                        </div>
+                    )}
+
+                    {/* if the config.renderItem is provided then use it to render the data */}
+                    {config?.renderItem && config.renderItem(data)}
+
+                </div>
+                <hr />
+                <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={onClose}>
+                        Close
                     </Button>
                 </div>
             </div>
