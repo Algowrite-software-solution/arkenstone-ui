@@ -95,6 +95,23 @@ export interface DataManagerConfig<T extends object> {
 
   // Service Instance
   service: ServiceFactory<T, any, any, any>;
+  serviceConfig?: {
+    getAll?: {
+      params?: Record<string, any>;
+    };
+    getById?: {
+      params?: Record<string, any>;
+    };
+    create?: {
+      params?: Record<string, any>;
+    };
+    update?: {
+      params?: Record<string, any>;
+    };
+    delete?: {
+      params?: Record<string, any>;
+    };
+  };
 
   // Layout
   layout: LayoutType;
@@ -105,8 +122,21 @@ export interface DataManagerConfig<T extends object> {
   display: {
     type: "table" | "list" | "grid";
 
+    viewModalConfig?: {
+      title?: string;
+      description?: string;
+      renderItem?: (item: T) => React.ReactNode;
+    };
+
+    disableCreate?: boolean;
+
     // For Table
     columns: ColumnDef<T>[];
+    actions?: {
+      edit?: boolean;
+      delete?: boolean;
+      view?: boolean;
+    };
     searchKeys?: string[]; // Fields to enable search on
 
     // For List/Grid view

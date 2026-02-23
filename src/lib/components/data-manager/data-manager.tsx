@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // --- Internal Modules ---
@@ -15,12 +15,30 @@ import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog"
+
+
 export function DataManager<T extends { id: string | number }>({
     config
 }: {
     config: DataManagerConfig<T>
 }) {
     const { service, devMode } = config;
+
+    // Action Config
+    const actionConfig = {
+        view: true,
+        edit: true,
+        delete: true,
+        ...config.display.actions
+    };
 
     // =========================================================================
     // 1. STATE MANAGEMENT
@@ -31,6 +49,7 @@ export function DataManager<T extends { id: string | number }>({
     // Local UI State
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+    const [isViewing, setIsViewing] = useState(false);
 
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
@@ -92,7 +111,7 @@ export function DataManager<T extends { id: string | number }>({
         const loadData = async () => {
             try {
                 log("Fetching Data...");
-                const response = await service.getAll();
+                const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
 
                 if (!isMounted) return;
 
@@ -122,9 +141,23 @@ export function DataManager<T extends { id: string | number }>({
     // =========================================================================
 
     const handleCreate = async (values: any) => {
+        if (config.display.disableCreate) return;
+
         log("Creating Item", values);
         try {
-            const options = isImageInputExists ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+            let options: any = {}
+
+            if (isImageInputExists) {
+                options = {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                }
+            }
+
+            options = {
+                ...options,
+                data: config.serviceConfig?.create?.params ?? {}
+            };
+
             let finalData = values;
 
             if (isImageInputExists) {
@@ -214,10 +247,15 @@ export function DataManager<T extends { id: string | number }>({
         try {
             // Check if we need FormData (for images) or JSON
             let finalData = payload;
-            let options = {};
+            let options: any = {
+                data: config.serviceConfig?.update?.params ?? {}
+            };
 
             if (isImageInputExists) {
-                options = { headers: { 'Content-Type': 'multipart/form-data' } };
+                options = {
+                    ...options,
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                };
                 const formData = new FormData();
 
                 Object.keys(payload).forEach(key => {
@@ -282,7 +320,9 @@ export function DataManager<T extends { id: string | number }>({
 
         log("Deleting Item", id);
         try {
-            await service.delete(id);
+            await service.delete(id, {
+                data: config.serviceConfig?.delete?.params ?? {}
+            });
             toast.success("Item deleted");
 
             updateStore((state: any) => {
@@ -311,37 +351,60 @@ export function DataManager<T extends { id: string | number }>({
 
         const baseColumns = [...config.display.columns];
 
-        baseColumns.push({
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }: any) => (
-                <div className="flex items-center justify-end gap-2">
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsCreating(false);
-                            setSelectedId(row.original.id);
-                        }}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(row.original.id);
-                        }}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-            ),
-        });
+        if (actionConfig?.view || actionConfig?.edit || actionConfig?.delete) {
+            baseColumns.push({
+                id: 'actions',
+                header: 'Actions',
+                cell: ({ row }: any) => (
+                    <div className="flex items-center justify-end gap-2">
+
+                        {actionConfig?.view && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsViewing(true);
+                                    setSelectedId(row.original.id);
+                                }}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        {actionConfig?.edit && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsCreating(false);
+                                    setSelectedId(row.original.id);
+                                }}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        {actionConfig?.delete && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(row.original.id);
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
+                ),
+            });
+        }
 
         return baseColumns;
     }, [config.display.columns, selectedId]);
@@ -378,7 +441,7 @@ export function DataManager<T extends { id: string | number }>({
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
 
-                {!isCreating && (
+                {!isCreating && !config.display.disableCreate && (
                     <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add {config.title || 'Item'}
@@ -427,6 +490,13 @@ export function DataManager<T extends { id: string | number }>({
                 onConfirm={onConfirmDialog}
                 onCancel={onCancelDialog}
             />
+
+            <ViewDialog
+                isOpen={isViewing}
+                data={activeItem}
+                onClose={() => setIsViewing(false)}
+                config={config.display?.viewModalConfig}
+            />
         </div>
     );
 }
@@ -461,4 +531,69 @@ export function ConfirmationDialog({ isOpen, message, onConfirm, onCancel }: Con
             </div>
         </div>
     );
+}
+
+
+// =========================================================================
+// VIEW MODAL
+// =========================================================================
+
+
+
+interface ViewDialogProps {
+    isOpen: boolean;
+    data: any;
+    onClose: () => void;
+    config?: {
+        title?: string;
+        description?: string;
+        renderItem?: (item: any) => React.ReactNode;
+    };
+}
+
+export function ViewDialog({ isOpen, data, onClose, config }: ViewDialogProps) {
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl w-full" >
+                <DialogHeader>
+                    <DialogTitle>
+                        {config?.title || "View Details"}
+                    </DialogTitle>
+
+                    {config?.description && (
+                        <DialogDescription>
+                            {config.description}
+                        </DialogDescription>
+                    )}
+                </DialogHeader>
+
+                {/* SCROLLABLE BODY */}
+                <div className="overflow-y-auto pr-2 space-y-4" style={{ maxHeight: '80vh' }}>
+                    {typeof data === "object" && !config?.renderItem &&
+                        data !== null &&
+                        Object.keys(data).map((key) => (
+                            <div key={key} className="flex flex-col space-y-1">
+                                <p className="text-sm text-muted-foreground">{key}</p>
+                                <p>{typeof data[key] !== "object" ? data[key] : null}</p>
+                            </div>
+                        ))}
+
+                    {typeof data === "string" && (
+                        <div className="flex flex-col space-y-1">
+                            <p className="text-sm text-muted-foreground">Data</p>
+                            <p>{data}</p>
+                        </div>
+                    )}
+
+                    {config?.renderItem && config.renderItem(data)}
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 }
