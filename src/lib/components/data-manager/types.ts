@@ -128,6 +128,8 @@ export interface DataManagerConfig<T extends object> {
       renderItem?: (item: T) => React.ReactNode;
     };
 
+    disableCreate?: boolean;
+
     // For Table
     columns: ColumnDef<T>[];
     actions?: {

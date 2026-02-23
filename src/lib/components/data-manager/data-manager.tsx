@@ -15,12 +15,30 @@ import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog"
+
+
 export function DataManager<T extends { id: string | number }>({
     config
 }: {
     config: DataManagerConfig<T>
 }) {
     const { service, devMode } = config;
+
+    // Action Config
+    const actionConfig = {
+        view: true,
+        edit: true,
+        delete: true,
+        ...config.display.actions
+    };
 
     // =========================================================================
     // 1. STATE MANAGEMENT
@@ -123,6 +141,8 @@ export function DataManager<T extends { id: string | number }>({
     // =========================================================================
 
     const handleCreate = async (values: any) => {
+        if (config.display.disableCreate) return;
+
         log("Creating Item", values);
         try {
             let options: any = {}
@@ -331,58 +351,60 @@ export function DataManager<T extends { id: string | number }>({
 
         const baseColumns = [...config.display.columns];
 
-        baseColumns.push({
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }: any) => (
-                <div className="flex items-center justify-end gap-2">
+        if (actionConfig?.view || actionConfig?.edit || actionConfig?.delete) {
+            baseColumns.push({
+                id: 'actions',
+                header: 'Actions',
+                cell: ({ row }: any) => (
+                    <div className="flex items-center justify-end gap-2">
 
-                    {config.display.actions?.view && (
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsViewing(true);
-                                setSelectedId(row.original.id);
-                            }}
-                        >
-                            <Eye className="h-4 w-4" />
-                        </Button>
-                    )}
+                        {actionConfig?.view && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsViewing(true);
+                                    setSelectedId(row.original.id);
+                                }}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        )}
 
-                    {config.display.actions?.edit && (
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsCreating(false);
-                                setSelectedId(row.original.id);
-                            }}
-                        >
-                            <Pencil className="h-4 w-4" />
-                        </Button>
-                    )}
+                        {actionConfig?.edit && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsCreating(false);
+                                    setSelectedId(row.original.id);
+                                }}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        )}
 
-                    {config.display.actions?.delete && (
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(row.original.id);
-                            }}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    )}
-                </div>
-            ),
-        });
+                        {actionConfig?.delete && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(row.original.id);
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
+                ),
+            });
+        }
 
         return baseColumns;
     }, [config.display.columns, selectedId]);
@@ -419,7 +441,7 @@ export function DataManager<T extends { id: string | number }>({
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
 
-                {!isCreating && (
+                {!isCreating && !config.display.disableCreate && (
                     <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add {config.title || 'Item'}
@@ -530,41 +552,48 @@ interface ViewDialogProps {
 }
 
 export function ViewDialog({ isOpen, data, onClose, config }: ViewDialogProps) {
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-background text-foreground border p-6 rounded-lg shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
-                <h3 className="text-lg font-semibold mb-2">{config?.title || 'View Details'}</h3>
-                {config?.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
-                <hr />
-                <div className="flex flex-col space-y-2">
-                    {/* if the data property is a simple object then disply the keys and values in a simple list with lables and values */}
-                    {typeof data === 'object' && data !== null && Object.keys(data).map((key) => (
-                        <div key={key} className="flex flex-col space-y-2">
-                            <p className="text-muted-foreground text-sm">{key}</p>
-                            <p>{data[key]}</p>
-                        </div>
-                    ))}
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl w-full" >
+                <DialogHeader>
+                    <DialogTitle>
+                        {config?.title || "View Details"}
+                    </DialogTitle>
 
-                    {typeof data === 'string' && (
-                        <div className="flex flex-col space-y-2">
-                            <p className="text-muted-foreground text-sm">Data</p>
+                    {config?.description && (
+                        <DialogDescription>
+                            {config.description}
+                        </DialogDescription>
+                    )}
+                </DialogHeader>
+
+                {/* SCROLLABLE BODY */}
+                <div className="overflow-y-auto pr-2 space-y-4" style={{ maxHeight: '80vh' }}>
+                    {typeof data === "object" && !config?.renderItem &&
+                        data !== null &&
+                        Object.keys(data).map((key) => (
+                            <div key={key} className="flex flex-col space-y-1">
+                                <p className="text-sm text-muted-foreground">{key}</p>
+                                <p>{typeof data[key] !== "object" ? data[key] : null}</p>
+                            </div>
+                        ))}
+
+                    {typeof data === "string" && (
+                        <div className="flex flex-col space-y-1">
+                            <p className="text-sm text-muted-foreground">Data</p>
                             <p>{data}</p>
                         </div>
                     )}
 
-                    {/* if the config.renderItem is provided then use it to render the data */}
                     {config?.renderItem && config.renderItem(data)}
-
                 </div>
-                <hr />
-                <div className="flex justify-end space-x-2">
+
+                <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
                         Close
                     </Button>
-                </div>
-            </div>
-        </div>
-    );
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 }
