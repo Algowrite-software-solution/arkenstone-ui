@@ -153,11 +153,6 @@ export function DataManager<T extends { id: string | number }>({
                 }
             }
 
-            options = {
-                ...options,
-                data: config.serviceConfig?.create?.params ?? {}
-            };
-
             let finalData = values;
 
             if (isImageInputExists) {
@@ -247,9 +242,7 @@ export function DataManager<T extends { id: string | number }>({
         try {
             // Check if we need FormData (for images) or JSON
             let finalData = payload;
-            let options: any = {
-                data: config.serviceConfig?.update?.params ?? {}
-            };
+            let options: any = {};
 
             if (isImageInputExists) {
                 options = {
