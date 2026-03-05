@@ -50,6 +50,7 @@ export function DataManager<T extends { id: string | number }>({
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [isViewing, setIsViewing] = useState(false);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
@@ -67,7 +68,11 @@ export function DataManager<T extends { id: string | number }>({
         selectedId ? data.find((i: T) => i.id === selectedId) : null,
         [selectedId, data]);
 
-    const isPanelOpen = !!selectedId || isCreating;
+    useEffect(() => {
+        setIsPanelOpen(!!selectedId || isCreating && (!!selectedId && !isViewing));
+        console.log("Panel open:", !!selectedId || isCreating && (!!selectedId && !isViewing));
+        console.log("Made with Love ❤️");
+    }, [selectedId, isCreating, isViewing]);
 
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
@@ -359,6 +364,7 @@ export function DataManager<T extends { id: string | number }>({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsViewing(true);
+                                    setIsCreating(false);
                                     setSelectedId(row.original.id);
                                 }}
                             >
@@ -374,6 +380,7 @@ export function DataManager<T extends { id: string | number }>({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsCreating(false);
+                                    setIsViewing(false);
                                     setSelectedId(row.original.id);
                                 }}
                             >
