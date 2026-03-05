@@ -50,7 +50,6 @@ export function DataManager<T extends { id: string | number }>({
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [isViewing, setIsViewing] = useState(false);
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
@@ -68,11 +67,7 @@ export function DataManager<T extends { id: string | number }>({
         selectedId ? data.find((i: T) => i.id === selectedId) : null,
         [selectedId, data]);
 
-    useEffect(() => {
-        setIsPanelOpen(!!selectedId || isCreating && (!!selectedId && !isViewing));
-        console.log("Panel open:", !!selectedId || isCreating && (!!selectedId && !isViewing));
-        console.log("Made with Love ❤️");
-    }, [selectedId, isCreating, isViewing]);
+    const isPanelOpen = (!!selectedId || isCreating);
 
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
@@ -338,6 +333,8 @@ export function DataManager<T extends { id: string | number }>({
     const handleClose = () => {
         setSelectedId(null);
         setIsCreating(false);
+        setIsViewing(false);
+        console.log("closed all opened panels!");
     };
 
     // =========================================================================
@@ -364,7 +361,6 @@ export function DataManager<T extends { id: string | number }>({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsViewing(true);
-                                    setIsCreating(false);
                                     setSelectedId(row.original.id);
                                 }}
                             >
@@ -380,7 +376,6 @@ export function DataManager<T extends { id: string | number }>({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsCreating(false);
-                                    setIsViewing(false);
                                     setSelectedId(row.original.id);
                                 }}
                             >
@@ -494,7 +489,7 @@ export function DataManager<T extends { id: string | number }>({
             <ViewDialog
                 isOpen={isViewing}
                 data={activeItem}
-                onClose={() => setIsViewing(false)}
+                handleClose={handleClose}
                 config={config.display?.viewModalConfig}
             />
         </div>
@@ -543,7 +538,7 @@ export function ConfirmationDialog({ isOpen, message, onConfirm, onCancel }: Con
 interface ViewDialogProps {
     isOpen: boolean;
     data: any;
-    onClose: () => void;
+    handleClose: () => void;
     config?: {
         title?: string;
         description?: string;
@@ -551,9 +546,9 @@ interface ViewDialogProps {
     };
 }
 
-export function ViewDialog({ isOpen, data, onClose, config }: ViewDialogProps) {
+export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProps) {
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="max-w-4xl w-full" >
                 <DialogHeader>
                     <DialogTitle>
@@ -589,7 +584,7 @@ export function ViewDialog({ isOpen, data, onClose, config }: ViewDialogProps) {
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
+                    <Button variant="outline" onClick={handleClose}>
                         Close
                     </Button>
                 </DialogFooter>
