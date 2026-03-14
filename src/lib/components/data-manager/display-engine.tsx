@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
@@ -92,8 +92,8 @@ function DataTable<T>({
                 {/* Search Bar Logic */}
                 {(searchComponent?.length ?? 0) > 0 && (
                     <div className={cn("flex flex-col gap-2", searchConfig.placement === 'top' ? "w-full" : "w-full md:flex-row md:items-center")}>
-                         {searchComponent?.map((component) => (
-                            <div key={component.column} className="relative w-full md:max-w-sm">
+                        {searchComponent?.map((component) => (
+                            <div key={component.column} className="relative w-full md:max-w-sm flex justify-center items-center">
                                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder={component.placeholder ?? `Filter ${component.column}...`}
@@ -188,12 +188,12 @@ function DataTable<T>({
 
 // --- 2. The List Component ---
 
-function DataList<T>({ 
-    data, 
-    renderItem 
-}: { 
-    data: T[], 
-    renderItem?: (item: T) => React.ReactNode 
+function DataList<T>({
+    data,
+    renderItem
+}: {
+    data: T[],
+    renderItem?: (item: T) => React.ReactNode
 }) {
     if (!data || data.length === 0) {
         return <div className="p-8 text-center text-muted-foreground border border-dashed rounded-lg">No Items Found</div>;
@@ -216,12 +216,12 @@ function DataList<T>({
 
 // --- 3. The Grid Component ---
 
-function DataGrid<T>({ 
-    data, 
-    renderItem 
-}: { 
-    data: T[], 
-    renderItem?: (item: T) => React.ReactNode 
+function DataGrid<T>({
+    data,
+    renderItem
+}: {
+    data: T[],
+    renderItem?: (item: T) => React.ReactNode
 }) {
     if (!data || data.length === 0) return <div className="p-8 text-center text-muted-foreground">No Items Found</div>;
 
@@ -238,15 +238,15 @@ function DataGrid<T>({
 
 // --- 4. The Single Entity Component ---
 
-function DataEntity<T>({ 
-    data, 
-    config 
-}: { 
-    data: T, 
-    config?: DisplayConfig<T>['entityConfig'] 
+function DataEntity<T>({
+    data,
+    config
+}: {
+    data: T,
+    config?: DisplayConfig<T>['entityConfig']
 }) {
     if (!data) return null;
-    
+
     // Extract Keys
     const keys = Object.keys(data) as Array<keyof T>;
 
@@ -261,7 +261,7 @@ function DataEntity<T>({
                     if (config?.hiddenKeys?.includes(String(key))) return null;
 
                     const value = data[key];
-                    
+
                     return (
                         <div key={String(key)} className="grid grid-cols-3 border-b pb-2 last:border-0">
                             <span className="font-medium text-sm text-muted-foreground capitalize">
@@ -269,14 +269,14 @@ function DataEntity<T>({
                             </span>
                             <div className="col-span-2 text-sm">
                                 {/* Check for Custom Renderer */}
-                                {config?.customRender && config.customRender[key] 
+                                {config?.customRender && config.customRender[key]
                                     ? config.customRender[key]!(value, data)
                                     : (
                                         // Default Rendering
-                                        typeof value === 'object' && value !== null 
+                                        typeof value === 'object' && value !== null
                                             ? <pre className="text-xs bg-muted p-1 rounded">{JSON.stringify(value, null, 2)}</pre>
                                             : String(value)
-                                      )
+                                    )
                                 }
                             </div>
                         </div>
@@ -303,19 +303,19 @@ export const DisplayEngine = <T extends object>({
     if (loading) {
         return (
             <div className="flex h-64 w-full items-center justify-center">
-                 <div className="h-8 w-8 animate-spin p-4 rounded-full border-4 border-primary border-t-transparent"></div>
+                <div className="h-8 w-8 animate-spin p-4 rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
         );
     }
 
     return (
         <div className={cn("w-full transition-all p-4 duration-300 animate-in fade-in", className)}>
-            
+
             {/* TABLE View */}
             {type === 'table' && Array.isArray(data) && columns && (
-                <DataTable 
-                    data={data} 
-                    columns={columns} 
+                <DataTable
+                    data={data}
+                    columns={columns}
                     searchComponent={searchKeys?.map(key => ({ column: key }))}
                 />
             )}
@@ -334,7 +334,7 @@ export const DisplayEngine = <T extends object>({
             {type === 'entity' && !Array.isArray(data) && (
                 <DataEntity data={data} config={entityConfig} />
             )}
-            
+
             {/* Fallback for invalid config */}
             {(!data && !loading) && <div className="text-muted-foreground text-sm italic">No data to display.</div>}
         </div>
