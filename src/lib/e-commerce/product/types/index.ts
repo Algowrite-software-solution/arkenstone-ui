@@ -29,6 +29,8 @@ export interface Category {
   description: string | null;
   children?: Category[];
   products_count?: number;
+  image_url?: string | null;
+  alt_text?: string | null;
   created_at: string;
   updated_at: string;
 }
