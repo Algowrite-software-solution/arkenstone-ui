@@ -11,6 +11,7 @@ export type InputType =
   | "select"
   | "checkbox"
   | "date"
+  | "multiple_images"
   | "single_image"
   | "image"
   | "custom";

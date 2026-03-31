@@ -447,6 +447,71 @@ export const GenericForm: React.FC<GenericFormProps> = ({
               />
             )}
 
+            {field.type === "multiple_images" && (
+              <MediaInput
+                value={Array.isArray(fieldValue) ? fieldValue : (fieldValue ? [fieldValue] : [])}
+                onChange={(newFiles) => {
+                  handleChange(field.name, newFiles)
+                }}
+                onRemove={(removedItem: any) => {
+                  const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
+                  console.log(removedItem);
+
+                  // if remove endpoint is provided, call it for both string and object scenarios
+                  if (field.removeImageOptions?.removeEndpoint) {
+                    let itemToRemove;
+
+                    if (typeof removedItem === 'string') {
+                      itemToRemove = removedItem;
+                      console.log("removed item is a string");
+
+                      apiPost(`${field.removeImageOptions.removeEndpoint}`, { data: { [removedKey]: itemToRemove } }); // for strings (URLS)  uses Post method based request
+                    } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
+                      itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
+                      console.log("removed item is a object");
+
+                      apiDelete(`${field.removeImageOptions.removeEndpoint}/${itemToRemove}`, {}); // Uses standard DELETE Method endpoints for object ID based remove
+                    }
+                    return;
+                  } else {
+                    // Only update setValues if the endpoint does not exist
+
+                    // If it's a string (URL), track it as removed
+                    if (typeof removedItem === 'string') {
+                      setValues((prev: any) => {
+                        const currentRemoved = prev[removedKey] || [];
+                        // Add only if not already there
+                        if (!currentRemoved.includes(removedItem)) {
+                          return { ...prev, [removedKey]: [...currentRemoved, removedItem] };
+                        }
+                        return prev;
+                      });
+                    }
+
+                    // if removed item is a object and if id property exists add id
+                    if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField && field.removeImageOptions?.removedImagesKey) {
+                      const item = removedItem[field.removeImageOptions?.removedImagesKey];
+                      console.log("item", item);
+                      setValues((prev: any) => {
+                        const currentRemoved = prev[removedKey] || [];
+                        // Add only if not already there
+                        if (!currentRemoved.includes(item)) {
+                          return { ...prev, [removedKey]: [...currentRemoved, item] };
+                        }
+                        return prev;
+                      });
+                    }
+                  }
+                }}
+                previewOptions={field.previewOptions}
+                maxCount={field.maxCount}
+                maxSize={field.maxSize}
+                accept={field.accept}
+                disabled={field.disabled}
+              />
+            )}
+
+
             {/* INPUT: SINGLE IMAGE */}
             {field.type === "single_image" && (
               <SingleMediaInput

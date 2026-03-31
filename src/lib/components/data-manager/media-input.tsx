@@ -20,6 +20,21 @@ interface MediaInputProps {
     };
 }
 
+/**
+ * Media input handles the image files inputs.
+ * this offers drag and drop features, max file count limits, file size limits and image preview features
+ * 
+ * @param value - array of a combination of files, urls or objects with image urls (a file or a URL is required to properly preview the existing data)
+ * @param onChange - callback to update the input value
+ * @param onRemove - callback to remove an item from the input value (the fall back will take the same original value as a parameter)
+ * @param maxCount - maximum number of files allowed
+ * @param maxSize - maximum size of each file in MB
+ * @param accept - accepted file types
+ * @param disabled - disable the input
+ * @param className - custom class names
+ * @param previewOptions - options for previewing image data (currently this contain the images data retrival from the orignal image)
+ * @returns 
+ */
 export const MediaInput: React.FC<MediaInputProps> = ({
     value = [],
     onChange,
@@ -31,33 +46,37 @@ export const MediaInput: React.FC<MediaInputProps> = ({
     className,
     previewOptions,
 }) => {
-    const [previews, setPreviews] = useState<(string | null)[]>([]);
+    const [previews, setPreviews] = useState<(string | null)[]>([]); // hold previews in component lifecycle
 
-    // Generate previews for Files
+    // handle previews from the providede value for the input. 
     useEffect(() => {
-
-        console.log("verion 1");
-
-
-        const newPreviews = value.map((file: any) => {
-            if (typeof file === "string") {
-                return file
+        const newPreviews = value.map((imageData: any) => {
+            // When Image Data is a URL use it as it is
+            if (typeof imageData === "string") {
+                return imageData
             };
-            if (file instanceof File) {
-                return URL.createObjectURL(file)
+
+            // When Image Data is a File converts to a data URL
+            if (imageData instanceof File) {
+                return URL.createObjectURL(imageData)
             };
-            if (file instanceof Object && previewOptions?.transform) {
-                return previewOptions.transform(file);
+
+            // When Image Data is an Object of a model, if transform function is provided use it (for complex retrival and modifications)
+            if (imageData instanceof Object && previewOptions?.transform) {
+                return previewOptions.transform(imageData);
             }
-            if (file instanceof Object && previewOptions?.key) {
-                return file?.[previewOptions.key];
+
+            // When Image Data is an Object of a model, if key is provided use it to retrieve value (only 1 level)
+            if (imageData instanceof Object && previewOptions?.key) {
+                return imageData?.[previewOptions.key];
             }
+
             return null;
         });
 
         setPreviews(newPreviews);
 
-        // Cleanup object URLs to avoid memory leaks
+        // Cleanup object URLs to avoid memory leaks (since the files are managed by browser outside the react)
         return () => {
             newPreviews.forEach((url) => {
                 if (url && url.startsWith("blob:")) URL.revokeObjectURL(url);
@@ -65,24 +84,28 @@ export const MediaInput: React.FC<MediaInputProps> = ({
         };
     }, [value]);
 
+    // handle the drop functionality of an image (selecting an image)
     const onDrop = useCallback(
         (acceptedFiles: File[]) => {
-            if (disabled) return;
+            if (disabled) return; // ignore if input is disabled
 
             const currentCount = value.length;
             const remainingSlots = maxCount - currentCount;
 
+            // hard validation on max count
             if (remainingSlots <= 0) {
                 toast.error(`You can only upload up to ${maxCount} images.`);
                 return;
             }
 
-            const filesToAdd = acceptedFiles.slice(0, remainingSlots);
+            const filesToAdd = acceptedFiles.slice(0, remainingSlots); // only select the first few images to fill the remaining solts in FIFO  order.
 
+            // show info if the user tries to upload more images than the remaining slots
             if (filesToAdd.length < acceptedFiles.length) {
                 toast.info(`Only added ${filesToAdd.length} files due to limit.`);
             }
 
+            // validate the size of the files and only select the files in size range.
             const validFiles = filesToAdd.filter(file => {
                 const sizeInMB = file.size / (1024 * 1024);
                 if (sizeInMB > maxSize) {
@@ -93,7 +116,7 @@ export const MediaInput: React.FC<MediaInputProps> = ({
             })
 
             if (validFiles.length > 0) {
-                onChange([...value, ...validFiles]);
+                onChange([...value, ...validFiles]); // update the input with existing values and new values.
             }
         },
         [value, maxCount, maxSize, onChange, disabled],
@@ -106,14 +129,15 @@ export const MediaInput: React.FC<MediaInputProps> = ({
         maxFiles: maxCount,
     });
 
+    // handle the remove functionality of an image
     const handleRemove = (index: number) => {
-        if (disabled) return;
+        if (disabled) return; // ignore if input is disabled
         const itemToRemove = value[index];
         const newValue = [...value];
-        newValue.splice(index, 1);
-        const imageFiles = newValue.filter(f => !(typeof f === 'string'));
-        onChange(imageFiles);
-        if (onRemove) onRemove(itemToRemove);
+        newValue.splice(index, 1); // remove the item from the input value
+        const imageFiles = newValue.filter(f => !(typeof f === 'string')); // only image files are selected as input value.
+        onChange(imageFiles); // update the input current value
+        if (onRemove) onRemove(itemToRemove); // use remove image handler to remove the image (this contains the same format that was passed oringally to the input)
     };
 
     return (
@@ -157,14 +181,7 @@ export const MediaInput: React.FC<MediaInputProps> = ({
                                 key={index}
                                 className="relative group aspect-square rounded-lg border bg-background overflow-hidden"
                             >
-                                {previewUrl ? (
-                                    <ImageModal image={previewUrl} />
-                                ) : (
-                                    <div className="flex items-center justify-center h-full bg-muted">
-                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                                    </div>
-                                )}
-
+                                {/* remove button - used to delete the image item */}
                                 <button
                                     type="button"
                                     onClick={() => handleRemove(index)}
@@ -173,6 +190,15 @@ export const MediaInput: React.FC<MediaInputProps> = ({
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
+
+                                {/* display the image if it was a siple string or blob url */}
+                                {previewUrl ? (
+                                    <ImageModal image={previewUrl} />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full bg-muted">
+                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                )}
                                 {isFile && (
                                     <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] p-1 truncate px-2">
                                         New Upload

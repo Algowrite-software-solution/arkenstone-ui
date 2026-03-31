@@ -6,8 +6,9 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface SingleMediaInputProps {
-    value?: File | string | null;
+    value?: File | string | any;
     onChange: (file: File | null) => void;
+    onRemove?: (removedItem: File | string | any) => void;
     maxSize?: number; // in MB
     accept?: string;
     disabled?: boolean;
@@ -21,6 +22,7 @@ interface SingleMediaInputProps {
 export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
     value,
     onChange,
+    onRemove,
     maxSize = 2,
     accept = "image/*",
     disabled = false,
@@ -32,6 +34,7 @@ export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
 
     // Generate preview
     useEffect(() => {
+        // if the value is empty 
         if (!value) {
             setPreview(null);
             return;
@@ -40,29 +43,30 @@ export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
         let url: string | null = null;
 
         if (typeof value === "string") {
-            url = value;
+            url = value; // if the value is possibly a URL
         } else if (value instanceof File) {
-            url = URL.createObjectURL(value);
+            url = URL.createObjectURL(value); // if the value is a Image File convert it to Data URL
         } else if (value instanceof Object && previewOptions?.transform) {
-            url = previewOptions.transform(value);
+            url = previewOptions.transform(value); // if the value is an Object and has a transform function, we uses that to retrive the URL (when complex retreaval logics are needed)
         } else if (value instanceof Object && previewOptions?.key) {
-            url = (value as any)?.[previewOptions.key];
+            url = (value as any)?.[previewOptions.key]; // if the value is an Object and has a key, we use it to retrive the URL (only useful with 1 level)
         }
 
-        setPreview(url);
+        setPreview(url); // set the previews
 
         return () => {
-            if (url && url.startsWith("blob:")) URL.revokeObjectURL(url);
+            if (url && url.startsWith("blob:")) URL.revokeObjectURL(url); // clear the memory leaks
         };
     }, [value, previewOptions]);
 
+    // handle the drop functionality of an image (selecting an image)
     const onDrop = useCallback(
         (acceptedFiles: File[]) => {
-            if (disabled) return;
+            if (disabled) return; // ignore if input is disabled
 
-            if (acceptedFiles.length === 0) return;
+            if (acceptedFiles.length === 0) return; // ignore if no files are selected
 
-            const file = acceptedFiles[0];
+            const file = acceptedFiles[0]; // select the first file
             const sizeInMB = file.size / (1024 * 1024);
 
             if (sizeInMB > maxSize) {
@@ -70,7 +74,7 @@ export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
                 return;
             }
 
-            onChange(file);
+            onChange(file); // handle value change to set the new file input
         },
         [maxSize, onChange, disabled]
     );
@@ -80,13 +84,16 @@ export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
         accept: accept ? { [accept]: [] } : undefined,
         disabled: disabled,
         maxFiles: 1, // Strict single file
-        multiple: false,
+        multiple: false, // Strict single file
     });
 
+    // handle the remove functionality of an image
     const handleRemove = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (disabled) return;
-        onChange(null);
+        const itemToRemove = value;
+        if (disabled) return; // ignore if the input is disabled
+        onChange(null);  //  set null as the value for the image
+        if (onRemove) onRemove(itemToRemove); // remove handler to remove the elemetns from the parent component
     };
 
     return (
