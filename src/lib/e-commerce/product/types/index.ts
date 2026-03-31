@@ -92,5 +92,5 @@ export interface Product {
   primary_image: ProductImage | null;
   created_at: string;
   updated_at: string;
-  stocks: Stock[] | null;
+  stocks?: Stock[] | null;
 }
