@@ -1,3 +1,5 @@
+import { Stock } from "@/e-commerce/stocks";
+
 export interface Brand {
   id: number;
   name: string;
@@ -90,4 +92,5 @@ export interface Product {
   primary_image: ProductImage | null;
   created_at: string;
   updated_at: string;
+  stocks: Stock[] | null;
 }
