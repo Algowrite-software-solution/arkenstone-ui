@@ -51,6 +51,8 @@ export function DataManager<T extends { id: string | number }>({
     const [isCreating, setIsCreating] = useState(false);
     const [isViewing, setIsViewing] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
         isOpen: boolean;
@@ -143,6 +145,8 @@ export function DataManager<T extends { id: string | number }>({
     const handleCreate = async (values: any) => {
         if (config.display.disableCreate) return;
 
+        setIsLoading(true); // update the button indications and change text
+
         log("Creating Item", values);
         try {
             let options: any = {}
@@ -182,10 +186,14 @@ export function DataManager<T extends { id: string | number }>({
         } catch (e) {
             log("Create Error", e);
         }
+
+        setIsLoading(false);
     };
 
     const handleUpdate = async (values: any) => {
         if (!selectedId) return;
+
+        setIsLoading(true); // update the button indications and change text
 
         log("Updating Item 123", values);
         let payload = values;
@@ -303,6 +311,8 @@ export function DataManager<T extends { id: string | number }>({
         } catch (e) {
             log("Update Error", e);
         }
+
+        setIsLoading(false);
     };
 
     const handleDelete = async (id: string | number) => {
@@ -459,6 +469,7 @@ export function DataManager<T extends { id: string | number }>({
                             updateFormValues={config.updateFormValues}
                             initialValues={isCreating ? {} : (activeItem ?? {})}
                             onSubmit={isCreating ? handleCreate : handleUpdate}
+                            isLoading={isLoading}
                             submitLabel={isCreating ? "Create" : "Save Changes"}
                             liveUpdate={config.form.liveUpdate}
                             className={config.layout === 'split-view' ? "h-full" : ""}
