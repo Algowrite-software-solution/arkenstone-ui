@@ -449,13 +449,16 @@ export function DataManager<T extends { id: string | number }>({
                 {!isCreating && !config.display.disableCreate && (
                     <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add {config.title || 'Item'}
+                        Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
                     </Button>
                 )}
             </div>
 
+            {/* Custom Element Space - Header */}
+            {config.display.layoutSpaces?.header ?? null}
+
             {/* --- BODY --- */}
-            <div className="flex-1 overflow-hidden p-4 md:p-6">
+            <div className={`flex-1 overflow-hidden p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
                 <LayoutManager
                     type={config.layout}
                     modalSize={config.modalSize}
@@ -488,6 +491,9 @@ export function DataManager<T extends { id: string | number }>({
                     />
                 </LayoutManager>
             </div>
+
+            {/* Custom Element Space - Footer */}
+            {config.display.layoutSpaces?.footer ?? null}
 
             {/* --- CONFIRMATION DIALOG --- */}
             <ConfirmationDialog
