@@ -129,6 +129,10 @@ export interface DataManagerConfig<T extends object> {
       renderItem?: (item: T) => React.ReactNode;
     };
 
+    createModalConfig?: {
+      createButtonText?: string;
+    };
+
     disableCreate?: boolean;
 
     // For Table
@@ -139,6 +143,11 @@ export interface DataManagerConfig<T extends object> {
       view?: boolean;
     };
     searchKeys?: string[]; // Fields to enable search on
+
+    layoutSpaces?: {
+      header?: React.ReactNode; // any UI component
+      footer?: React.ReactNode; // any UI component
+    };
 
     // For List/Grid view
     renderItem?: (item: T) => React.ReactNode;
