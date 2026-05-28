@@ -151,6 +151,11 @@ export interface DataManagerConfig<T extends object> {
 
     // For List/Grid view
     renderItem?: (item: T) => React.ReactNode;
+
+    // Pagination Configuration
+    pagination?: {
+      pageSizeOptions?: number[];
+    };
   };
 
   // Input/Form Configuration

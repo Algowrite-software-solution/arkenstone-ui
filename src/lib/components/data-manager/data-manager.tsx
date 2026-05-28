@@ -488,6 +488,7 @@ export function DataManager<T extends { id: string | number }>({
                         searchKeys={config.display.searchKeys}
                         renderItem={renderWrapper}
                         className="h-full overflow-auto"
+                        pagination={config.display.pagination}
                     />
                 </LayoutManager>
             </div>
