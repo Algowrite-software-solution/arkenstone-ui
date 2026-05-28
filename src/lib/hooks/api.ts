@@ -6,7 +6,10 @@ let api: any = null; // Lazy initialization
 
 // set default headers
 export const setDefaultHeaders = (headers: any) => {
-  api.defaults.headers.common = { ...api.defaults.headers.common, ...headers };
+  axios.defaults.headers.common = {
+    ...axios.defaults.headers.common,
+    ...headers,
+  };
 };
 
 export interface ApiOptions {
