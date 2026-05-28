@@ -2,7 +2,12 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useConfigStore } from "@/stores";
 
-let api = null; // Lazy initialization
+let api: any = null; // Lazy initialization
+
+// set default headers
+export const setDefaultHeaders = (headers: any) => {
+  api.defaults.headers.common = { ...api.defaults.headers.common, ...headers };
+};
 
 export interface ApiOptions {
   data?: any;
@@ -23,7 +28,7 @@ export interface ApiOptions {
  */
 const getDisplayErrorMessage = (
   message: string | null,
-  errors: any
+  errors: any,
 ): string => {
   // 1. If message exists, use it immediately (per protocol)
   if (message) return message;
@@ -68,7 +73,7 @@ const getDisplayErrorMessage = (
 const request = async (
   method: string,
   url: string,
-  options: ApiOptions = {}
+  options: ApiOptions = {},
 ) => {
   const {
     data = {},
@@ -84,10 +89,12 @@ const request = async (
 
   // cors headers
   const apiConfig = useConfigStore.getState().api;
-  const corsHeaders = apiConfig?.isSameOrigin ? {} : {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  };
+  const corsHeaders = apiConfig?.isSameOrigin
+    ? {}
+    : {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      };
 
   api = axios.create({
     baseURL: useConfigStore.getState().api?.url ?? "/api/v1",
