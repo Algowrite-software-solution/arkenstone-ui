@@ -69,7 +69,7 @@ export function DataManager<T extends { id: string | number }>({
         selectedId ? data.find((i: T) => i.id === selectedId) : null,
         [selectedId, data]);
 
-    const isPanelOpen = (!!selectedId || isCreating);
+    const isPanelOpen = (!!selectedId || isCreating) && !isViewing;
 
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
