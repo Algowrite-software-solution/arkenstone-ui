@@ -1,21 +1,22 @@
 import { useState } from 'react'
 import './App.css'
-import { ProductCard } from './lib/product/components/product-card/product-card'
-import { ProductCardViewDetails } from './lib/product/components/product-card/components/product-card-view-details'
-import { dummyProducts } from './lib/data/products'
-
+// import { ProductCard } from './lib/product/components/product-card/product-card'
+// import { ProductCardViewDetails } from './lib/product/components/product-card/components/product-card-view-details'
+// import { dummyProducts } from './lib/data/products'
 
 import './lib/css/app.css'
-import { Product } from './lib/product/types'
+// import { Product } from './lib/product/types'
+
+import { TestDataManagerLocal } from './test/test-data-manager-local'
 
 function App() {
-  const handleAddToCart = (product: Product) => {
-    alert(`Added ${product.name} to cart!`);
-  };
+  // const handleAddToCart = (product: Product) => {
+  //   alert(`Added ${product.name} to cart!`);
+  // };
 
-  const handleViewDetails = (product: Product) => {
-    alert(`Viewing details for ${product.name}`);
-  };
+  // const handleViewDetails = (product: Product) => {
+  //   alert(`Viewing details for ${product.name}`);
+  // };
 
   const handleColorSelect = (color: string) => {
     console.log('Selected color:', color);
@@ -23,10 +24,13 @@ function App() {
 
   return (
     <>
-      <div className="app-container">
+      {/* Data Manager Demo */}
+      <TestDataManagerLocal />
+
+      <div className="app-container" style={{ display: 'none' }}>
         <h1>Product Cards</h1>
         <div className="product-cards-grid">
-          {dummyProducts.map((product) => (
+          {/* {dummyProducts.map((product) => (
             <ProductCardViewDetails
               key={product.id}
               product={product}
@@ -47,7 +51,7 @@ function App() {
                 showCategories={true}
               />
             </ProductCardViewDetails>
-          ))}
+          ))} */}
         </div>
       </div>
     </>

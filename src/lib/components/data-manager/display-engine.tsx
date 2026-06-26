@@ -11,7 +11,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import {
@@ -82,6 +82,9 @@ function DataTable<T>({
     const table = useReactTable({
         data,
         columns,
+        defaultColumn: {
+            enableSorting: false,
+        },
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
@@ -158,11 +161,41 @@ function DataTable<T>({
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header, index) => (
-                                        <TableHead key={header.id} className={`bg-secondary text-secondary-foreground ${index === headerGroup.headers.length - 1 ? 'text-end' : ''}`}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    ))}
+                                    {headerGroup.headers.map((header, index) => {
+                                        const canSort = header.column.getCanSort();
+                                        const isSorted = header.column.getIsSorted();
+                                        return (
+                                            <TableHead
+                                                key={header.id}
+                                                className={cn(
+                                                    "bg-secondary text-secondary-foreground",
+                                                    index === headerGroup.headers.length - 1 ? 'text-end' : '',
+                                                    canSort ? 'cursor-pointer select-none hover:bg-secondary/80' : ''
+                                                )}
+                                                onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                                            >
+                                                {header.isPlaceholder ? null : (
+                                                    <div className={cn(
+                                                        "flex items-center gap-1",
+                                                        index === headerGroup.headers.length - 1 ? 'justify-end' : 'justify-start'
+                                                    )}>
+                                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                                        {canSort && (
+                                                            <span>
+                                                                {isSorted === 'asc' ? (
+                                                                    <ArrowUp className="h-4 w-4" />
+                                                                ) : isSorted === 'desc' ? (
+                                                                    <ArrowDown className="h-4 w-4" />
+                                                                ) : (
+                                                                    <ArrowUpDown className="h-4 w-4 opacity-50" />
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </TableHead>
+                                        );
+                                    })}
                                 </TableRow>
                             ))}
                         </TableHeader>
