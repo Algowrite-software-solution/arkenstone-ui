@@ -134,6 +134,18 @@ export interface DataManagerConfig<T extends object> {
     };
 
     disableCreate?: boolean;
+    disableRefresh?: boolean;
+
+    bulkActions?: {
+      enabled?: boolean;
+      identifierKey?: keyof T;
+      actions?: {
+        icon?: React.ReactNode;
+        label: string;
+        onClick: (selectedIds: any[], selectedItems: T[]) => void | Promise<void>;
+        variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+      }[];
+    };
 
     // For Table
     columns: ColumnDef<T>[];

@@ -6,8 +6,9 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // --- Internal Modules ---
 import { DataManagerConfig } from './types';
@@ -52,6 +53,21 @@ export function DataManager<T extends { id: string | number }>({
     const [isViewing, setIsViewing] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
+
+    // Row selection for bulk actions
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+    const selectedIds = useMemo(() => {
+        return Object.keys(rowSelection).filter(key => rowSelection[key]);
+    }, [rowSelection]);
+
+    const selectedItems = useMemo(() => {
+        const idKey = config.display.bulkActions?.identifierKey || 'id';
+        return data.filter((item: T) => {
+            const id = String((item as any)[idKey]);
+            return !!rowSelection[id];
+        });
+    }, [data, rowSelection, config.display.bulkActions?.identifierKey]);
 
     // --- CONFIRMATION DIALOG STATE ---
     const [confirmState, setConfirmState] = useState<{
@@ -144,32 +160,29 @@ export function DataManager<T extends { id: string | number }>({
     // 3. EFFECTS & DATA LOADING
     // =========================================================================
 
+    const loadData = useCallback(async () => {
+        try {
+            log("Fetching Data...");
+            updateStore((state: any) => {
+                state.loading = true;
+            });
+            const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
+            const listData = Array.isArray(response) ? response : (response as any)?.data || [];
+            updateStore((state: any) => {
+                state.list = listData;
+                state.loading = false;
+            });
+        } catch (error) {
+            console.error("Failed to load data", error);
+            updateStore((state: any) => {
+                state.loading = false;
+            });
+        }
+    }, [service, config?.serviceConfig?.getAll?.params, updateStore]);
+
     useEffect(() => {
-        let isMounted = true;
-
-        const loadData = async () => {
-            try {
-                log("Fetching Data...");
-                const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
-
-                if (!isMounted) return;
-
-                const listData = Array.isArray(response) ? response : (response as any)?.data || [];
-
-                updateStore((state: any) => {
-                    state.list = listData;
-                    state.loading = false;
-                });
-
-            } catch (error) {
-                console.error("Failed to load data", error);
-            }
-        };
-
         loadData();
-
-        return () => { isMounted = false; };
-    }, [service]);
+    }, [loadData]);
 
 
     const isImageInputExists = config.form?.fields?.some((field: any) => field.type === 'image');
@@ -388,10 +401,92 @@ export function DataManager<T extends { id: string | number }>({
     // 5. DISPLAY CONFIGURATION
     // =========================================================================
 
+    const bulkActions = useMemo(() => {
+        if (!config.display.bulkActions?.enabled) return [];
+
+        if (config.display.bulkActions.actions) {
+            return config.display.bulkActions.actions;
+        }
+
+        const identifierKey = config.display.bulkActions.identifierKey || 'id';
+
+        return [
+            {
+                label: "Delete Selected",
+                icon: <Trash2 className="h-4 w-4" />,
+                variant: "destructive" as const,
+                onClick: async (selectedIds: any[]) => {
+                    const isConfirmed = await requestConfirmation(
+                        `Are you sure you want to delete the selected ${selectedIds.length} items? This action cannot be undone.`
+                    );
+                    if (!isConfirmed) return;
+
+                    try {
+                        const deletePromise = Promise.all(
+                            selectedIds.map(id => service.delete(id, {
+                                data: config.serviceConfig?.delete?.params ?? {}
+                            }))
+                        );
+                        
+                        toast.promise(deletePromise, {
+                            loading: 'Deleting selected items...',
+                            success: 'Selected items deleted successfully',
+                            error: 'Failed to delete some items',
+                        });
+
+                        await deletePromise;
+
+                        updateStore((state: any) => {
+                            state.list = state.list.filter(
+                                (item: T) => !selectedIds.includes(String((item as any)[identifierKey]))
+                            );
+                        });
+
+                        setRowSelection({});
+                    } catch (e) {
+                        log("Bulk Delete Error", e);
+                    }
+                }
+            }
+        ];
+    }, [
+        config.display.bulkActions,
+        service,
+        config.serviceConfig?.delete?.params,
+        updateStore,
+        requestConfirmation
+    ]);
+
     const tableColumns = useMemo(() => {
         if (config.display.type !== 'table') return [];
 
         const baseColumns = [...config.display.columns];
+
+        if (config.display.bulkActions?.enabled) {
+            baseColumns.unshift({
+                id: 'select',
+                header: ({ table }: any) => (
+                    <input
+                        type="checkbox"
+                        checked={table.getIsAllPageRowsSelected()}
+                        onChange={table.getToggleAllPageRowsSelectedHandler()}
+                        aria-label="Select all"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer translate-y-[2px]"
+                    />
+                ),
+                cell: ({ row }: any) => (
+                    <input
+                        type="checkbox"
+                        checked={row.getIsSelected()}
+                        onChange={row.getToggleSelectedHandler()}
+                        aria-label="Select row"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer translate-y-[2px]"
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            });
+        }
 
         if (actionConfig?.view || actionConfig?.edit || actionConfig?.delete) {
             baseColumns.push({
@@ -449,7 +544,7 @@ export function DataManager<T extends { id: string | number }>({
         }
 
         return baseColumns;
-    }, [config.display.columns, selectedId]);
+    }, [config.display.columns, config.display.bulkActions?.enabled, selectedId]);
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
@@ -483,12 +578,27 @@ export function DataManager<T extends { id: string | number }>({
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
 
-                {!isCreating && !config.display.disableCreate && (
-                    <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
-                    </Button>
-                )}
+                <div className="flex items-center gap-2">
+                    {!config.display.disableRefresh && (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-9 w-9 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={loadData}
+                            disabled={loading}
+                            title="Refresh data"
+                        >
+                            <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                        </Button>
+                    )}
+
+                    {!isCreating && !config.display.disableCreate && (
+                        <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Custom Element Space - Header */}
@@ -496,6 +606,40 @@ export function DataManager<T extends { id: string | number }>({
 
             {/* --- BODY --- */}
             <div className={`flex-1 overflow-hidden p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
+                
+                {/* Bulk Actions Toolbar */}
+                {config.display.bulkActions?.enabled && selectedIds.length > 0 && (
+                    <div className="flex items-center justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg mb-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-primary">
+                                {selectedIds.length} record{selectedIds.length > 1 ? 's' : ''} selected
+                            </span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer h-7 px-2"
+                                onClick={() => setRowSelection({})}
+                            >
+                                Clear selection
+                            </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {bulkActions.map((action, index) => (
+                                <Button
+                                    key={index}
+                                    variant={action.variant || "outline"}
+                                    size="sm"
+                                    onClick={() => action.onClick(selectedIds, selectedItems)}
+                                    className="gap-2 cursor-pointer h-8"
+                                >
+                                    {action.icon}
+                                    {action.label}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <LayoutManager
                     type={config.layout}
                     modalSize={config.modalSize}
@@ -530,6 +674,9 @@ export function DataManager<T extends { id: string | number }>({
                         onPaginationChange={setPaginationState}
                         columnVisibility={columnVisibility}
                         onColumnVisibilityChange={setColumnVisibility}
+                        rowSelection={rowSelection}
+                        onRowSelectionChange={setRowSelection}
+                        bulkActions={config.display.bulkActions}
                     />
                 </LayoutManager>
             </div>

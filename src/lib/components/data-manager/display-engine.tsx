@@ -52,6 +52,13 @@ export interface DisplayConfig<T> {
     onPaginationChange?: OnChangeFn<PaginationState>;
     columnVisibility?: VisibilityState;
     onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
+    rowSelection?: Record<string, boolean>;
+    onRowSelectionChange?: OnChangeFn<any>;
+    bulkActions?: {
+        enabled?: boolean;
+        identifierKey?: keyof T;
+        actions?: any[];
+    };
 }
 
 // --- 1. The Table Component (Adapted from your provided code) ---
@@ -74,6 +81,9 @@ function DataTable<T>({
     onPaginationChange,
     columnVisibility,
     onColumnVisibilityChange,
+    rowSelection,
+    onRowSelectionChange,
+    bulkActions,
 }: {
     data: T[];
     columns: ColumnDef<T>[];
@@ -89,10 +99,22 @@ function DataTable<T>({
     onPaginationChange?: OnChangeFn<PaginationState>;
     columnVisibility?: VisibilityState;
     onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
+    rowSelection?: Record<string, boolean>;
+    onRowSelectionChange?: OnChangeFn<any>;
+    bulkActions?: {
+        enabled?: boolean;
+        identifierKey?: keyof T;
+        actions?: any[];
+    };
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [rowSelection, setRowSelection] = React.useState({});
+    
+    // Fallback internal row selection state if not controlled externally
+    const [internalRowSelection, setInternalRowSelection] = React.useState({});
+
+    const activeRowSelection = rowSelection ?? internalRowSelection;
+    const activeOnRowSelectionChange = onRowSelectionChange ?? setInternalRowSelection;
  
     // Fallback internal column visibility state if not controlled externally
     const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({});
@@ -122,14 +144,18 @@ function DataTable<T>({
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: activeOnColumnVisibilityChange,
-        onRowSelectionChange: setRowSelection,
+        onRowSelectionChange: activeOnRowSelectionChange,
         onPaginationChange: activeOnPaginationChange,
         autoResetPageIndex: false,
+        getRowId: (row: any, index: number) => {
+            const idKey = bulkActions?.identifierKey || 'id';
+            return String(row[idKey] ?? index);
+        },
         state: {
             sorting,
             columnFilters,
             columnVisibility: activeColumnVisibility,
-            rowSelection,
+            rowSelection: activeRowSelection,
             pagination: activePagination,
         },
     });
@@ -418,6 +444,9 @@ export const DisplayEngine = <T extends object>({
     onPaginationChange,
     columnVisibility,
     onColumnVisibilityChange,
+    rowSelection,
+    onRowSelectionChange,
+    bulkActions,
 }: DisplayConfig<T>) => {
 
     if (loading) {
@@ -442,6 +471,9 @@ export const DisplayEngine = <T extends object>({
                     onPaginationChange={onPaginationChange}
                     columnVisibility={columnVisibility}
                     onColumnVisibilityChange={onColumnVisibilityChange}
+                    rowSelection={rowSelection}
+                    onRowSelectionChange={onRowSelectionChange}
+                    bulkActions={bulkActions}
                 />
             )}
 
