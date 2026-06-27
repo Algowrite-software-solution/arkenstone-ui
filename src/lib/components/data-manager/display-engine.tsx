@@ -50,6 +50,8 @@ export interface DisplayConfig<T> {
     };
     paginationState?: PaginationState;
     onPaginationChange?: OnChangeFn<PaginationState>;
+    columnVisibility?: VisibilityState;
+    onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
 }
 
 // --- 1. The Table Component (Adapted from your provided code) ---
@@ -70,6 +72,8 @@ function DataTable<T>({
     pagination,
     paginationState,
     onPaginationChange,
+    columnVisibility,
+    onColumnVisibilityChange,
 }: {
     data: T[];
     columns: ColumnDef<T>[];
@@ -83,11 +87,18 @@ function DataTable<T>({
     };
     paginationState?: PaginationState;
     onPaginationChange?: OnChangeFn<PaginationState>;
+    columnVisibility?: VisibilityState;
+    onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+ 
+    // Fallback internal column visibility state if not controlled externally
+    const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({});
+
+    const activeColumnVisibility = columnVisibility ?? internalColumnVisibility;
+    const activeOnColumnVisibilityChange = onColumnVisibilityChange ?? setInternalColumnVisibility;
  
     // Fallback internal pagination state if not controlled externally
     const [internalPagination, setInternalPagination] = React.useState<PaginationState>({
@@ -110,14 +121,14 @@ function DataTable<T>({
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
+        onColumnVisibilityChange: activeOnColumnVisibilityChange,
         onRowSelectionChange: setRowSelection,
         onPaginationChange: activeOnPaginationChange,
         autoResetPageIndex: false,
         state: {
             sorting,
             columnFilters,
-            columnVisibility,
+            columnVisibility: activeColumnVisibility,
             rowSelection,
             pagination: activePagination,
         },
@@ -405,6 +416,8 @@ export const DisplayEngine = <T extends object>({
     pagination,
     paginationState,
     onPaginationChange,
+    columnVisibility,
+    onColumnVisibilityChange,
 }: DisplayConfig<T>) => {
 
     if (loading) {
@@ -427,6 +440,8 @@ export const DisplayEngine = <T extends object>({
                     pagination={pagination}
                     paginationState={paginationState}
                     onPaginationChange={onPaginationChange}
+                    columnVisibility={columnVisibility}
+                    onColumnVisibilityChange={onColumnVisibilityChange}
                 />
             )}
 

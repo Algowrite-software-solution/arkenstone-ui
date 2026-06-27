@@ -84,6 +84,23 @@ export function DataManager<T extends { id: string | number }>({
         }
     }, [paginationState, config.display.pagination?.persistPagination, service]);
 
+    // Column visibility state (restores from Zustand store if persistence is enabled)
+    const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
+        if (config.display.persistColumnVisibility !== false) {
+            const storeState = service.useStore.getState() as any;
+            if (storeState.columnVisibility) {
+                return storeState.columnVisibility;
+            }
+        }
+        return {};
+    });
+
+    useEffect(() => {
+        if (config.display.persistColumnVisibility !== false) {
+            service.useStore.setState({ columnVisibility });
+        }
+    }, [columnVisibility, config.display.persistColumnVisibility, service]);
+
     // Derived State
     const activeItem = useMemo(() =>
         selectedId ? data.find((i: T) => i.id === selectedId) : null,
@@ -511,6 +528,8 @@ export function DataManager<T extends { id: string | number }>({
                         pagination={config.display.pagination}
                         paginationState={paginationState}
                         onPaginationChange={setPaginationState}
+                        columnVisibility={columnVisibility}
+                        onColumnVisibilityChange={setColumnVisibility}
                     />
                 </LayoutManager>
             </div>
