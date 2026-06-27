@@ -88,10 +88,13 @@ export default function EmployeePage() {
                 validation: { required: true },
                 fetchOptions() {
                   const categories = categoryService.getAll()
-                  return categories.then((res) => res?.data?.map((category : Category ) => ({
-                    value: category.id,
-                    label: category.name,
-                  })));
+                  return categories.then((res) => {
+                    const list = Array.isArray(res) ? res : (res as any)?.data || [];
+                    return list.map((category : Category ) => ({
+                      value: category.id,
+                      label: category.name,
+                    }));
+                  });
                 },
                 enableDefaultOption: true,
                 defaultOption: {

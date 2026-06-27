@@ -137,6 +137,7 @@ export interface DataManagerConfig<T extends object> {
 
     // For Table
     columns: ColumnDef<T>[];
+    persistColumnVisibility?: boolean;
     actions?: {
       edit?: boolean;
       delete?: boolean;
@@ -155,6 +156,7 @@ export interface DataManagerConfig<T extends object> {
     // Pagination Configuration
     pagination?: {
       pageSizeOptions?: number[];
+      persistPagination?: boolean;
     };
   };
 

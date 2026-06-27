@@ -10,6 +10,8 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
+    OnChangeFn,
+    PaginationState,
 } from '@tanstack/react-table';
 import { ChevronDown, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +46,12 @@ export interface DisplayConfig<T> {
     };
     pagination?: {
         pageSizeOptions?: number[];
+        persistPagination?: boolean;
     };
+    paginationState?: PaginationState;
+    onPaginationChange?: OnChangeFn<PaginationState>;
+    columnVisibility?: VisibilityState;
+    onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
 }
 
 // --- 1. The Table Component (Adapted from your provided code) ---
@@ -63,6 +70,10 @@ function DataTable<T>({
     children,
     actionButtons,
     pagination,
+    paginationState,
+    onPaginationChange,
+    columnVisibility,
+    onColumnVisibilityChange,
 }: {
     data: T[];
     columns: ColumnDef<T>[];
@@ -72,12 +83,31 @@ function DataTable<T>({
     actionButtons?: React.ReactNode;
     pagination?: {
         pageSizeOptions?: number[];
+        persistPagination?: boolean;
     };
+    paginationState?: PaginationState;
+    onPaginationChange?: OnChangeFn<PaginationState>;
+    columnVisibility?: VisibilityState;
+    onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+ 
+    // Fallback internal column visibility state if not controlled externally
+    const [internalColumnVisibility, setInternalColumnVisibility] = React.useState<VisibilityState>({});
+
+    const activeColumnVisibility = columnVisibility ?? internalColumnVisibility;
+    const activeOnColumnVisibilityChange = onColumnVisibilityChange ?? setInternalColumnVisibility;
+ 
+    // Fallback internal pagination state if not controlled externally
+    const [internalPagination, setInternalPagination] = React.useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: pagination?.pageSizeOptions?.[0] ?? 10,
+    });
+
+    const activePagination = paginationState ?? internalPagination;
+    const activeOnPaginationChange = onPaginationChange ?? setInternalPagination;
 
     const table = useReactTable({
         data,
@@ -91,15 +121,27 @@ function DataTable<T>({
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
+        onColumnVisibilityChange: activeOnColumnVisibilityChange,
         onRowSelectionChange: setRowSelection,
+        onPaginationChange: activeOnPaginationChange,
+        autoResetPageIndex: false,
         state: {
             sorting,
             columnFilters,
-            columnVisibility,
+            columnVisibility: activeColumnVisibility,
             rowSelection,
+            pagination: activePagination,
         },
     });
+
+    const pageCount = table.getPageCount();
+    const pageIndex = table.getState().pagination.pageIndex;
+
+    React.useEffect(() => {
+        if (pageCount > 0 && pageIndex >= pageCount) {
+            table.setPageIndex(pageCount - 1);
+        }
+    }, [pageCount, pageIndex, table]);
 
     return (
         <div className="w-full space-y-4">
@@ -231,7 +273,7 @@ function DataTable<T>({
                                         table.setPageSize(Number(value));
                                     }}
                                 >
-                                    <SelectTrigger className="h-8 w-[70px]">
+                                    <SelectTrigger className="h-8 w-[90px] px-2.5">
                                         <SelectValue placeholder={table.getState().pagination.pageSize} />
                                     </SelectTrigger>
                                     <SelectContent side="top">
@@ -371,7 +413,11 @@ export const DisplayEngine = <T extends object>({
     className,
     loading,
     entityConfig,
-    pagination
+    pagination,
+    paginationState,
+    onPaginationChange,
+    columnVisibility,
+    onColumnVisibilityChange,
 }: DisplayConfig<T>) => {
 
     if (loading) {
@@ -392,6 +438,10 @@ export const DisplayEngine = <T extends object>({
                     columns={columns}
                     searchComponent={searchKeys?.map(key => ({ column: key }))}
                     pagination={pagination}
+                    paginationState={paginationState}
+                    onPaginationChange={onPaginationChange}
+                    columnVisibility={columnVisibility}
+                    onColumnVisibilityChange={onColumnVisibilityChange}
                 />
             )}
 
