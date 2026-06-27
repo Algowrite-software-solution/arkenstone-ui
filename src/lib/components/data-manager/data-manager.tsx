@@ -609,37 +609,44 @@ export function DataManager<T extends { id: string | number }>({
             <div className={`flex-1 overflow-hidden p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
                 
                 {/* Bulk Actions Toolbar */}
-                {config.display.bulkActions?.enabled && selectedIds.length > 0 && (
-                    <div className="flex items-center justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg mb-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-primary">
-                                {selectedIds.length} record{selectedIds.length > 1 ? 's' : ''} selected
-                            </span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer h-7 px-2"
-                                onClick={() => setRowSelection({})}
-                            >
-                                Clear selection
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {bulkActions.map((action, index) => (
+                <div className={cn(
+                    "grid transition-all duration-300 ease-in-out",
+                    config.display.bulkActions?.enabled && selectedIds.length > 0
+                        ? "grid-rows-[1fr] opacity-100 mb-4"
+                        : "grid-rows-[0fr] opacity-0 mb-0 pointer-events-none"
+                )}>
+                    <div className="overflow-hidden">
+                        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-primary">
+                                    {selectedIds.length} record{selectedIds.length > 1 ? 's' : ''} selected
+                                </span>
                                 <Button
-                                    key={index}
-                                    variant={action.variant || "outline"}
+                                    variant="ghost"
                                     size="sm"
-                                    onClick={() => action.onClick(selectedIds, selectedItems)}
-                                    className="gap-2 cursor-pointer h-8"
+                                    className="text-xs text-muted-foreground hover:text-foreground cursor-pointer h-7 px-2"
+                                    onClick={() => setRowSelection({})}
                                 >
-                                    {action.icon}
-                                    {action.label}
+                                    Clear selection
                                 </Button>
-                            ))}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {bulkActions.map((action, index) => (
+                                    <Button
+                                        key={index}
+                                        variant={action.variant || "outline"}
+                                        size="sm"
+                                        onClick={() => action.onClick(selectedIds, selectedItems)}
+                                        className="gap-2 cursor-pointer h-8"
+                                    >
+                                        {action.icon}
+                                        {action.label}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
 
                 <LayoutManager
                     type={config.layout}
