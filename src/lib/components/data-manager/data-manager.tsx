@@ -64,6 +64,26 @@ export function DataManager<T extends { id: string | number }>({
         resolver: null
     });
 
+    // Pagination state (restores from Zustand store if persistence is enabled)
+    const [paginationState, setPaginationState] = useState(() => {
+        if (config.display.pagination?.persistPagination !== false) {
+            const storeState = service.useStore.getState() as any;
+            if (storeState.pagination) {
+                return storeState.pagination;
+            }
+        }
+        return {
+            pageIndex: 0,
+            pageSize: config.display.pagination?.pageSizeOptions?.[0] ?? 10,
+        };
+    });
+
+    useEffect(() => {
+        if (config.display.pagination?.persistPagination !== false) {
+            service.useStore.setState({ pagination: paginationState });
+        }
+    }, [paginationState, config.display.pagination?.persistPagination, service]);
+
     // Derived State
     const activeItem = useMemo(() =>
         selectedId ? data.find((i: T) => i.id === selectedId) : null,
@@ -489,6 +509,8 @@ export function DataManager<T extends { id: string | number }>({
                         renderItem={renderWrapper}
                         className="h-full overflow-auto"
                         pagination={config.display.pagination}
+                        paginationState={paginationState}
+                        onPaginationChange={setPaginationState}
                     />
                 </LayoutManager>
             </div>

@@ -155,6 +155,7 @@ export interface DataManagerConfig<T extends object> {
     // Pagination Configuration
     pagination?: {
       pageSizeOptions?: number[];
+      persistPagination?: boolean;
     };
   };
 
