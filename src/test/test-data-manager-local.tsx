@@ -143,6 +143,19 @@ export function TestDataManagerLocal() {
                   pagination: {
                     pageSizeOptions: [10, 20, 30],
                   },
+                  bulkActions: {
+                    enabled: true,
+                    identifierKey: "id",
+                    actions: [
+                      {
+                        label: "Print Names",
+                        variant: "outline",
+                        onClick: (ids, items) => {
+                          alert(`Selected names: ${items.map(item => item.name).join(", ")}`);
+                        }
+                      }
+                    ]
+                  },
                 },
                 form: {
                   fields: [
