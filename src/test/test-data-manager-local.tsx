@@ -22,14 +22,27 @@ const ExampleDataService = new ServiceFactory<ExampleData>({
   syncWithStore: true,
 });
 
-// Seed data
-const initialData: ExampleData[] = [
-  { id: 1, name: "Alice Smith", status: "Active", category: "Engineering" },
-  { id: 2, name: "Bob Jones", status: "Inactive", category: "Design" },
-  { id: 3, name: "Charlie Brown", status: "Active", category: "Product" },
-  { id: 4, name: "David Miller", status: "Active", category: "Marketing" },
-  { id: 5, name: "Emma Wilson", status: "Inactive", category: "HR" },
-];
+// Seed data (generates 30 sample employees for pagination testing)
+const initialData: ExampleData[] = Array.from({ length: 30 }, (_, index) => {
+  const id = index + 1;
+  const names = [
+    "Alice Smith", "Bob Jones", "Charlie Brown", "David Miller", "Emma Wilson",
+    "Frank Thomas", "Grace Davis", "Henry Wilson", "Ivy Taylor", "Jack Anderson",
+    "Kate Thomas", "Liam Jackson", "Mia White", "Noah Martin", "Olivia Thompson",
+    "Paul Harris", "Quinn Clark", "Ryan Lewis", "Sophia Walker", "Tyler Hall",
+    "Ursula Allen", "Victor Young", "Wendy King", "Xavier Wright", "Yolanda Scott",
+    "Zachary Green", "Abigail Adams", "Benjamin Baker", "Chloe Carter", "Daniel Diaz"
+  ];
+  const statuses = ["Active", "Inactive"];
+  const categories = ["Engineering", "Design", "Product", "Marketing", "HR", "Sales", "Support"];
+  
+  return {
+    id,
+    name: names[index % names.length],
+    status: statuses[index % statuses.length],
+    category: categories[index % categories.length]
+  };
+});
 
 // Initialize list in store
 ExampleDataService.useStore.setState({ list: initialData });

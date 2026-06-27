@@ -93,6 +93,7 @@ function DataTable<T>({
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
+        autoResetPageIndex: false,
         state: {
             sorting,
             columnFilters,
@@ -100,6 +101,15 @@ function DataTable<T>({
             rowSelection,
         },
     });
+
+    const pageCount = table.getPageCount();
+    const pageIndex = table.getState().pagination.pageIndex;
+
+    React.useEffect(() => {
+        if (pageCount > 0 && pageIndex >= pageCount) {
+            table.setPageIndex(pageCount - 1);
+        }
+    }, [pageCount, pageIndex, table]);
 
     return (
         <div className="w-full space-y-4">
