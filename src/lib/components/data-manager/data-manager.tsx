@@ -6,8 +6,9 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // --- Internal Modules ---
 import { DataManagerConfig } from './types';
@@ -144,32 +145,29 @@ export function DataManager<T extends { id: string | number }>({
     // 3. EFFECTS & DATA LOADING
     // =========================================================================
 
+    const loadData = useCallback(async () => {
+        try {
+            log("Fetching Data...");
+            updateStore((state: any) => {
+                state.loading = true;
+            });
+            const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
+            const listData = Array.isArray(response) ? response : (response as any)?.data || [];
+            updateStore((state: any) => {
+                state.list = listData;
+                state.loading = false;
+            });
+        } catch (error) {
+            console.error("Failed to load data", error);
+            updateStore((state: any) => {
+                state.loading = false;
+            });
+        }
+    }, [service, config?.serviceConfig?.getAll?.params, updateStore]);
+
     useEffect(() => {
-        let isMounted = true;
-
-        const loadData = async () => {
-            try {
-                log("Fetching Data...");
-                const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
-
-                if (!isMounted) return;
-
-                const listData = Array.isArray(response) ? response : (response as any)?.data || [];
-
-                updateStore((state: any) => {
-                    state.list = listData;
-                    state.loading = false;
-                });
-
-            } catch (error) {
-                console.error("Failed to load data", error);
-            }
-        };
-
         loadData();
-
-        return () => { isMounted = false; };
-    }, [service]);
+    }, [loadData]);
 
 
     const isImageInputExists = config.form?.fields?.some((field: any) => field.type === 'image');
@@ -483,12 +481,27 @@ export function DataManager<T extends { id: string | number }>({
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
 
-                {!isCreating && !config.display.disableCreate && (
-                    <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
-                    </Button>
-                )}
+                <div className="flex items-center gap-2">
+                    {!config.display.disableRefresh && (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-9 w-9 text-muted-foreground hover:text-foreground cursor-pointer"
+                            onClick={loadData}
+                            disabled={loading}
+                            title="Refresh data"
+                        >
+                            <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                        </Button>
+                    )}
+
+                    {!isCreating && !config.display.disableCreate && (
+                        <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Custom Element Space - Header */}

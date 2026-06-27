@@ -134,6 +134,7 @@ export interface DataManagerConfig<T extends object> {
     };
 
     disableCreate?: boolean;
+    disableRefresh?: boolean;
 
     // For Table
     columns: ColumnDef<T>[];
