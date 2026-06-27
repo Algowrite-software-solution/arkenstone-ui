@@ -391,7 +391,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 }}
                 onRemove={(removedItem: any) => {
                   const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
-                  console.log(removedItem);
+                  // console.log(removedItem);
 
                   // if remove endpoint is provided, call it for both string and object scenarios
                   if (field.removeImageOptions?.removeEndpoint) {
@@ -399,12 +399,12 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
                     if (typeof removedItem === 'string') {
                       itemToRemove = removedItem;
-                      console.log("removed item is a string");
+                      // console.log("removed item is a string");
 
                       apiPost(`${field.removeImageOptions.removeEndpoint}`, { data: { [removedKey]: itemToRemove } }); // for strings  uses Post method based request
                     } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
                       itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
-                      console.log("removed item is a object");
+                      // console.log("removed item is a object");
 
                       apiDelete(`${field.removeImageOptions.removeEndpoint}/${itemToRemove}`, {}); // Uses standard DELETE Method endpoints for object ID based remove
                     }
@@ -427,7 +427,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                     // if removed item is a object and if id property exists add id
                     if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField && field.removeImageOptions?.removedImagesKey) {
                       const item = removedItem[field.removeImageOptions?.removedImagesKey];
-                      console.log("item", item);
+                      // console.log("item", item);
                       setValues((prev: any) => {
                         const currentRemoved = prev[removedKey] || [];
                         // Add only if not already there
@@ -455,7 +455,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                 }}
                 onRemove={(removedItem: any) => {
                   const removedKey = field.removeImageOptions?.removedImagesField || 'removed_images';
-                  console.log(removedItem);
+                  // console.log(removedItem);
 
                   // if remove endpoint is provided, call it for both string and object scenarios
                   if (field.removeImageOptions?.removeEndpoint) {
@@ -463,12 +463,12 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
                     if (typeof removedItem === 'string') {
                       itemToRemove = removedItem;
-                      console.log("removed item is a string");
+                      // console.log("removed item is a string");
 
                       apiPost(`${field.removeImageOptions.removeEndpoint}`, { data: { [removedKey]: itemToRemove } }); // for strings (URLS)  uses Post method based request
                     } else if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesKey) {
                       itemToRemove = removedItem[field.removeImageOptions?.removedImagesKey];
-                      console.log("removed item is a object");
+                      // console.log("removed item is a object");
 
                       apiDelete(`${field.removeImageOptions.removeEndpoint}/${itemToRemove}`, {}); // Uses standard DELETE Method endpoints for object ID based remove
                     }
@@ -491,7 +491,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
                     // if removed item is a object and if id property exists add id
                     if (typeof removedItem === "object" && field.removeImageOptions?.removedImagesField && field.removeImageOptions?.removedImagesKey) {
                       const item = removedItem[field.removeImageOptions?.removedImagesKey];
-                      console.log("item", item);
+                      // console.log("item", item);
                       setValues((prev: any) => {
                         const currentRemoved = prev[removedKey] || [];
                         // Add only if not already there

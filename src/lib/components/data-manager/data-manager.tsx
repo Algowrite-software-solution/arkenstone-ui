@@ -344,7 +344,7 @@ export function DataManager<T extends { id: string | number }>({
         setSelectedId(null);
         setIsCreating(false);
         setIsViewing(false);
-        console.log("closed all opened panels!");
+        // console.log("closed all opened panels!");
     };
 
     // =========================================================================
