@@ -62,6 +62,7 @@ export function DataManager<T extends { id: string | number }>({
     }, [rowSelection]);
 
     const selectedItems = useMemo(() => {
+        if (!Array.isArray(data)) return [];
         const idKey = config.display.bulkActions?.identifierKey || 'id';
         return data.filter((item: T) => {
             const id = String((item as any)[idKey]);
@@ -437,7 +438,7 @@ export function DataManager<T extends { id: string | number }>({
                         await deletePromise;
 
                         updateStore((state: any) => {
-                            state.list = state.list.filter(
+                            state.list = (state.list || []).filter(
                                 (item: T) => !selectedIds.includes(String((item as any)[identifierKey]))
                             );
                         });

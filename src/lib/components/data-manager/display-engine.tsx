@@ -55,8 +55,8 @@ export interface DisplayConfig<T> {
     rowSelection?: Record<string, boolean>;
     onRowSelectionChange?: OnChangeFn<any>;
     bulkActions?: {
-        enabled?: boolean;
-        identifierKey?: keyof T;
+        enabled: boolean;
+        identifierKey: keyof T;
         actions?: any[];
     };
 }
@@ -102,8 +102,8 @@ function DataTable<T>({
     rowSelection?: Record<string, boolean>;
     onRowSelectionChange?: OnChangeFn<any>;
     bulkActions?: {
-        enabled?: boolean;
-        identifierKey?: keyof T;
+        enabled: boolean;
+        identifierKey: keyof T;
         actions?: any[];
     };
 }) {

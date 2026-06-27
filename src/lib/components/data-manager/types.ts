@@ -137,8 +137,8 @@ export interface DataManagerConfig<T extends object> {
     disableRefresh?: boolean;
 
     bulkActions?: {
-      enabled?: boolean;
-      identifierKey?: keyof T;
+      enabled: boolean;
+      identifierKey: keyof T;
       actions?: {
         icon?: React.ReactNode;
         label: string;
