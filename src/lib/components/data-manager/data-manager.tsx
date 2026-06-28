@@ -83,7 +83,7 @@ export function DataManager<T extends { id: string | number }>({
 
     // Pagination state (restores from Zustand store if persistence is enabled)
     const [paginationState, setPaginationState] = useState(() => {
-        if (config.display.pagination?.persistPagination !== false) {
+        if (config.display.pagination?.persistPagination !== false && typeof service.useStore?.getState === 'function') {
             const storeState = service.useStore.getState() as any;
             if (storeState.pagination) {
                 return storeState.pagination;
@@ -96,14 +96,14 @@ export function DataManager<T extends { id: string | number }>({
     });
 
     useEffect(() => {
-        if (config.display.pagination?.persistPagination !== false) {
+        if (config.display.pagination?.persistPagination !== false && typeof service.useStore?.setState === 'function') {
             service.useStore.setState({ pagination: paginationState });
         }
     }, [paginationState, config.display.pagination?.persistPagination, service]);
 
     // Column visibility state (restores from Zustand store if persistence is enabled)
     const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
-        if (config.display.persistColumnVisibility !== false) {
+        if (config.display.persistColumnVisibility !== false && typeof service.useStore?.getState === 'function') {
             const storeState = service.useStore.getState() as any;
             if (storeState.columnVisibility) {
                 return storeState.columnVisibility;
@@ -113,7 +113,7 @@ export function DataManager<T extends { id: string | number }>({
     });
 
     useEffect(() => {
-        if (config.display.persistColumnVisibility !== false) {
+        if (config.display.persistColumnVisibility !== false && typeof service.useStore?.setState === 'function') {
             service.useStore.setState({ columnVisibility });
         }
     }, [columnVisibility, config.display.persistColumnVisibility, service]);
