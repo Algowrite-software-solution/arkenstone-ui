@@ -449,7 +449,10 @@ export const DisplayEngine = <T extends object>({
     bulkActions,
 }: DisplayConfig<T>) => {
 
-    if (loading) {
+    const hasData = Array.isArray(data) ? data.length > 0 : !!data;
+    const showLoadingPlaceholder = loading && !hasData;
+
+    if (showLoadingPlaceholder) {
         return (
             <div className="flex h-64 w-full items-center justify-center">
                 <div className="h-8 w-8 animate-spin p-4 rounded-full border-4 border-primary border-t-transparent"></div>
@@ -458,7 +461,16 @@ export const DisplayEngine = <T extends object>({
     }
 
     return (
-        <div className={cn("w-full transition-all p-4 duration-300 animate-in fade-in", className)}>
+        <div className={cn(
+            "w-full transition-all p-4 duration-300 animate-in fade-in relative",
+            loading && "pointer-events-none",
+            className
+        )}>
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px] z-50 animate-in fade-in duration-200">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                </div>
+            )}
 
             {/* TABLE View */}
             {type === 'table' && Array.isArray(data) && columns && (

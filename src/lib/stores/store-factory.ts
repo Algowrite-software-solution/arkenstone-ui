@@ -1,4 +1,4 @@
-import { create, StateCreator } from "zustand";
+import { create, StateCreator, StoreApi, UseBoundStore } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
@@ -25,7 +25,7 @@ export const createGenericStore = <
       get: () => TState & BaseActions<TState> & TCustomActions
     ) => TCustomActions;
   } = {}
-) => {
+): UseBoundStore<StoreApi<TState & BaseActions<TState> & TCustomActions>> => {
   const { name, methods } = options;
 
   /**
@@ -76,8 +76,8 @@ export const createGenericStore = <
         }
         }
       )
-    );
+    ) as any;
   }
 
-  return create<StoreType>()(immer(stateInitializer));
+  return create<StoreType>()(immer(stateInitializer)) as any;
 };
