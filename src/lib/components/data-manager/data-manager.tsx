@@ -161,13 +161,15 @@ export function DataManager<T extends { id: string | number }>({
     // 3. EFFECTS & DATA LOADING
     // =========================================================================
 
+    const serializedParams = JSON.stringify(config?.serviceConfig?.getAll?.params ?? {});
+
     const loadData = useCallback(async () => {
         try {
             log("Fetching Data...");
             updateStore((state: any) => {
                 state.loading = true;
             });
-            const response = await service.getAll(config?.serviceConfig?.getAll?.params ?? {});
+            const response = await service.getAll(JSON.parse(serializedParams));
             const listData = Array.isArray(response) ? response : (response as any)?.data || [];
             updateStore((state: any) => {
                 state.list = listData;
@@ -179,7 +181,7 @@ export function DataManager<T extends { id: string | number }>({
                 state.loading = false;
             });
         }
-    }, [service, config?.serviceConfig?.getAll?.params, updateStore]);
+    }, [service, serializedParams, updateStore]);
 
     useEffect(() => {
         loadData();
