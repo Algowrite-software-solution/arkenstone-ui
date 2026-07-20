@@ -206,6 +206,16 @@ export function TestDataManagerLocal() {
             Random Users (Dynamic API)
           </button>
           <button
+            onClick={() => window.location.hash = '#/grid'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/grid'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Grid View (Custom Layout)
+          </button>
+          <button
             onClick={() => window.location.hash = '#/other'}
             className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
@@ -337,7 +347,77 @@ export function TestDataManagerLocal() {
           </>
         )}
 
-        {/* Tab 3: Other Page */}
+        {/* Tab 3: Grid View */}
+        {currentPath === '#/grid' && (
+          <>
+            <p className="text-muted-foreground">
+              This layout showcases grid rendering of items with card layouts and custom header widgets. Hover over a card to trigger actions.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Featured Grid",
+                description: "Grid layout mode with a stats header layout space injected above.",
+                service: ExampleDataService,
+                layout: "modal",
+                modalSize: "md",
+                devMode: true,
+                display: {
+                  type: "grid",
+                  layoutSpaces: {
+                    header: (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Total Cards</span>
+                          <h4 className="text-2xl font-bold text-foreground">100</h4>
+                        </div>
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Active Posts</span>
+                          <h4 className="text-2xl font-bold text-primary">85</h4>
+                        </div>
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Drafts</span>
+                          <h4 className="text-2xl font-bold text-amber-500">15</h4>
+                        </div>
+                      </div>
+                    )
+                  },
+                  renderItem: (item) => (
+                    <div className="border border-border rounded-xl p-4 bg-card hover:shadow-md transition-all h-full flex flex-col justify-between space-y-3">
+                      <div className="space-y-1">
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wider">Post #{item.id}</span>
+                        <h3 className="font-bold text-foreground line-clamp-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{item.body}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground pt-2 border-t flex justify-between">
+                        <span>Status: Active</span>
+                        <span>Author: System</span>
+                      </div>
+                    </div>
+                  )
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 4: Other Page */}
         {currentPath === '#/other' && (
           <div className="p-6 sm:p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
             <h2 className="text-xl font-bold">Other Page</h2>

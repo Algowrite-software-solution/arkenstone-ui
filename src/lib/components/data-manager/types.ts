@@ -155,7 +155,7 @@ export interface DataManagerConfig<T extends object> {
     };
 
     // For Table
-    columns: ColumnDef<T>[];
+    columns?: ColumnDef<T>[];
     persistColumnVisibility?: boolean;
     actions?: {
       edit?: boolean;

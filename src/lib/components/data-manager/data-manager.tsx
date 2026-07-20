@@ -481,7 +481,7 @@ export function DataManager<T extends { id: string | number }>({
     const tableColumns = useMemo(() => {
         if (config.display.type !== 'table') return [];
 
-        let baseColumns = [...config.display.columns];
+        let baseColumns = config.display.columns ? [...config.display.columns] : [];
 
         if (isMobile) {
             baseColumns = baseColumns.filter((column: any) => !column.meta?.hideOnMobile);
