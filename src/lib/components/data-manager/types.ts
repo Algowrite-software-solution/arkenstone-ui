@@ -1,5 +1,11 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, RowData } from "@tanstack/react-table";
 import { ServiceFactory } from "../../services/service-factory"; // Point to your Factory
+
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    hideOnMobile?: boolean;
+  }
+}
 
 // --- Input Types ---
 export type InputType =
@@ -93,6 +99,7 @@ export type LayoutType = "split-view" | "modal" | "tab-view" | "fullscreen";
 export interface DataManagerConfig<T extends object> {
   title: string;
   description?: string;
+  showDescriptionOnMobile?: boolean;
 
   // Service Instance
   service: ServiceFactory<T, any, any, any>;

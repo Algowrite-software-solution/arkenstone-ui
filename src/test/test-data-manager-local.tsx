@@ -74,7 +74,7 @@ ExampleDataService.delete = async (id: string | number) => {
 const postColumns: ColumnDef<ExampleData>[] = [
   { accessorKey: "id", header: "ID", enableSorting: true },
   { accessorKey: "title", header: "Title", enableSorting: true },
-  { accessorKey: "body", header: "Body" },
+  { accessorKey: "body", header: "Body", meta: { hideOnMobile: true } },
 ];
 
 // =========================================================================
@@ -160,7 +160,7 @@ const userColumns: ColumnDef<RandomUserData>[] = [
   },
   { accessorKey: "name", header: "Name", enableSorting: true },
   { accessorKey: "email", header: "Email" },
-  { accessorKey: "phone", header: "Phone" },
+  { accessorKey: "phone", header: "Phone", meta: { hideOnMobile: true } },
 ];
 
 
@@ -228,6 +228,7 @@ export function TestDataManagerLocal() {
               config={{
                 title: "Posts",
                 description: "A table view of posts with built-in search, filtering, pagination, and sorting support.",
+                showDescriptionOnMobile: true,
                 service: ExampleDataService,
                 layout: "modal",
                 modalSize: "lg",
@@ -286,8 +287,7 @@ export function TestDataManagerLocal() {
                 title: "Random Users",
                 description: "Tests bulk actions, filters, and rendering using login.uuid as the identifierKey.",
                 service: RandomUserService,
-                layout: "modal",
-                modalSize: "lg",
+                layout: "split-view",
                 devMode: true,
                 display: {
                   type: "table",

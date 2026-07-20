@@ -60,6 +60,18 @@ export function DataManager<T extends { id: string | number }>({
 
     const [isLoading, setIsLoading] = useState(false);
 
+    // Mobile viewport detection
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Row selection for bulk actions
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
@@ -469,7 +481,11 @@ export function DataManager<T extends { id: string | number }>({
     const tableColumns = useMemo(() => {
         if (config.display.type !== 'table') return [];
 
-        const baseColumns = [...config.display.columns];
+        let baseColumns = [...config.display.columns];
+
+        if (isMobile) {
+            baseColumns = baseColumns.filter((column: any) => !column.meta?.hideOnMobile);
+        }
 
         if (config.display.bulkActions?.enabled) {
             baseColumns.unshift({
@@ -553,7 +569,7 @@ export function DataManager<T extends { id: string | number }>({
         }
 
         return baseColumns;
-    }, [config.display.columns, config.display.bulkActions?.enabled, selectedId]);
+    }, [config.display.columns, config.display.bulkActions?.enabled, selectedId, isMobile]);
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
@@ -584,7 +600,14 @@ export function DataManager<T extends { id: string | number }>({
             <div className="flex-none px-0 py-3 sm:p-4 md:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
-                    {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
+                    {config.description && (
+                        <p className={cn(
+                            "text-sm text-muted-foreground mt-1",
+                            !config.showDescriptionOnMobile && "hidden sm:block"
+                        )}>
+                            {config.description}
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -622,7 +645,7 @@ export function DataManager<T extends { id: string | number }>({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 {config.display.columns
-                                    ?.filter((column: any) => column.accessorKey || column.id)
+                                    ?.filter((column: any) => (column.accessorKey || column.id) && !(isMobile && column.meta?.hideOnMobile))
                                     .map((column: any) => {
                                         const columnId = column.accessorKey || column.id;
                                         const columnLabel = typeof column.header === 'string' ? column.header : columnId;
@@ -809,7 +832,7 @@ interface ViewDialogProps {
 export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProps) {
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="max-w-4xl w-full" >
+            <DialogContent className="sm:max-w-4xl w-full" >
                 <DialogHeader>
                     <DialogTitle>
                         {config?.title || "View Details"}
