@@ -6,9 +6,15 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Eye, RotateCw } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, RotateCw, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // --- Internal Modules ---
 import { DataManagerConfig } from './types';
@@ -600,6 +606,44 @@ export function DataManager<T extends { id: string | number }>({
                             <Plus className="mr-2 h-4 w-4 shrink-0" />
                             Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
                         </Button>
+                    )}
+
+                    {config.display.type === 'table' && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-muted-foreground hover:text-foreground h-9 text-xs cursor-pointer shrink-0"
+                                >
+                                    <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                                    Columns
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {config.display.columns
+                                    ?.filter((column: any) => column.accessorKey || column.id)
+                                    .map((column: any) => {
+                                        const columnId = column.accessorKey || column.id;
+                                        const columnLabel = typeof column.header === 'string' ? column.header : columnId;
+                                        return (
+                                            <DropdownMenuCheckboxItem
+                                                key={columnId}
+                                                className="capitalize cursor-pointer"
+                                                checked={columnVisibility[columnId] !== false}
+                                                onCheckedChange={(value) => {
+                                                    setColumnVisibility((prev) => ({
+                                                        ...prev,
+                                                        [columnId]: !!value,
+                                                    }));
+                                                }}
+                                            >
+                                                {columnLabel}
+                                            </DropdownMenuCheckboxItem>
+                                        );
+                                    })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     )}
                 </div>
             </div>
