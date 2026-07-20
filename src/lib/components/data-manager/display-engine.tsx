@@ -170,7 +170,7 @@ function DataTable<T>({
     }, [pageCount, pageIndex, table]);
 
     return (
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-4 max-w-full">
             {children && <div className="p-1">{children}</div>}
 
             <div className="flex w-full flex-col gap-4">
@@ -192,15 +192,15 @@ function DataTable<T>({
                 )}
 
                 {/* Toolbar (Column Toggle + Actions) */}
-                <div className="flex w-full items-center justify-between">
-                    <div className="flex-1 text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 w-full sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">
                         {table.getFilteredRowModel().rows.length} record(s) found.
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                         {actionButtons}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="ml-auto">
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                                     Columns <ChevronDown className="ml-2 h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -224,7 +224,7 @@ function DataTable<T>({
                 </div>
 
                 {/* The Table */}
-                <div className="rounded-md border bg-card">
+                <div className="rounded-md border bg-card w-full overflow-x-auto">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -236,7 +236,7 @@ function DataTable<T>({
                                             <TableHead
                                                 key={header.id}
                                                 className={cn(
-                                                    "bg-secondary text-secondary-foreground",
+                                                    "bg-secondary text-secondary-foreground px-2 py-3 sm:px-4 sm:py-4",
                                                     index === headerGroup.headers.length - 1 ? 'text-end' : '',
                                                     canSort ? 'cursor-pointer select-none hover:bg-secondary/80' : ''
                                                 )}
@@ -272,7 +272,7 @@ function DataTable<T>({
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                            <TableCell key={cell.id} className="max-w-[200px] sm:max-w-[300px] truncate px-2 py-3 sm:px-4 sm:py-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                         ))}
                                     </TableRow>
                                 ))
@@ -288,8 +288,8 @@ function DataTable<T>({
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-2 items-center justify-between w-full">
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
                         {pagination && (
                             <div className="flex items-center gap-2">
                                 <p className="text-xs font-medium text-muted-foreground whitespace-nowrap">Rows per page</p>
@@ -313,11 +313,11 @@ function DataTable<T>({
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto justify-center sm:justify-end">
+                        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="w-24">
                             Previous
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="w-24">
                             Next
                         </Button>
                     </div>
@@ -404,11 +404,11 @@ function DataEntity<T>({
                     const value = data[key];
 
                     return (
-                        <div key={String(key)} className="grid grid-cols-3 border-b pb-2 last:border-0">
+                        <div key={String(key)} className="grid grid-cols-1 sm:grid-cols-3 border-b pb-2 gap-1 sm:gap-2 last:border-0">
                             <span className="font-medium text-sm text-muted-foreground capitalize">
                                 {String(key).replace(/([A-Z])/g, " $1").trim()}
                             </span>
-                            <div className="col-span-2 text-sm">
+                            <div className="sm:col-span-2 text-sm">
                                 {/* Check for Custom Renderer */}
                                 {config?.customRender && config.customRender[key]
                                     ? config.customRender[key]!(value, data)

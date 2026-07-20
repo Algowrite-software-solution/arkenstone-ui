@@ -123,19 +123,23 @@ export const SingleMediaInput: React.FC<SingleMediaInputProps> = ({
                             />
                         </ImageModal>
 
-                        {/* Overlay with Change/Remove actions */}
-                        <div className={cn(
-                            "absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity",
-                            isHovered && !disabled ? "opacity-100" : "opacity-0"
-                        )}>
-                            <p className="text-white text-sm font-medium">Click or Drop to Replace</p>
+                        {/* Remove button - always visible on mobile, hover-only on desktop */}
+                        {!disabled && (
                             <button
                                 type="button"
                                 onClick={handleRemove}
-                                className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
+                                className="absolute top-2 right-2 z-10 p-1.5 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                             >
                                 <X className="h-4 w-4" />
                             </button>
+                        )}
+
+                        {/* Overlay with Change/Replace text - hover-only on all screens to avoid obscuring the image preview */}
+                        <div className={cn(
+                            "absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity pointer-events-none lg:pointer-events-auto",
+                            isHovered && !disabled ? "opacity-100" : "opacity-0"
+                        )}>
+                            <p className="text-white text-sm font-medium">Click or Drop to Replace</p>
                         </div>
                     </>
                 ) : (

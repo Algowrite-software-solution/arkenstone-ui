@@ -180,14 +180,14 @@ export function TestDataManagerLocal() {
 
   return (
     <Arkenstone>
-      <div className="p-8 max-w-6xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-foreground">Arkenstone Data Manager Preview</h1>
+      <div className="px-0 py-4 sm:p-8 mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Arkenstone Data Manager Preview</h1>
         
         {/* Navigation Tabs */}
-        <div className="flex gap-4 border-b border-border pb-2">
+        <div className="flex flex-wrap gap-2 sm:gap-4 border-b border-border pb-2">
           <button
             onClick={() => window.location.hash = '#/posts'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/posts'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -197,7 +197,7 @@ export function TestDataManagerLocal() {
           </button>
           <button
             onClick={() => window.location.hash = '#/users'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/users'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -207,7 +207,7 @@ export function TestDataManagerLocal() {
           </button>
           <button
             onClick={() => window.location.hash = '#/other'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -339,7 +339,7 @@ export function TestDataManagerLocal() {
 
         {/* Tab 3: Other Page */}
         {currentPath === '#/other' && (
-          <div className="p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
+          <div className="p-6 sm:p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
             <h2 className="text-xl font-bold">Other Page</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
               You navigated to the URL `#/other`. The active DataManager component has been unmounted.

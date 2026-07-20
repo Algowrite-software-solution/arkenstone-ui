@@ -223,7 +223,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn("space-y-4 p-4 h-full overflow-y-auto", className)}
+      className={cn("space-y-4 p-2.5 sm:p-4 h-full overflow-y-auto", className)}
     >
       {fields.map((field) => {
         // Handle Conditional Visibility

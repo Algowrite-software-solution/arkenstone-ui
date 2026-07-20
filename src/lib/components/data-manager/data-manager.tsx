@@ -575,18 +575,18 @@ export function DataManager<T extends { id: string | number }>({
         <div className="w-full flex flex-col overflow-hidden bg-sidebar rounded-2xl relative">
 
             {/* --- HEADER --- */}
-            <div className="flex-none p-4 md:p-6 border-b flex justify-between items-start md:items-center">
+            <div className="flex-none px-0 py-3 sm:p-4 md:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
                     {config.description && <p className="text-sm text-muted-foreground mt-1">{config.description}</p>}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                     {!config.display.disableRefresh && (
                         <Button
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9 text-muted-foreground hover:text-foreground cursor-pointer"
+                            className="h-9 w-9 text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
                             onClick={loadData}
                             disabled={loading}
                             title="Refresh data"
@@ -596,8 +596,8 @@ export function DataManager<T extends { id: string | number }>({
                     )}
 
                     {!isCreating && !config.display.disableCreate && (
-                        <Button onClick={() => { setSelectedId(null); setIsCreating(true); }}>
-                            <Plus className="mr-2 h-4 w-4" />
+                        <Button onClick={() => { setSelectedId(null); setIsCreating(true); }} className="w-full sm:w-auto">
+                            <Plus className="mr-2 h-4 w-4 shrink-0" />
                             Add {config?.display?.createModalConfig?.createButtonText ?? (config.title || 'Item')}
                         </Button>
                     )}
@@ -608,7 +608,7 @@ export function DataManager<T extends { id: string | number }>({
             {config.display.layoutSpaces?.header ?? null}
 
             {/* --- BODY --- */}
-            <div className={`flex-1 overflow-hidden p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
+            <div className={`flex-1 overflow-hidden px-0 py-2.5 sm:p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
                 
                 {/* Bulk Actions Toolbar */}
                 <div className={cn(
@@ -618,8 +618,8 @@ export function DataManager<T extends { id: string | number }>({
                         : "grid-rows-[0fr] opacity-0 mb-0 pointer-events-none"
                 )}>
                     <div className="overflow-hidden">
-                        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:items-center sm:justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg">
+                            <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
                                 <span className="text-sm font-medium text-primary">
                                     {selectedIds.length} record{selectedIds.length > 1 ? 's' : ''} selected
                                 </span>
@@ -632,14 +632,14 @@ export function DataManager<T extends { id: string | number }>({
                                     Clear selection
                                 </Button>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                                 {bulkActions.map((action, index) => (
                                     <Button
                                         key={index}
                                         variant={action.variant || "outline"}
                                         size="sm"
                                         onClick={() => action.onClick(selectedIds, selectedItems)}
-                                        className="gap-2 cursor-pointer h-8"
+                                        className="gap-2 cursor-pointer h-8 w-full sm:w-auto"
                                     >
                                         {action.icon}
                                         {action.label}
@@ -779,7 +779,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
                 </DialogHeader>
 
                 {/* SCROLLABLE BODY */}
-                <div className="overflow-y-auto pr-2 space-y-4" style={{ maxHeight: '80vh' }}>
+                <div className="overflow-y-auto pr-2 space-y-4 max-h-[60vh] sm:max-h-[70vh] md:max-h-[80vh]">
                     {typeof data === "object" && !config?.renderItem &&
                         data !== null &&
                         Object.keys(data).map((key) => (
