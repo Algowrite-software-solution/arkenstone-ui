@@ -216,6 +216,16 @@ export function TestDataManagerLocal() {
             Grid View (Custom Layout)
           </button>
           <button
+            onClick={() => window.location.hash = '#/list'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/list'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            List View (Tab Layout)
+          </button>
+          <button
             onClick={() => window.location.hash = '#/other'}
             className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
@@ -359,8 +369,7 @@ export function TestDataManagerLocal() {
                 title: "Featured Grid",
                 description: "Grid layout mode with a stats header layout space injected above.",
                 service: ExampleDataService,
-                layout: "modal",
-                modalSize: "md",
+                layout: "fullscreen",
                 devMode: true,
                 display: {
                   type: "grid",
@@ -417,7 +426,57 @@ export function TestDataManagerLocal() {
           </>
         )}
 
-        {/* Tab 4: Other Page */}
+        {/* Tab 4: List View */}
+        {currentPath === '#/list' && (
+          <>
+            <p className="text-muted-foreground">
+              This layout showcases a standard vertical list view using the "tab-view" layout, which opens the editor in an elegant secondary tab.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Standard List",
+                description: "List layout mode demonstrating the tab-view detail panel.",
+                service: ExampleDataService,
+                layout: "tab-view",
+                devMode: true,
+                display: {
+                  type: "list",
+                  renderItem: (item) => (
+                    <div className="border border-border rounded-xl p-4 bg-card hover:bg-muted/10 transition-colors flex items-center justify-between gap-4 w-full">
+                      <div className="space-y-1 truncate flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded-full">ID #{item.id}</span>
+                          <span className="text-xs text-muted-foreground">Category: Overview</span>
+                        </div>
+                        <h3 className="font-semibold text-foreground truncate">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{item.body}</p>
+                      </div>
+                    </div>
+                  )
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 5: Other Page */}
         {currentPath === '#/other' && (
           <div className="p-6 sm:p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
             <h2 className="text-xl font-bold">Other Page</h2>
@@ -425,7 +484,7 @@ export function TestDataManagerLocal() {
               You navigated to the URL `#/other`. The active DataManager component has been unmounted.
             </p>
             <p className="text-sm text-primary font-medium">
-              Click either "Posts" or "Random Users" tab above to go back and verify state persistence.
+              Click one of the tabs above to go back and verify state persistence.
             </p>
           </div>
         )}
