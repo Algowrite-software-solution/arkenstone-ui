@@ -185,7 +185,7 @@ export const MediaInput: React.FC<MediaInputProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => handleRemove(index)}
-                                    className="absolute top-1 right-1 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                                    className="absolute top-1 right-1 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity disabled:opacity-50 z-10"
                                     disabled={disabled}
                                 >
                                     <X className="h-3 w-3" />

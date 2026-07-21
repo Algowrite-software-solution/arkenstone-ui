@@ -74,7 +74,7 @@ ExampleDataService.delete = async (id: string | number) => {
 const postColumns: ColumnDef<ExampleData>[] = [
   { accessorKey: "id", header: "ID", enableSorting: true },
   { accessorKey: "title", header: "Title", enableSorting: true },
-  { accessorKey: "body", header: "Body" },
+  { accessorKey: "body", header: "Body", meta: { hideOnMobile: true } },
 ];
 
 // =========================================================================
@@ -160,7 +160,7 @@ const userColumns: ColumnDef<RandomUserData>[] = [
   },
   { accessorKey: "name", header: "Name", enableSorting: true },
   { accessorKey: "email", header: "Email" },
-  { accessorKey: "phone", header: "Phone" },
+  { accessorKey: "phone", header: "Phone", meta: { hideOnMobile: true } },
 ];
 
 
@@ -180,14 +180,14 @@ export function TestDataManagerLocal() {
 
   return (
     <Arkenstone>
-      <div className="p-8 max-w-6xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-foreground">Arkenstone Data Manager Preview</h1>
+      <div className="px-0 py-4 sm:p-8 mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Arkenstone Data Manager Preview</h1>
         
         {/* Navigation Tabs */}
-        <div className="flex gap-4 border-b border-border pb-2">
+        <div className="flex flex-wrap gap-2 sm:gap-4 border-b border-border pb-2">
           <button
             onClick={() => window.location.hash = '#/posts'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/posts'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -197,7 +197,7 @@ export function TestDataManagerLocal() {
           </button>
           <button
             onClick={() => window.location.hash = '#/users'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/users'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -206,8 +206,28 @@ export function TestDataManagerLocal() {
             Random Users (Dynamic API)
           </button>
           <button
+            onClick={() => window.location.hash = '#/grid'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/grid'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Grid View (Custom Layout)
+          </button>
+          <button
+            onClick={() => window.location.hash = '#/list'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/list'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            List View (Tab Layout)
+          </button>
+          <button
             onClick={() => window.location.hash = '#/other'}
-            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer ${
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
                 ? 'border-b-2 border-primary text-primary bg-primary/5'
                 : 'text-muted-foreground hover:text-foreground'
@@ -228,6 +248,7 @@ export function TestDataManagerLocal() {
               config={{
                 title: "Posts",
                 description: "A table view of posts with built-in search, filtering, pagination, and sorting support.",
+                showDescriptionOnMobile: true,
                 service: ExampleDataService,
                 layout: "modal",
                 modalSize: "lg",
@@ -286,8 +307,7 @@ export function TestDataManagerLocal() {
                 title: "Random Users",
                 description: "Tests bulk actions, filters, and rendering using login.uuid as the identifierKey.",
                 service: RandomUserService,
-                layout: "modal",
-                modalSize: "lg",
+                layout: "split-view",
                 devMode: true,
                 display: {
                   type: "table",
@@ -337,15 +357,134 @@ export function TestDataManagerLocal() {
           </>
         )}
 
-        {/* Tab 3: Other Page */}
+        {/* Tab 3: Grid View */}
+        {currentPath === '#/grid' && (
+          <>
+            <p className="text-muted-foreground">
+              This layout showcases grid rendering of items with card layouts and custom header widgets. Hover over a card to trigger actions.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Featured Grid",
+                description: "Grid layout mode with a stats header layout space injected above.",
+                service: ExampleDataService,
+                layout: "fullscreen",
+                devMode: true,
+                display: {
+                  type: "grid",
+                  layoutSpaces: {
+                    header: (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Total Cards</span>
+                          <h4 className="text-2xl font-bold text-foreground">100</h4>
+                        </div>
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Active Posts</span>
+                          <h4 className="text-2xl font-bold text-primary">85</h4>
+                        </div>
+                        <div className="border border-border bg-card p-4 rounded-xl shadow-sm">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Drafts</span>
+                          <h4 className="text-2xl font-bold text-amber-500">15</h4>
+                        </div>
+                      </div>
+                    )
+                  },
+                  renderItem: (item) => (
+                    <div className="border border-border rounded-xl p-4 bg-card hover:shadow-md transition-all h-full flex flex-col justify-between space-y-3">
+                      <div className="space-y-1">
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wider">Post #{item.id}</span>
+                        <h3 className="font-bold text-foreground line-clamp-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{item.body}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground pt-2 border-t flex justify-between">
+                        <span>Status: Active</span>
+                        <span>Author: System</span>
+                      </div>
+                    </div>
+                  )
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 4: List View */}
+        {currentPath === '#/list' && (
+          <>
+            <p className="text-muted-foreground">
+              This layout showcases a standard vertical list view using the "tab-view" layout, which opens the editor in an elegant secondary tab.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Standard List",
+                description: "List layout mode demonstrating the tab-view detail panel.",
+                service: ExampleDataService,
+                layout: "tab-view",
+                devMode: true,
+                display: {
+                  type: "list",
+                  renderItem: (item) => (
+                    <div className="border border-border rounded-xl p-4 bg-card hover:bg-muted/10 transition-colors flex items-center justify-between gap-4 w-full">
+                      <div className="space-y-1 truncate flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded-full">ID #{item.id}</span>
+                          <span className="text-xs text-muted-foreground">Category: Overview</span>
+                        </div>
+                        <h3 className="font-semibold text-foreground truncate">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{item.body}</p>
+                      </div>
+                    </div>
+                  )
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 5: Other Page */}
         {currentPath === '#/other' && (
-          <div className="p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
+          <div className="p-6 sm:p-12 border border-dashed rounded-lg bg-card text-center space-y-3">
             <h2 className="text-xl font-bold">Other Page</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
               You navigated to the URL `#/other`. The active DataManager component has been unmounted.
             </p>
             <p className="text-sm text-primary font-medium">
-              Click either "Posts" or "Random Users" tab above to go back and verify state persistence.
+              Click one of the tabs above to go back and verify state persistence.
             </p>
           </div>
         )}
