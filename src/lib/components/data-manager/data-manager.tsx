@@ -8,7 +8,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Eye, RotateCw, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, toTitleCase } from '@/lib/utils';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -648,7 +648,7 @@ export function DataManager<T extends { id: string | number }>({
                                     ?.filter((column: any) => (column.accessorKey || column.id) && !(isMobile && column.meta?.hideOnMobile))
                                     .map((column: any) => {
                                         const columnId = column.accessorKey || column.id;
-                                        const columnLabel = typeof column.header === 'string' ? column.header : columnId;
+                                        const columnLabel = typeof column.header === 'string' ? column.header : toTitleCase(columnId);
                                         return (
                                             <DropdownMenuCheckboxItem
                                                 key={columnId}
