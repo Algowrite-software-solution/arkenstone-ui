@@ -159,7 +159,6 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     if (!rules) return null;
     if (
       rules.required &&
-      isCreating &&
       (value === "" || value === null || value === undefined)
     )
       return rules.message || "Required";

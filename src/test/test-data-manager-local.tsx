@@ -73,7 +73,7 @@ ExampleDataService.delete = async (id: string | number) => {
 
 const postColumns: ColumnDef<ExampleData>[] = [
   { accessorKey: "id", header: "ID", enableSorting: true },
-  { accessorKey: "title", header: "Title", enableSorting: true },
+  { accessorKey: "title", header: "Title", enableSorting: true, enableHiding: false },
   { accessorKey: "body", header: "Body", meta: { hideOnMobile: true } },
 ];
 

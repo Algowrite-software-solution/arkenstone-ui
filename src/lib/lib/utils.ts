@@ -22,3 +22,23 @@ export function getValue(obj: any, path: string) {
 
   return result;
 }
+
+export function toTitleCase(str: string): string {
+  if (!str) return "";
+
+  // Replace underscores and hyphens with spaces
+  let result = str.replace(/[_-]+/g, " ");
+
+  // Insert a space before uppercase letters (for camelCase)
+  result = result.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+  // Capitalize the first letter of each word and convert the rest to lowercase
+  return result
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => {
+      if (word.toLowerCase() === "id") return "ID";
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
