@@ -25,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, toTitleCase } from '@/lib/utils';
 
 // --- Types & Interfaces ---
 
@@ -180,7 +180,7 @@ function DataTable<T>({
                             <div key={component.column} className="relative w-full md:max-w-sm flex justify-center items-center">
                                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    placeholder={component.placeholder ?? `Filter ${component.column}...`}
+                                    placeholder={component.placeholder ?? `Filter ${toTitleCase(component.column)}...`}
                                     value={(table.getColumn(component.column)?.getFilterValue() as string) ?? ''}
                                     onChange={(event) => table.getColumn(component.column)?.setFilterValue(event.target.value)}
                                     className={cn('pl-8', component.className)}
