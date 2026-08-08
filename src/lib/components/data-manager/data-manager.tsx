@@ -513,7 +513,7 @@ export function DataManager<T extends { id: string | number }>({
             });
         }
 
-        if (actionConfig?.view || actionConfig?.edit || actionConfig?.delete) {
+        if (actionConfig?.view || actionConfig?.edit || actionConfig?.delete || (actionConfig?.custom && actionConfig.custom.length > 0)) {
             baseColumns.push({
                 id: 'actions',
                 header: 'Actions',
@@ -535,6 +535,36 @@ export function DataManager<T extends { id: string | number }>({
                             </Button>
                         )}
 
+
+                        {actionConfig?.custom && actionConfig.custom.map((action: any, index: number) => {
+                            const isHidden = typeof action.hidden === 'function' ? action.hidden(row.original) : action.hidden;
+                            if (isHidden) return null;
+
+                            const isDisabled = typeof action.disabled === 'function' ? action.disabled(row.original) : action.disabled;
+
+                            return (
+                                <Button
+                                    key={index}
+                                    size="icon"
+                                    variant={action.variant || "ghost"}
+                                    className={cn(
+                                        "h-8 w-8 cursor-pointer",
+                                        action.variant === 'destructive' 
+                                            ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/20' 
+                                            : 'text-primary hover:primary hover:bg-primary/20',
+                                        action.className
+                                    )}
+                                    disabled={isDisabled}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        action.onClick(row.original);
+                                    }}
+                                    title={action.label}
+                                >
+                                    {action.icon || action.label}
+                                </Button>
+                            );
+                        })}
                         {actionConfig?.edit && (
                             <Button
                                 size="icon"
@@ -569,7 +599,7 @@ export function DataManager<T extends { id: string | number }>({
         }
 
         return baseColumns;
-    }, [config.display.columns, config.display.bulkActions?.enabled, selectedId, isMobile]);
+    }, [config.display.columns, config.display.bulkActions?.enabled, config.display.actions, selectedId, isMobile]);
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
