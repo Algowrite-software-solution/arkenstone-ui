@@ -95,6 +95,16 @@ export interface FieldConfig {
 // --- Layout Types ---
 export type LayoutType = "split-view" | "modal" | "tab-view" | "fullscreen";
 
+export interface RowAction<T> {
+  label: string;
+  icon?: React.ReactNode;
+  onClick: (item: T) => void | Promise<void>;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  hidden?: boolean | ((item: T) => boolean);
+  disabled?: boolean | ((item: T) => boolean);
+  className?: string;
+}
+
 // --- Main Configuration ---
 export interface DataManagerConfig<T extends object> {
   title: string;
@@ -161,6 +171,7 @@ export interface DataManagerConfig<T extends object> {
       edit?: boolean;
       delete?: boolean;
       view?: boolean;
+      custom?: RowAction<T>[];
     };
     searchKeys?: string[]; // Fields to enable search on
 

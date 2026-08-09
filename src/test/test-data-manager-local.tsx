@@ -3,6 +3,7 @@ import { Arkenstone } from '../lib/components/arkestone'
 import { DataManager } from '../lib/components/data-manager/data-manager'
 import { ServiceFactory } from '../lib/services/service-factory'
 import { ColumnDef } from '@tanstack/react-table'
+import { Star, Heart } from 'lucide-react'
 
 // =========================================================================
 // TAB 1: Static Posts Setup
@@ -259,6 +260,30 @@ export function TestDataManagerLocal() {
                   searchKeys: ["title", "body"],
                   pagination: {
                     pageSizeOptions: [10, 20, 30],
+                  },
+                  actions: {
+                    view: true,
+                    edit: true,
+                    delete: true,
+                    custom: [
+                      {
+                        label: "Alert Title",
+                        icon: <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
+                        onClick: (item) => {
+                          alert(`Custom action: ${item.title}`);
+                        }
+                      },
+                      {
+                        label: "Like Post (Conditional)",
+                        icon: <Heart className="h-4 w-4" />,
+                        className: "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50",
+                        hidden: (item) => item.id % 2 === 0, // Hidden for even ID posts
+                        disabled: (item) => item.id % 3 === 0, // Disabled if ID is divisible by 3
+                        onClick: (item) => {
+                          alert(`Liked: ${item.title}`);
+                        }
+                      }
+                    ]
                   },
                   bulkActions: {
                     enabled: true,
