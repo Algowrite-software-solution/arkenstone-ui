@@ -13,7 +13,7 @@ import {
     OnChangeFn,
     PaginationState,
 } from '@tanstack/react-table';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -26,6 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, toTitleCase } from '@/lib/utils';
+import { SearchOptions } from './types';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 // --- Types & Interfaces ---
 
@@ -34,6 +36,7 @@ export interface DisplayConfig<T> {
     data: T | T[]; // Can be an array (table/list) or single object (entity)
     columns?: ColumnDef<T>[]; // Required for Table
     searchKeys?: string[]; // Keys to generate search inputs for
+    searchOptions?: SearchOptions;
     renderItem?: (item: T) => React.ReactNode; // Required for List/Grid
     className?: string;
     loading?: boolean;
@@ -73,6 +76,7 @@ function DataTable<T>({
     columns,
     searchComponent,
     searchConfig = { placement: 'inline' },
+    searchOptions,
     children,
     actionButtons,
     pagination,
@@ -88,6 +92,7 @@ function DataTable<T>({
     columns: ColumnDef<T>[];
     searchComponent?: SearchComponent[];
     searchConfig?: { placement?: 'inline' | 'top' };
+    searchOptions?: SearchOptions;
     children?: React.ReactNode;
     actionButtons?: React.ReactNode;
     pagination?: {
@@ -108,6 +113,10 @@ function DataTable<T>({
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = React.useState('');
+    const [isAdvancedOpen, setIsAdvancedOpen] = React.useState(() => {
+        return !!searchOptions?.disableGlobal;
+    });
     
     // Fallback internal row selection state if not controlled externally
     const [internalRowSelection, setInternalRowSelection] = React.useState({});
@@ -138,6 +147,16 @@ function DataTable<T>({
         },
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: (row, columnId, filterValue) => {
+            const keys = searchComponent?.map(s => s.column) ?? [];
+            if (keys.length > 0 && !keys.includes(columnId)) {
+                return false;
+            }
+            const value = row.getValue(columnId);
+            if (value == null) return false;
+            return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
+        },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -156,6 +175,7 @@ function DataTable<T>({
             columnVisibility: activeColumnVisibility,
             rowSelection: activeRowSelection,
             pagination: activePagination,
+            globalFilter,
         },
     });
 
@@ -168,6 +188,14 @@ function DataTable<T>({
         }
     }, [pageCount, pageIndex, table]);
 
+    const disableGlobal = !!searchOptions?.disableGlobal;
+    const disableAdvanced = !!searchOptions?.disableAdvanced;
+    const forceAdvancedVisibleOnMobile = !!searchOptions?.forceAdvancedVisibleOnMobile || disableGlobal;
+
+    const showGlobal = !disableGlobal && !isAdvancedOpen;
+    const showToggle = !disableAdvanced && !disableGlobal;
+    const showAdvancedPanel = !disableAdvanced && (isAdvancedOpen || disableGlobal);
+
     return (
         <div className="w-full space-y-4 max-w-full">
             {children && <div className="p-1">{children}</div>}
@@ -175,18 +203,92 @@ function DataTable<T>({
             <div className="flex w-full flex-col gap-4">
                 {/* Search Bar Logic */}
                 {(searchComponent?.length ?? 0) > 0 && (
-                    <div className={cn("flex flex-col gap-2", searchConfig.placement === 'top' ? "w-full" : "w-full md:flex-row md:items-center")}>
-                        {searchComponent?.map((component) => (
-                            <div key={component.column} className="relative w-full md:max-w-sm flex justify-center items-center">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder={component.placeholder ?? `Filter ${toTitleCase(component.column)}...`}
-                                    value={(table.getColumn(component.column)?.getFilterValue() as string) ?? ''}
-                                    onChange={(event) => table.getColumn(component.column)?.setFilterValue(event.target.value)}
-                                    className={cn('pl-8', component.className)}
-                                />
-                            </div>
-                        ))}
+                    <div className="flex flex-col gap-3 w-full">
+                        {/* Global Search / Advanced Filters Toolbar */}
+                        <div className="flex flex-wrap items-center gap-2 w-full">
+                            {/* Primary Global Search */}
+                            {showGlobal && (
+                                <div className="relative flex-1 min-w-[240px] max-w-sm">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search..."
+                                        value={globalFilter ?? ''}
+                                        onChange={(event) => setGlobalFilter(event.target.value)}
+                                        className="pl-9 pr-9 h-9 text-sm"
+                                    />
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 h-5 w-5 text-muted-foreground/70 hover:text-foreground cursor-help transition-colors flex items-center justify-center rounded-full hover:bg-muted/50">
+                                                    <HelpCircle className="h-3.5 w-3.5" />
+                                                </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" align="center" className="max-w-xs p-3">
+                                                <p className="text-primary-foreground/75 text-[11px] leading-relaxed">
+                                                    Matches keywords against:
+                                                </p>
+                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                    {searchComponent?.map(s => (
+                                                        <span key={s.column} className="px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground capitalize">
+                                                            {toTitleCase(s.column)}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            )}
+
+                            {/* Inline Advanced Filters */}
+                            {showAdvancedPanel && (
+                                <div className={cn(
+                                    "flex flex-wrap items-center gap-2 flex-1",
+                                    !forceAdvancedVisibleOnMobile && "hidden md:flex"
+                                )}>
+                                    {searchComponent?.map((component) => (
+                                        <div key={component.column} className="relative flex-1 min-w-[160px] max-w-sm">
+                                            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/70" />
+                                            <Input
+                                                placeholder={component.placeholder ?? `Filter ${toTitleCase(component.column)}...`}
+                                                value={(table.getColumn(component.column)?.getFilterValue() as string) ?? ''}
+                                                onChange={(event) => table.getColumn(component.column)?.setFilterValue(event.target.value)}
+                                                className={cn('pl-8 h-9 text-xs', component.className)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Advanced Filter Toggle Button */}
+                            {showToggle && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        const nextState = !isAdvancedOpen;
+                                        setIsAdvancedOpen(nextState);
+                                        
+                                        // Reset search parameters depending on which mode is closed
+                                        if (nextState) {
+                                            // Opening Advanced Filters -> Clear Global Search
+                                            setGlobalFilter('');
+                                        } else {
+                                            // Opening Global Search -> Clear Column Filters
+                                            table.setColumnFilters([]);
+                                        }
+                                    }}
+                                    className={cn(
+                                        "gap-2 h-9 text-xs cursor-pointer ml-auto w-[160px] px-5 shrink-0",
+                                        // Hidden on mobile by default (hidden md:flex) unless forceAdvancedVisibleOnMobile is true
+                                        !forceAdvancedVisibleOnMobile && "hidden md:inline-flex"
+                                    )}
+                                >
+                                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                                    {isAdvancedOpen ? "Hide Filters" : "Advanced Filters"}
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -412,6 +514,7 @@ export const DisplayEngine = <T extends object>({
     data,
     columns,
     searchKeys,
+    searchOptions,
     renderItem,
     className,
     loading,
@@ -450,6 +553,7 @@ export const DisplayEngine = <T extends object>({
                     data={data}
                     columns={columns}
                     searchComponent={searchKeys?.map(key => ({ column: key }))}
+                    searchOptions={searchOptions}
                     pagination={pagination}
                     paginationState={paginationState}
                     onPaginationChange={onPaginationChange}

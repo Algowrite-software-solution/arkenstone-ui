@@ -194,7 +194,7 @@ export function TestDataManagerLocal() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            Posts (Static API)
+            Posts (Static API - Default Search)
           </button>
           <button
             onClick={() => window.location.hash = '#/users'}
@@ -204,7 +204,27 @@ export function TestDataManagerLocal() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            Random Users (Dynamic API)
+            Random Users (Dynamic API - No Global Search)
+          </button>
+          <button
+            onClick={() => window.location.hash = '#/only-global'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/only-global'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Global Search Only
+          </button>
+          <button
+            onClick={() => window.location.hash = '#/force-mobile'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/force-mobile'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Mobile Advanced Toggle
           </button>
           <button
             onClick={() => window.location.hash = '#/grid'}
@@ -338,6 +358,9 @@ export function TestDataManagerLocal() {
                   type: "table",
                   columns: userColumns,
                   searchKeys: ["name", "email"],
+                  searchOptions: {
+                    disableGlobal: true,
+                  },
                   pagination: {
                     pageSizeOptions: [5, 10, 15],
                   },
@@ -373,6 +396,110 @@ export function TestDataManagerLocal() {
                       name: "phone",
                       label: "Phone Number",
                       type: "text",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 2.1: Global Search Only */}
+        {currentPath === '#/only-global' && (
+          <>
+            <p className="text-muted-foreground">
+              This table configures search keys but hides advanced individual filters (`disableAdvanced: true`). Only the global search is visible.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Global Search Only",
+                description: "Demonstrates disabling the individual column filters.",
+                service: ExampleDataService,
+                layout: "modal",
+                modalSize: "lg",
+                devMode: true,
+                display: {
+                  type: "table",
+                  columns: postColumns,
+                  searchKeys: ["title", "body"],
+                  searchOptions: {
+                    disableAdvanced: true,
+                  },
+                  pagination: {
+                    pageSizeOptions: [10, 20, 30],
+                  },
+                  actions: {
+                    view: true,
+                    edit: true,
+                    delete: true,
+                  },
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab 2.2: Mobile Advanced Toggle */}
+        {currentPath === '#/force-mobile' && (
+          <>
+            <p className="text-muted-foreground">
+              This table forces the advanced filters toggle to remain visible on mobile viewports (`forceAdvancedVisibleOnMobile: true`).
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Mobile Advanced Toggle",
+                description: "Forces the advanced filter toggle button to show on mobile devices.",
+                service: ExampleDataService,
+                layout: "modal",
+                modalSize: "lg",
+                devMode: true,
+                display: {
+                  type: "table",
+                  columns: postColumns,
+                  searchKeys: ["title", "body"],
+                  searchOptions: {
+                    forceAdvancedVisibleOnMobile: true,
+                  },
+                  pagination: {
+                    pageSizeOptions: [10, 20, 30],
+                  },
+                  actions: {
+                    view: true,
+                    edit: true,
+                    delete: true,
+                  },
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Body",
+                      type: "textarea",
                       validation: { required: true },
                     },
                   ],

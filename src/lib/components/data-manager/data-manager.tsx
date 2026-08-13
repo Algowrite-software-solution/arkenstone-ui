@@ -778,6 +778,7 @@ export function DataManager<T extends { id: string | number }>({
                         loading={loading}
                         columns={tableColumns}
                         searchKeys={config.display.searchKeys}
+                        searchOptions={config.display.searchOptions}
                         renderItem={renderWrapper}
                         className="h-full overflow-auto"
                         pagination={config.display.pagination}
