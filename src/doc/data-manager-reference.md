@@ -510,6 +510,53 @@ Validates that two inputs conform to a business rule (e.g. validating that a dis
 }
 ```
 
+### E. Custom Row Actions
+
+DataManager allows you to inject custom action buttons into the action column of each row. These actions can run custom callbacks, trigger side-effects, or dispatch direct API requests:
+
+```typescript
+display: {
+    type: 'table',
+    columns: [
+        { accessorKey: 'sku', header: 'SKU' },
+        { accessorKey: 'name', header: 'Product Title' },
+        { accessorKey: 'status', header: 'Status' }
+    ],
+    actions: {
+        edit: true,    // Standard edit button (visible)
+        delete: true,  // Standard delete button (visible)
+        view: false,   // Standard read-only view button (hidden)
+        custom: [
+            {
+                label: "Approve Product",
+                variant: "outline",
+                // Action is hidden if the product is already active
+                hidden: (product) => product.status === 'active',
+                // Action is disabled if there is no stock
+                disabled: (product) => product.stock <= 0,
+                onClick: async (product) => {
+                    await fetch(`/api/products/${product.id}/approve`, { method: 'POST' });
+                    // Trigger store refresh after action completion
+                    ProductService.getAll();
+                }
+            }
+        ]
+    }
+}
+```
+
+#### `RowAction<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `label` | `string` | The text label displayed on the action button or tooltip. |
+| `icon` | `React.ReactNode` | Optional visual React component (e.g. Lucide icon) rendered inside the button. |
+| `onClick` | `(item: T) => void \| Promise<void>` | Callback function executed when clicked, receiving the specific row's record. |
+| `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | Tailwind visual variation style of the button. |
+| `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to hide the action for a given record. |
+| `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to disable/lock the button. |
+| `className` | `string` | Custom Tailwind classes injected into the button element wrapper. |
+
 ---
 
 ## 12. Complete Implementation Demos
