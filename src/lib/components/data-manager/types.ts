@@ -92,6 +92,12 @@ export interface FieldConfig {
   }) => React.ReactNode;
 }
 
+export interface SearchOptions {
+  disableGlobal?: boolean;
+  disableAdvanced?: boolean;
+  forceAdvancedVisibleOnMobile?: boolean;
+}
+
 // --- Layout Types ---
 export type LayoutType = "split-view" | "modal" | "tab-view" | "fullscreen";
 
@@ -174,6 +180,7 @@ export interface DataManagerConfig<T extends object> {
       custom?: RowAction<T>[];
     };
     searchKeys?: string[]; // Fields to enable search on
+    searchOptions?: SearchOptions;
 
     layoutSpaces?: {
       header?: React.ReactNode; // any UI component
