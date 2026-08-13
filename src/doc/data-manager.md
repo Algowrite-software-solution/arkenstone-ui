@@ -20,7 +20,7 @@ Before building a UI, you must define a **Service**. This service acts as the si
 Create a new file (e.g., `services/ProductService.ts`).
 
 ```typescript
-import { ServiceFactory } from 'generic-service-factory'; // Import path
+import { ServiceFactory } from 'arkenstone-ui';
 
 // 1. Define your Data Types
 export interface Product {
@@ -79,7 +79,7 @@ The `DataManager` is the UI powerhouse. It takes your Service and a Configuratio
 ### Basic Usage
 
 ```tsx
-import { DataManager } from 'generic-service-factory';
+import { DataManager } from 'arkenstone-ui';
 import { ProductService, Product } from './services/ProductService';
 
 export default function ProductPage() {
@@ -120,6 +120,7 @@ Controls how data is viewed (Table, List, or Grid).
 | `type` | `'table' \| 'list' \| 'grid'` | The visualization mode. |
 | `columns` | `ColumnDef<T>[]` | **(Table Only)** Array of TanStack Table definitions. |
 | `searchKeys` | `string[]` | Array of object keys to generate search bars for. |
+| `searchOptions` | `SearchOptions` | Optional settings for global/advanced filtering (`disableGlobal`, `disableAdvanced`, `forceAdvancedVisibleOnMobile`). |
 | `renderItem` | `(item: T) => Node` | **(List/Grid Only)** Function to render individual cards. |
 
 **Example (Table):**
