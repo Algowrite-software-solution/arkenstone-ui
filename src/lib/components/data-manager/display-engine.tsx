@@ -191,6 +191,7 @@ function DataTable<T>({
     const disableGlobal = !!searchOptions?.disableGlobal;
     const disableAdvanced = !!searchOptions?.disableAdvanced;
     const forceAdvancedVisibleOnMobile = !!searchOptions?.forceAdvancedVisibleOnMobile || disableGlobal;
+    const isToggleHiddenOnMobile = !forceAdvancedVisibleOnMobile || disableAdvanced;
 
     const showGlobal = !disableGlobal && !isAdvancedOpen;
     const showToggle = !disableAdvanced && !disableGlobal;
@@ -208,7 +209,10 @@ function DataTable<T>({
                         <div className="flex flex-wrap items-center gap-2 w-full">
                             {/* Primary Global Search */}
                             {showGlobal && (
-                                <div className="relative flex-1 min-w-[240px] max-w-sm">
+                                <div className={cn(
+                                    "relative flex-1 min-w-[240px] max-w-sm",
+                                    isToggleHiddenOnMobile && "mx-auto md:ml-0 md:mr-auto"
+                                )}>
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         placeholder="Search..."
@@ -367,18 +371,18 @@ function DataTable<T>({
                 </div>
 
                 {/* Pagination */}
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-2 items-center justify-between w-full">
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+                <div className="flex flex-row gap-2 items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
                         {pagination && (
                             <div className="flex items-center gap-2">
-                                <p className="text-xs font-medium text-muted-foreground whitespace-nowrap">Rows per page</p>
+                                <p className="text-xs font-medium text-muted-foreground whitespace-nowrap hidden sm:block">Rows per page</p>
                                 <Select
                                     value={`${table.getState().pagination.pageSize}`}
                                     onValueChange={(value) => {
                                         table.setPageSize(Number(value));
                                     }}
                                 >
-                                    <SelectTrigger className="h-8 w-[90px] px-2.5">
+                                    <SelectTrigger className="h-8 w-[80px] sm:w-[90px] px-2">
                                         <SelectValue placeholder={table.getState().pagination.pageSize} />
                                     </SelectTrigger>
                                     <SelectContent side="top">
@@ -392,11 +396,11 @@ function DataTable<T>({
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center space-x-2 w-full sm:w-auto justify-center sm:justify-end">
-                        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="w-24">
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-8 px-3 text-xs sm:w-24">
                             Previous
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="w-24">
+                        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-8 px-3 text-xs sm:w-24">
                             Next
                         </Button>
                     </div>

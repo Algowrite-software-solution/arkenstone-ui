@@ -628,7 +628,7 @@ export function DataManager<T extends { id: string | number }>({
 
             {/* --- HEADER --- */}
             <div className="flex-none px-0 py-3 sm:p-4 md:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                <div>
+                <div className="w-full sm:w-auto flex flex-col items-center sm:items-start text-center sm:text-left">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">{config.title}</h1>
                     {config.description && (
                         <p className={cn(
