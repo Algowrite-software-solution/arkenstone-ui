@@ -746,13 +746,18 @@ export function DataManager<T extends { id: string | number }>({
             <div className={`flex-1 overflow-hidden px-0 py-2.5 sm:p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
                 
                 {/* Bulk Actions Toolbar */}
-                <div className={cn(
-                    "grid transition-all duration-300 ease-in-out",
-                    config.display.bulkActions?.enabled && selectedIds.length > 0
-                        ? "grid-rows-[1fr] opacity-100 mb-4"
-                        : "grid-rows-[0fr] opacity-0 mb-0 pointer-events-none"
-                )}>
-                    <div className="overflow-hidden">
+                <div 
+                    className={cn(
+                        "grid overflow-hidden transition-all duration-300 ease-in-out",
+                        config.display.bulkActions?.enabled && selectedIds.length > 0
+                            ? "opacity-100 mb-4"
+                            : "opacity-0 mb-0 pointer-events-none"
+                    )}
+                    style={{
+                        gridTemplateRows: config.display.bulkActions?.enabled && selectedIds.length > 0 ? "1fr" : "0fr"
+                    }}
+                >
+                    <div className="overflow-hidden min-h-0">
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:items-center sm:justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg">
                             <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
                                 <span className="text-sm font-medium text-primary">
