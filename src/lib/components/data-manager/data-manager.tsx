@@ -40,11 +40,19 @@ export function DataManager<T extends { id: string | number }>({
     const { service, devMode } = config;
 
     // Action Config
+    const viewConfig = config.display.actions?.view ?? true;
+    const editConfig = config.display.actions?.edit ?? true;
+    const deleteConfig = config.display.actions?.delete ?? true;
+
+    const isViewEnabled = viewConfig !== false && (typeof viewConfig !== 'object' || viewConfig.enabled !== false);
+    const isEditEnabled = editConfig !== false && (typeof editConfig !== 'object' || editConfig.enabled !== false);
+    const isDeleteEnabled = deleteConfig !== false && (typeof deleteConfig !== 'object' || deleteConfig.enabled !== false);
+
     const actionConfig = {
-        view: true,
-        edit: true,
-        delete: true,
-        ...config.display.actions
+        view: isViewEnabled,
+        edit: isEditEnabled,
+        delete: isDeleteEnabled,
+        custom: config.display.actions?.custom
     };
 
     // =========================================================================
@@ -57,6 +65,9 @@ export function DataManager<T extends { id: string | number }>({
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [isViewing, setIsViewing] = useState(false);
+    const [resolvedData, setResolvedData] = useState<any>(null);
+    const [resolvingId, setResolvingId] = useState<string | number | null>(null);
+    const [resolvingType, setResolvingType] = useState<'edit' | 'view' | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -180,6 +191,32 @@ export function DataManager<T extends { id: string | number }>({
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
     };
+
+    const getActionState = useCallback((actionConfig: any, item: T) => {
+        if (actionConfig === false) return { hidden: true, disabled: false };
+        if (actionConfig === true) return { hidden: false, disabled: false };
+        if (typeof actionConfig === 'function') {
+            const res = actionConfig(item);
+            return {
+                hidden: !!res?.hidden,
+                disabled: !!res?.disabled
+            };
+        }
+        if (typeof actionConfig === 'object' && actionConfig !== null) {
+            const isHidden = typeof actionConfig.hidden === 'function' 
+                ? actionConfig.hidden(item) 
+                : !!actionConfig.hidden;
+            const isDisabled = typeof actionConfig.disabled === 'function' 
+                ? actionConfig.disabled(item) 
+                : !!actionConfig.disabled;
+            const isEnabled = actionConfig.enabled !== false;
+            return { 
+                hidden: isHidden || !isEnabled, 
+                disabled: isDisabled 
+            };
+        }
+        return { hidden: true, disabled: false };
+    }, []);
 
     // =========================================================================
     // 2. CONFIRMATION LOGIC
@@ -445,11 +482,39 @@ export function DataManager<T extends { id: string | number }>({
         }
     };
 
+    const resolveItemData = async (item: T, type: 'edit' | 'view') => {
+        const actionConfig = config.display.actions?.[type];
+        let finalData: any = item;
+
+        if (actionConfig && typeof actionConfig === 'object' && 'resolveData' in actionConfig && actionConfig.resolveData) {
+            setResolvingId(item.id);
+            setResolvingType(type);
+            try {
+                finalData = await actionConfig.resolveData(item);
+            } catch (error) {
+                toast.error("Failed to load details");
+                setResolvingId(null);
+                setResolvingType(null);
+                return;
+            }
+            setResolvingId(null);
+            setResolvingType(null);
+        }
+
+        setResolvedData(finalData);
+        setSelectedId(item.id);
+        if (type === 'edit') {
+            setIsCreating(false);
+        } else {
+            setIsViewing(true);
+        }
+    };
+
     const handleClose = () => {
         setSelectedId(null);
         setIsCreating(false);
         setIsViewing(false);
-        // console.log("closed all opened panels!");
+        setResolvedData(null);
     };
 
     // =========================================================================
@@ -551,103 +616,142 @@ export function DataManager<T extends { id: string | number }>({
             baseColumns.push({
                 id: 'actions',
                 header: 'Actions',
-                cell: ({ row }: any) => (
-                    <div className="flex items-center justify-end gap-2">
+                cell: ({ row }: any) => {
+                    const item = row.original;
+                    const viewState = getActionState(viewConfig, item);
+                    const editState = getActionState(editConfig, item);
+                    const deleteState = getActionState(deleteConfig, item);
 
-                        {actionConfig?.view && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsViewing(true);
-                                    setSelectedId(row.original.id);
-                                }}
-                            >
-                                <Eye className="h-4 w-4" />
-                            </Button>
-                        )}
+                    return (
+                        <div className="flex items-center justify-end gap-2">
 
-
-                        {actionConfig?.custom && actionConfig.custom.map((action: any, index: number) => {
-                            const isHidden = typeof action.hidden === 'function' ? action.hidden(row.original) : action.hidden;
-                            if (isHidden) return null;
-
-                            const isDisabled = typeof action.disabled === 'function' ? action.disabled(row.original) : action.disabled;
-
-                            return (
+                            {!viewState.hidden && (
                                 <Button
-                                    key={index}
                                     size="icon"
-                                    variant={action.variant || "ghost"}
-                                    className={cn(
-                                        "h-8 w-8 cursor-pointer",
-                                        action.variant === 'destructive' 
-                                            ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/20' 
-                                            : 'text-primary hover:primary hover:bg-primary/20',
-                                        action.className
-                                    )}
-                                    disabled={isDisabled}
+                                    variant="ghost"
+                                    className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        action.onClick(row.original);
+                                        resolveItemData(item, 'view');
                                     }}
-                                    title={action.label}
+                                    disabled={viewState.disabled || (resolvingId === item.id && resolvingType === 'view')}
                                 >
-                                    {action.icon || action.label}
+                                    {resolvingId === item.id && resolvingType === 'view' ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    ) : (
+                                        <Eye className="h-4 w-4" />
+                                    )}
                                 </Button>
-                            );
-                        })}
-                        {actionConfig?.edit && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsCreating(false);
-                                    setSelectedId(row.original.id);
-                                }}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                        )}
+                            )}
 
-                        {actionConfig?.delete && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(row.original.id);
-                                }}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                ),
+
+                            {actionConfig?.custom && actionConfig.custom.map((action: any, index: number) => {
+                                const isHidden = typeof action.hidden === 'function' ? action.hidden(item) : action.hidden;
+                                if (isHidden) return null;
+
+                                const isDisabled = typeof action.disabled === 'function' ? action.disabled(item) : action.disabled;
+
+                                return (
+                                    <Button
+                                        key={index}
+                                        size="icon"
+                                        variant={action.variant || "ghost"}
+                                        className={cn(
+                                            "h-8 w-8 cursor-pointer",
+                                            action.variant === 'destructive' 
+                                                ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/20' 
+                                                : 'text-primary hover:primary hover:bg-primary/20',
+                                            action.className
+                                        )}
+                                        disabled={isDisabled}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            action.onClick(item);
+                                        }}
+                                        title={action.label}
+                                    >
+                                        {action.icon || action.label}
+                                    </Button>
+                                );
+                            })}
+                            {!editState.hidden && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        resolveItemData(item, 'edit');
+                                    }}
+                                    disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                                >
+                                    {resolvingId === item.id && resolvingType === 'edit' ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    ) : (
+                                        <Pencil className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            )}
+
+                            {!deleteState.hidden && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(item.id);
+                                    }}
+                                    disabled={deleteState.disabled}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                    );
+                },
             });
         }
 
         return baseColumns;
-    }, [config.display.columns, config.display.bulkActions?.enabled, config.display.actions, selectedId, isMobile]);
+    }, [config.display.columns, config.display.bulkActions?.enabled, config.display.actions, selectedId, isMobile, resolvingId, resolvingType]);
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
+
+        const editState = getActionState(editConfig, item);
+        const deleteState = getActionState(deleteConfig, item);
 
         return (
             <div className="group relative">
                 {config.display.renderItem(item)}
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border">
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setSelectedId(item.id)}>
-                        <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
+                    {!editState.hidden && (
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-6 w-6" 
+                            onClick={() => resolveItemData(item, 'edit')}
+                            disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                        >
+                            {resolvingId === item.id && resolvingType === 'edit' ? (
+                                <span className="h-3.5 w-3.5 animate-spin rounded-full border border-primary border-t-transparent" />
+                            ) : (
+                                <Pencil className="h-3 w-3" />
+                            )}
+                        </Button>
+                    )}
+                    {!deleteState.hidden && (
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-6 w-6 text-destructive" 
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deleteState.disabled}
+                        >
+                            <Trash2 className="h-3 w-3" />
+                        </Button>
+                    )}
                 </div>
             </div>
         );
@@ -801,7 +905,7 @@ export function DataManager<T extends { id: string | number }>({
                             isCreating={isCreating}
                             fields={config.form.fields}
                             updateFormValues={config.updateFormValues}
-                            initialValues={isCreating ? {} : (activeItem ?? {})}
+                            initialValues={isCreating ? {} : (resolvedData ?? activeItem ?? {})}
                             onSubmit={isCreating ? handleCreate : handleUpdate}
                             isLoading={isLoading}
                             submitLabel={isCreating ? "Create" : "Save Changes"}
@@ -845,7 +949,7 @@ export function DataManager<T extends { id: string | number }>({
 
             <ViewDialog
                 isOpen={isViewing}
-                data={activeItem}
+                data={resolvedData ?? activeItem}
                 handleClose={handleClose}
                 config={config.display?.viewModalConfig}
             />

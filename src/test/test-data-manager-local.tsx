@@ -247,6 +247,16 @@ export function TestDataManagerLocal() {
             List View (Tab Layout)
           </button>
           <button
+            onClick={() => window.location.hash = '#/resolve-data'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/resolve-data'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Resolve Data (Async Loading)
+          </button>
+          <button
             onClick={() => window.location.hash = '#/other'}
             className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
@@ -618,6 +628,84 @@ export function TestDataManagerLocal() {
                     {
                       name: "body",
                       label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab: Resolve Data */}
+        {currentPath === '#/resolve-data' && (
+          <>
+            <p className="text-muted-foreground mb-4">
+              Demonstrates asynchronous data resolution (`resolveData`) before mounting the details panel or form.
+              Clicking edit/view on any item will show a loading spinner on the button for 1.5 seconds, then open with deep/resolved content.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Posts (Async Resolve)",
+                description: "Simulates fetching rich detailed body text on demand when editing or viewing a post.",
+                service: ExampleDataService,
+                layout: "modal",
+                modalSize: "lg",
+                devMode: true,
+                display: {
+                  type: "table",
+                  columns: postColumns,
+                  searchKeys: ["title", "body"],
+                  pagination: {
+                    pageSizeOptions: [10, 20, 30],
+                  },
+                  actions: {
+                    view: {
+                      enabled: true,
+                      resolveData: async (item) => {
+                        // Simulate delay
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        return {
+                          ...item,
+                          body: `[RESOLVED VIEW DETAILS] ${item.body} (resolved at ${new Date().toLocaleTimeString()})`
+                        };
+                      },
+                      // Hide view action dynamically for even IDs
+                      hidden: (item) => item.id % 2 === 0,
+                    },
+                    edit: {
+                      enabled: true,
+                      resolveData: async (item) => {
+                        // Simulate delay
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        return {
+                          ...item,
+                          title: `${item.title} (RESOLVED FOR EDITING)`
+                        };
+                      },
+                      // Disable edit action dynamically if ID is divisible by 3
+                      disabled: (item) => item.id % 3 === 0,
+                    },
+                    delete: {
+                      enabled: true,
+                      // Hide delete action dynamically if ID is divisible by 5
+                      hidden: (item) => item.id % 5 === 0,
+                    }
+                  }
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Body",
                       type: "textarea",
                       validation: { required: true },
                     },

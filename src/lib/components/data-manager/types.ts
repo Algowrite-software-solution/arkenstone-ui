@@ -101,6 +101,13 @@ export interface SearchOptions {
 // --- Layout Types ---
 export type LayoutType = "split-view" | "modal" | "tab-view" | "fullscreen";
 
+export interface ActionConfig<T> {
+  enabled?: boolean;
+  resolveData?: (item: T) => Promise<any> | any;
+  hidden?: boolean | ((item: T) => boolean);
+  disabled?: boolean | ((item: T) => boolean);
+}
+
 export interface RowAction<T> {
   label: string;
   icon?: React.ReactNode;
@@ -174,9 +181,9 @@ export interface DataManagerConfig<T extends object> {
     columns?: ColumnDef<T>[];
     persistColumnVisibility?: boolean;
     actions?: {
-      edit?: boolean;
-      delete?: boolean;
-      view?: boolean;
+      edit?: boolean | ActionConfig<T>;
+      delete?: boolean | Omit<ActionConfig<T>, "resolveData">;
+      view?: boolean | ActionConfig<T>;
       custom?: RowAction<T>[];
     };
     searchKeys?: string[]; // Fields to enable search on

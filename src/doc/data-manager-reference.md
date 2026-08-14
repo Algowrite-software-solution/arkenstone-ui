@@ -102,11 +102,11 @@ Controls how data records are represented, paginated, sorted, and filtered.
     *   `grid`: Renders records as a multi-column responsive grid layout using `renderItem`.
 *   **`columns`**: Column definitions matching TanStack Table's spec. You can pass custom accessor cells to render badges, icons, formatted currency, or action buttons.
 *   **`persistColumnVisibility`**: If enabled, columns hidden by the user remain hidden on their next visit by saving their preferences to localStorage.
-*   **`actions`**: Configures buttons rendered in the final column of the table (or next to items in lists):
-    *   `edit`: Automatically loads record values and displays the edit form.
-    *   `delete`: Triggers a deletion request and alerts the user.
-    *   `view`: Opens a read-only detail view card.
-    *   `custom`: Array of additional action buttons defined by `RowAction<T>`.
+*   **`actions`**: Configures buttons rendered in the final column of the table (or next to items in lists). `edit`, `view`, and `delete` can be simple booleans or configuration objects of type `ActionConfig<T>`:
+    *   `edit`: Displays the edit form. Supports async pre-fetching via `resolveData(item)`, and row-level state predicates: `hidden?: (item) => boolean`, `disabled?: (item) => boolean`.
+    *   `view`: Opens a read-only details card. Supports `resolveData`, `hidden`, and `disabled` predicates.
+    *   `delete`: Triggers deletion. Supports `hidden` and `disabled` predicates.
+    *   `custom`: Array of additional custom action buttons defined by `RowAction<T>`.
 *   **`viewModalConfig`**: Configures the read-only details modal. You can define custom `title`, `description`, and a custom `renderItem` function to present detailed record fields without edit controls.
 *   **`createModalConfig`**: Configures the creation dialog trigger. Allows specifying `createButtonText` to customize the button text (e.g. "Create Product" instead of "Add Item").
 *   **`searchKeys`**: Declares which attributes of entity `T` the search filters look at. If empty, the search input fields will not render.
@@ -545,6 +545,43 @@ display: {
 }
 ```
 
+### F. Asynchronous Data Resolution & Row-Level Action Configuration
+
+This example highlights configuring `edit` and `view` actions with asynchronous pre-fetching hooks, as well as row-level conditional access constraints:
+
+```typescript
+display: {
+    type: 'table',
+    columns: [
+        { accessorKey: 'id', header: 'ID' },
+        { accessorKey: 'title', header: 'Title' }
+    ],
+    actions: {
+        // Simple boolean enables standard behavior
+        delete: true,
+        // Advanced view config with dynamic resolver hook and hidden predicate
+        view: {
+            enabled: true,
+            resolveData: async (post) => {
+                // Fetch full details from database before opening the details modal
+                const res = await fetch(`/api/posts/${post.id}/details`);
+                return await res.json();
+            },
+            hidden: (post) => post.isPrivate // Hide view details for private posts
+        },
+        // Advanced edit config with dynamic disabled predicate
+        edit: {
+            enabled: true,
+            resolveData: async (post) => {
+                const res = await fetch(`/api/posts/${post.id}/edit-payload`);
+                return await res.json();
+            },
+            disabled: (post) => post.isLockedByAdmin // Disable editing if post is locked
+        }
+    }
+}
+```
+
 #### `RowAction<T>` Properties Reference:
 
 | Property | Type | Description |
@@ -556,6 +593,15 @@ display: {
 | `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to hide the action for a given record. |
 | `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to disable/lock the button. |
 | `className` | `string` | Custom Tailwind classes injected into the button element wrapper. |
+
+#### `ActionConfig<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `enabled` | `boolean` | Whether the action button is active globally. Defaults to `true`. |
+| `resolveData` | `(item: T) => Promise<any> \| any` | Optional async function to fetch full details of the record before mounting the form/details viewer. |
+| `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be hidden for a given record. |
+| `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be disabled for a given record. |
 
 ---
 
