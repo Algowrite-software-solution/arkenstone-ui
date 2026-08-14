@@ -99,8 +99,18 @@ export function DataManager<T extends { id: string | number }>({
         resolver: null
     });
 
-    // Pagination state (restores from Zustand store if persistence is enabled)
+    // Pagination state (restores from Zustand store or LocalStorage if persistence is enabled)
     const [paginationState, setPaginationState] = useState(() => {
+        if (typeof window !== 'undefined' && config.display.pagination?.persistPagination === true) {
+            try {
+                const saved = localStorage.getItem(`arkenstone:dm:${config.title || ''}:pagination`);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Failed to load persisted pagination from localStorage", e);
+            }
+        }
         if (config.display.pagination?.persistPagination !== false && typeof service.useStore?.getState === 'function') {
             const storeState = service.useStore.getState() as any;
             if (storeState.pagination) {
@@ -109,18 +119,35 @@ export function DataManager<T extends { id: string | number }>({
         }
         return {
             pageIndex: 0,
-            pageSize: config.display.pagination?.pageSizeOptions?.[0] ?? 10,
+            pageSize: config.display.pagination?.pageSizeOptions?.[0] ?? 15,
         };
     });
 
     useEffect(() => {
+        if (typeof window !== 'undefined' && config.display.pagination?.persistPagination === true) {
+            try {
+                localStorage.setItem(`arkenstone:dm:${config.title || ''}:pagination`, JSON.stringify(paginationState));
+            } catch (e) {
+                console.error("Failed to persist pagination to localStorage", e);
+            }
+        }
         if (config.display.pagination?.persistPagination !== false && typeof service.useStore?.setState === 'function') {
             service.useStore.setState({ pagination: paginationState });
         }
-    }, [paginationState, config.display.pagination?.persistPagination, service]);
+    }, [paginationState, config.display.pagination?.persistPagination, service, config.title]);
 
-    // Column visibility state (restores from Zustand store if persistence is enabled)
+    // Column visibility state (restores from Zustand store or LocalStorage if persistence is enabled)
     const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() => {
+        if (typeof window !== 'undefined' && config.display.persistColumnVisibility === true) {
+            try {
+                const saved = localStorage.getItem(`arkenstone:dm:${config.title || ''}:colVisibility`);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Failed to load persisted column visibility from localStorage", e);
+            }
+        }
         if (config.display.persistColumnVisibility !== false && typeof service.useStore?.getState === 'function') {
             const storeState = service.useStore.getState() as any;
             if (storeState.columnVisibility) {
@@ -131,10 +158,17 @@ export function DataManager<T extends { id: string | number }>({
     });
 
     useEffect(() => {
+        if (typeof window !== 'undefined' && config.display.persistColumnVisibility === true) {
+            try {
+                localStorage.setItem(`arkenstone:dm:${config.title || ''}:colVisibility`, JSON.stringify(columnVisibility));
+            } catch (e) {
+                console.error("Failed to persist column visibility to localStorage", e);
+            }
+        }
         if (config.display.persistColumnVisibility !== false && typeof service.useStore?.setState === 'function') {
             service.useStore.setState({ columnVisibility });
         }
-    }, [columnVisibility, config.display.persistColumnVisibility, service]);
+    }, [columnVisibility, config.display.persistColumnVisibility, service, config.title]);
 
     // Derived State
     const activeItem = useMemo(() =>
@@ -712,13 +746,18 @@ export function DataManager<T extends { id: string | number }>({
             <div className={`flex-1 overflow-hidden px-0 py-2.5 sm:p-4 md:p-6 ${config.display.layoutSpaces?.header ? 'mt-2' : ''} ${config.display.layoutSpaces?.footer ? 'mb-2' : ''}`}>
                 
                 {/* Bulk Actions Toolbar */}
-                <div className={cn(
-                    "grid transition-all duration-300 ease-in-out",
-                    config.display.bulkActions?.enabled && selectedIds.length > 0
-                        ? "grid-rows-[1fr] opacity-100 mb-4"
-                        : "grid-rows-[0fr] opacity-0 mb-0 pointer-events-none"
-                )}>
-                    <div className="overflow-hidden">
+                <div 
+                    className={cn(
+                        "grid overflow-hidden transition-all duration-300 ease-in-out",
+                        config.display.bulkActions?.enabled && selectedIds.length > 0
+                            ? "opacity-100 mb-4"
+                            : "opacity-0 mb-0 pointer-events-none"
+                    )}
+                    style={{
+                        gridTemplateRows: config.display.bulkActions?.enabled && selectedIds.length > 0 ? "1fr" : "0fr"
+                    }}
+                >
+                    <div className="overflow-hidden min-h-0">
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:items-center sm:justify-between bg-primary/5 border border-primary/20 p-3 rounded-lg">
                             <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
                                 <span className="text-sm font-medium text-primary">

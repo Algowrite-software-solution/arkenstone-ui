@@ -133,7 +133,7 @@ function DataTable<T>({
     // Fallback internal pagination state if not controlled externally
     const [internalPagination, setInternalPagination] = React.useState<PaginationState>({
         pageIndex: 0,
-        pageSize: pagination?.pageSizeOptions?.[0] ?? 10,
+        pageSize: pagination?.pageSizeOptions?.[0] ?? 15,
     });
 
     const activePagination = paginationState ?? internalPagination;
@@ -386,7 +386,7 @@ function DataTable<T>({
                                         <SelectValue placeholder={table.getState().pagination.pageSize} />
                                     </SelectTrigger>
                                     <SelectContent side="top">
-                                        {(pagination.pageSizeOptions || [10, 15, 25, 50]).map((pageSize) => (
+                                        {(pagination.pageSizeOptions || [15, 25, 50, 100]).map((pageSize) => (
                                             <SelectItem key={pageSize} value={`${pageSize}`}>
                                                 {pageSize}
                                             </SelectItem>
