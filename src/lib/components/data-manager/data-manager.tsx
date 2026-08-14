@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // --- Internal Modules ---
-import { DataManagerConfig, ActionContext } from './types';
+import { DataManagerConfig, ActionContext, ViewFieldConfig } from './types';
 import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
@@ -1018,10 +1018,76 @@ interface ViewDialogProps {
         title?: string;
         description?: string;
         renderItem?: (item: any) => React.ReactNode;
+        fields?: ViewFieldConfig<any>[];
     };
 }
 
 export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProps) {
+    const renderValue = (value: any, item: any) => {
+        if (value === null || value === undefined || value === '') {
+            return <span className="text-muted-foreground/60 italic">—</span>;
+        }
+
+        if (typeof value === 'boolean') {
+            return value ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30">Yes</span>
+            ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/50">No</span>
+            );
+        }
+
+        if (typeof value === 'string') {
+            // Check for image URL
+            if (value.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) || value.startsWith('data:image/')) {
+                return (
+                    <div className="relative group max-w-[240px] mt-1 rounded-lg overflow-hidden bg-muted/40 shadow-sm">
+                        <img src={value} alt="Preview" className="max-h-28 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    </div>
+                );
+            }
+            // Check for Email
+            if (value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                return (
+                    <a href={`mailto:${value}`} className="text-primary hover:underline break-all inline-flex items-center gap-1">
+                        {value}
+                    </a>
+                );
+            }
+            // Check for Web Link
+            if (value.startsWith('http://') || value.startsWith('https://')) {
+                return (
+                    <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all inline-flex items-center gap-1">
+                        {value}
+                    </a>
+                );
+            }
+            // Check for ISO Date
+            if (value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+                try {
+                    return new Date(value).toLocaleString();
+                } catch (e) {
+                    // Fall through
+                }
+            }
+        }
+
+        if (typeof value === 'object') {
+            return (
+                <pre className="text-xs bg-muted/80 p-3 rounded-lg overflow-x-auto max-w-full font-mono text-foreground mt-1">
+                    {JSON.stringify(value, null, 2)}
+                </pre>
+            );
+        }
+
+        return String(value);
+    };
+
+    const getFieldColSpan = (value: any) => {
+        if (value && typeof value === 'object') return 'sm:col-span-2';
+        if (value && typeof value === 'string' && (value.length > 80 || value.includes('\n'))) return 'sm:col-span-2';
+        return 'sm:col-span-1';
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-4xl w-full" >
@@ -1039,23 +1105,63 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
 
                 {/* SCROLLABLE BODY */}
                 <div className="overflow-y-auto pr-2 space-y-4 max-h-[60vh] sm:max-h-[70vh] md:max-h-[80vh]">
-                    {typeof data === "object" && !config?.renderItem &&
-                        data !== null &&
-                        Object.keys(data).map((key) => (
-                            <div key={key} className="flex flex-col space-y-1">
-                                <p className="text-sm text-muted-foreground">{key}</p>
-                                <p>{typeof data[key] !== "object" ? data[key] : null}</p>
+                    {config?.renderItem ? (
+                        config.renderItem(data)
+                    ) : (
+                        typeof data !== "object" || data === null ? (
+                            <div className="bg-muted/20 p-4 rounded-xl">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Data</p>
+                                <p className="text-sm font-medium text-foreground mt-1">{String(data)}</p>
                             </div>
-                        ))}
-
-                    {typeof data === "string" && (
-                        <div className="flex flex-col space-y-1">
-                            <p className="text-sm text-muted-foreground">Data</p>
-                            <p>{data}</p>
-                        </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {config?.fields ? (
+                                    config.fields.map((field) => {
+                                        if (field.isSection) {
+                                            return (
+                                                <div 
+                                                    key={field.name} 
+                                                    className={cn(
+                                                        "sm:col-span-2 font-bold text-[10px] uppercase tracking-wider text-primary border-b border-border pb-1.5 mt-4 first:mt-0", 
+                                                        field.className
+                                                    )}
+                                                >
+                                                    {field.label || toTitleCase(String(field.name))}
+                                                </div>
+                                            );
+                                        }
+                                        const val = data[field.name];
+                                        const colSpan = getFieldColSpan(val);
+                                        return (
+                                            <div key={field.name} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan, field.className)}>
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                    {field.label || toTitleCase(String(field.name))}
+                                                </p>
+                                                <div className="text-sm font-medium text-foreground break-words">
+                                                    {field.render ? field.render(val, data) : renderValue(val, data)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    Object.keys(data).filter(key => typeof data[key] !== 'function').map((key) => {
+                                        const val = data[key];
+                                        const colSpan = getFieldColSpan(val);
+                                        return (
+                                            <div key={key} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan)}>
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                    {toTitleCase(key)}
+                                                </p>
+                                                <div className="text-sm font-medium text-foreground break-words">
+                                                    {renderValue(val, data)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        )
                     )}
-
-                    {config?.renderItem && config.renderItem(data)}
                 </div>
 
                 <DialogFooter>

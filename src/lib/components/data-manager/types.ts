@@ -125,6 +125,14 @@ export interface RowAction<T> {
   className?: string;
 }
 
+export interface ViewFieldConfig<T> {
+  name: string;
+  label?: string;
+  render?: (value: any, item: T) => React.ReactNode;
+  className?: string;
+  isSection?: boolean;
+}
+
 // --- Main Configuration ---
 export interface DataManagerConfig<T extends object> {
   title: string;
@@ -164,6 +172,7 @@ export interface DataManagerConfig<T extends object> {
       title?: string;
       description?: string;
       renderItem?: (item: T) => React.ReactNode;
+      fields?: ViewFieldConfig<T>[];
     };
 
     createModalConfig?: {

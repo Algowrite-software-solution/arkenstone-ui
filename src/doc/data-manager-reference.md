@@ -107,7 +107,7 @@ Controls how data records are represented, paginated, sorted, and filtered.
     *   `view`: Opens a read-only details card. Supports `resolveData`, `hidden`, and `disabled` predicates.
     *   `delete`: Triggers deletion. Supports `hidden` and `disabled` predicates.
     *   `custom`: Array of additional custom action buttons defined by `RowAction<T>`.
-*   **`viewModalConfig`**: Configures the read-only details modal. You can define custom `title`, `description`, and a custom `renderItem` function to present detailed record fields without edit controls.
+*   **`viewModalConfig`**: Configures the read-only details modal. You can define a custom `title`, `description`, a custom `renderItem` function, or a structured `fields?: ViewFieldConfig<T>[]` layout schema to map and auto-format record details inside a premium two-column grid.
 *   **`createModalConfig`**: Configures the creation dialog trigger. Allows specifying `createButtonText` to customize the button text (e.g. "Create Product" instead of "Add Item").
 *   **`searchKeys`**: Declares which attributes of entity `T` the search filters look at. If empty, the search input fields will not render.
 *   **`searchOptions`**: Configures how the search inputs are presented (as a single global bar, specific column inputs, or a toggleable layout). See details below.
@@ -611,6 +611,16 @@ display: {
 | `resolveData` | `(item: T) => Promise<any> \| any` | Optional async function to fetch full details of the record before mounting the form/details viewer. |
 | `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be hidden for a given record. |
 | `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be disabled for a given record. |
+
+#### `ViewFieldConfig<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The attribute/field key name in the record object `T` to fetch values from. |
+| `label` | `string` | Optional human-readable text label header. Defaults to key automatically converted to Title Case. |
+| `render` | `(value: any, item: T) => React.ReactNode` | Optional custom formatter function to render custom components, colors, icons, or badges. |
+| `className` | `string` | Custom CSS classes injected directly into the field card container element. |
+| `isSection` | `boolean` | If set to `true`, renders this item as a full-width section header divider (`border-b pb-1.5`) rather than a details field card. |
 
 ---
 

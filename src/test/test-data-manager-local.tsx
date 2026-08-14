@@ -671,7 +671,17 @@ export function TestDataManagerLocal() {
                         await new Promise(resolve => setTimeout(resolve, 1500));
                         return {
                           ...item,
-                          body: `[RESOLVED VIEW DETAILS] ${item.body} (resolved at ${new Date().toLocaleTimeString()})`
+                          body: `[RESOLVED VIEW DETAILS] ${item.body}`,
+                          isActive: item.id % 2 !== 0,
+                          coverImageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400",
+                          authorEmail: "writer.admin@arkenstone.io",
+                          readingTimeMinutes: 5,
+                          projectMetadata: {
+                            category: "Developer Documentation",
+                            tags: ["react", "data-manager", "tailwind"],
+                            version: "v2.4"
+                          },
+                          resolvedAt: new Date().toISOString()
                         };
                       },
                       // Hide view action dynamically for even IDs
@@ -695,6 +705,26 @@ export function TestDataManagerLocal() {
                       // Hide delete action dynamically if ID is divisible by 5
                       hidden: (item) => item.id % 5 === 0,
                     }
+                  },
+                  viewModalConfig: {
+                    title: "Post Inspection Profile",
+                    description: "Detailed system record containing resolved content fields.",
+                    fields: [
+                      { name: "sec-system", label: "System Status & Meta", isSection: true },
+                      { name: "id", label: "Post Identifier" },
+                      { name: "isActive", label: "Is Published / Active" },
+                      { name: "resolvedAt", label: "Date & Time Resolved" },
+
+                      { name: "sec-content", label: "Core Content details", isSection: true },
+                      { name: "title", label: "Structured Title", className: "bg-primary/5" },
+                      { name: "body", label: "Resolved Content Body" },
+
+                      { name: "sec-author", label: "Author Profile & Analytics", isSection: true },
+                      { name: "coverImageUrl", label: "Featured Cover Image" },
+                      { name: "authorEmail", label: "Author Contact Email" },
+                      { name: "readingTimeMinutes", label: "Est. Reading Time" },
+                      { name: "projectMetadata", label: "Nested JSON Metadata" }
+                    ]
                   }
                 },
                 form: {
