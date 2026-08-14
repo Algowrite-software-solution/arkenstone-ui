@@ -283,29 +283,22 @@ When `disableBulkActions` is set to `false`, the Table layout enables checkboxes
 
 ## 8. Sorting & Ordering Mechanics
 
-DataManager integrates client-side column sorting out-of-the-box when using the `'table'` display type.
+DataManager integrates client-side column sorting for the `'table'` display type. However, **column sorting is disabled by default** (`enableSorting: false` is configured for all columns).
 
-### A. Core User Interactions & Indicators
-*   **Toggle Sort:** Tapping on a column header toggles its sorting state through a cycle: **Ascending** ➔ **Descending** ➔ **Unsorted (Clear)**.
-*   **Visual Icons:**
-    *   `ArrowUp`: Active Ascending sorting.
-    *   `ArrowDown`: Active Descending sorting.
-    *   `ArrowUpDown` (50% opacity): Indicates the column is sortable but currently unsorted.
+### A. Enabling Column Sorting
 
-### B. Customizing Column Sorting
-
-You can restrict or customize sorting directly inside the TanStack Table `columns` array:
-
-#### 1. Disabling sorting on specific columns (e.g. actions, description columns)
-Set `enableSorting: false` in the column metadata.
+To enable sorting on a column, you must explicitly set `enableSorting: true` in that column's definition inside the TanStack Table `columns` array:
 
 ```typescript
 columns: [
-    { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'name', header: 'Name' },
-    // Disables sorting for the description column
-    { accessorKey: 'description', header: 'Description', enableSorting: false },
-    // Actions are usually not sortable
+    // Sorting enabled explicitly
+    { accessorKey: 'id', header: 'ID', enableSorting: true },
+    { accessorKey: 'name', header: 'Name', enableSorting: true },
+    
+    // Sorting disabled by default (no action needed)
+    { accessorKey: 'description', header: 'Description' },
+    
+    // Actions are usually not sortable (explicitly disabled or left empty)
     {
         id: 'actions',
         header: '',
@@ -315,7 +308,18 @@ columns: [
 ]
 ```
 
-#### 2. Defining a Custom Sorting Function (`sortingFn`)
+### B. Core User Interactions & Indicators
+
+Once sorting is enabled on a column:
+*   **Toggle Sort:** Tapping on a column header toggles its sorting state through a cycle: **Ascending** ➔ **Descending** ➔ **Unsorted (Clear)**.
+*   **Visual Icons:**
+    *   `ArrowUp`: Active Ascending sorting.
+    *   `ArrowDown`: Active Descending sorting.
+    *   `ArrowUpDown` (50% opacity): Indicates the column is sortable but currently unsorted.
+
+### C. Customizing Column Sorting
+
+#### 1. Defining a Custom Sorting Function (`sortingFn`)
 By default, TanStack Table uses alphanumeric sorting. You can provide a custom `sortingFn` for complex types like formatted strings or priority states:
 
 ```typescript
