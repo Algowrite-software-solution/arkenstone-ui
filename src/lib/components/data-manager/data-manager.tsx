@@ -623,7 +623,7 @@ export function DataManager<T extends { id: string | number }>({
                     const deleteState = getActionState(deleteConfig, item);
 
                     return (
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2" data-dm="actions-wrapper">
 
                             {!viewState.hidden && (
                                 <Button
@@ -635,6 +635,7 @@ export function DataManager<T extends { id: string | number }>({
                                         resolveItemData(item, 'view');
                                     }}
                                     disabled={viewState.disabled || (resolvingId === item.id && resolvingType === 'view')}
+                                    data-dm-action="view"
                                 >
                                     {resolvingId === item.id && resolvingType === 'view' ? (
                                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -676,6 +677,8 @@ export function DataManager<T extends { id: string | number }>({
                                             action.onClick(item, context);
                                         }}
                                         title={action.label}
+                                        data-dm-action="custom"
+                                        data-dm-custom-label={action.label.toLowerCase().replace(/\s+/g, '-')}
                                     >
                                         {action.icon || action.label}
                                     </Button>
@@ -691,6 +694,7 @@ export function DataManager<T extends { id: string | number }>({
                                         resolveItemData(item, 'edit');
                                     }}
                                     disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                                    data-dm-action="edit"
                                 >
                                     {resolvingId === item.id && resolvingType === 'edit' ? (
                                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -710,6 +714,7 @@ export function DataManager<T extends { id: string | number }>({
                                         handleDelete(item.id);
                                     }}
                                     disabled={deleteState.disabled}
+                                    data-dm-action="delete"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -732,7 +737,7 @@ export function DataManager<T extends { id: string | number }>({
         return (
             <div className="group relative">
                 {config.display.renderItem(item)}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border" data-dm="actions-wrapper">
                     {!editState.hidden && (
                         <Button 
                             size="icon" 
@@ -740,6 +745,7 @@ export function DataManager<T extends { id: string | number }>({
                             className="h-6 w-6" 
                             onClick={() => resolveItemData(item, 'edit')}
                             disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                            data-dm-action="edit"
                         >
                             {resolvingId === item.id && resolvingType === 'edit' ? (
                                 <span className="h-3.5 w-3.5 animate-spin rounded-full border border-primary border-t-transparent" />
@@ -755,6 +761,7 @@ export function DataManager<T extends { id: string | number }>({
                             className="h-6 w-6 text-destructive" 
                             onClick={() => handleDelete(item.id)}
                             disabled={deleteState.disabled}
+                            data-dm-action="delete"
                         >
                             <Trash2 className="h-3 w-3" />
                         </Button>

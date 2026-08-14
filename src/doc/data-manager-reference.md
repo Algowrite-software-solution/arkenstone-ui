@@ -614,7 +614,21 @@ display: {
 
 ---
 
-## 12. Complete Implementation Demos
+## 12. DOM Attribute Conventions for Testing & Styling
+
+All interactive action button containers and elements generated inside the `DataManager` are stamped with clean, standardized `data-dm-*` HTML attributes to provide stable targets for automated E2E tests (such as Playwright or Cypress) and custom CSS overrides:
+
+*   **Actions Container Wrapper**: Elements wrapping list or row actions are tagged with `data-dm="actions-wrapper"`.
+*   **Action Type Identifier**: Native action buttons are tagged with `data-dm-action="[action_type]"`:
+    *   `data-dm-action="view"` (View details action trigger)
+    *   `data-dm-action="edit"` (Edit record form trigger)
+    *   `data-dm-action="delete"` (Delete confirmation trigger)
+    *   `data-dm-action="custom"` (Custom custom action trigger)
+*   **Custom Action Label**: Custom actions are stamped with `data-dm-custom-label="[kebab-case-label]"` to uniquely identify each custom button by its title (e.g., `data-dm-custom-label="approve-product"`).
+
+---
+
+## 13. Complete Implementation Demos
 
 ### Demo 1: Dense E-Commerce Products (Modal Table View)
 A modal-driven grid view featuring search overrides, static column selections, async dropdowns, image uploading, and custom cells.
