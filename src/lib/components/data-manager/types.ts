@@ -108,10 +108,17 @@ export interface ActionConfig<T> {
   disabled?: boolean | ((item: T) => boolean);
 }
 
+export interface ActionContext<T> {
+  edit: (item: T) => void;
+  view: (item: T) => void;
+  delete: (item: T) => void;
+  refresh: () => Promise<void>;
+}
+
 export interface RowAction<T> {
   label: string;
   icon?: React.ReactNode;
-  onClick: (item: T) => void | Promise<void>;
+  onClick: (item: T, context: ActionContext<T>) => void | Promise<void>;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   hidden?: boolean | ((item: T) => boolean);
   disabled?: boolean | ((item: T) => boolean);

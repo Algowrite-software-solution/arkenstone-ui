@@ -299,8 +299,9 @@ export function TestDataManagerLocal() {
                       {
                         label: "Alert Title",
                         icon: <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
-                        onClick: (item) => {
-                          alert(`Custom action: ${item.title}`);
+                        onClick: (item, context) => {
+                          alert(`Custom action for "${item.title}". Triggers a manual list refresh.`);
+                          context.refresh();
                         }
                       },
                       {
@@ -309,8 +310,9 @@ export function TestDataManagerLocal() {
                         className: "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50",
                         hidden: (item) => item.id % 2 === 0, // Hidden for even ID posts
                         disabled: (item) => item.id % 3 === 0, // Disabled if ID is divisible by 3
-                        onClick: (item) => {
-                          alert(`Liked: ${item.title}`);
+                        onClick: (item, context) => {
+                          alert(`Liked: "${item.title}". Opening edit modal as a custom secondary flow.`);
+                          context.edit(item);
                         }
                       }
                     ]

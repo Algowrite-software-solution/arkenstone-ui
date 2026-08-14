@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // --- Internal Modules ---
-import { DataManagerConfig } from './types';
+import { DataManagerConfig, ActionContext } from './types';
 import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
@@ -651,6 +651,13 @@ export function DataManager<T extends { id: string | number }>({
 
                                 const isDisabled = typeof action.disabled === 'function' ? action.disabled(item) : action.disabled;
 
+                                const context: ActionContext<T> = {
+                                    edit: (targetItem) => resolveItemData(targetItem, 'edit'),
+                                    view: (targetItem) => resolveItemData(targetItem, 'view'),
+                                    delete: (targetItem) => handleDelete(targetItem.id),
+                                    refresh: () => loadData(),
+                                };
+
                                 return (
                                     <Button
                                         key={index}
@@ -666,7 +673,7 @@ export function DataManager<T extends { id: string | number }>({
                                         disabled={isDisabled}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            action.onClick(item);
+                                            action.onClick(item, context);
                                         }}
                                         title={action.label}
                                     >

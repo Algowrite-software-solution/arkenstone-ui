@@ -588,11 +588,20 @@ display: {
 | :--- | :--- | :--- |
 | `label` | `string` | The text label displayed on the action button or tooltip. |
 | `icon` | `React.ReactNode` | Optional visual React component (e.g. Lucide icon) rendered inside the button. |
-| `onClick` | `(item: T) => void \| Promise<void>` | Callback function executed when clicked, receiving the specific row's record. |
+| `onClick` | `(item: T, context: ActionContext<T>) => void \| Promise<void>` | Callback function executed when clicked, receiving the specific row's record and control context parameters. |
 | `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | Tailwind visual variation style of the button. |
 | `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to hide the action for a given record. |
 | `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to disable/lock the button. |
 | `className` | `string` | Custom Tailwind classes injected into the button element wrapper. |
+
+#### `ActionContext<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `edit` | `(item: T) => void` | Programmatically triggers the edit modal/panel workflow for the specified item. |
+| `view` | `(item: T) => void` | Programmatically triggers the view details modal workflow for the specified item. |
+| `delete` | `(item: T) => void` | Programmatically triggers the delete confirmation prompt flow for the specified item. |
+| `refresh` | `() => Promise<void>` | Re-fetches the current dataset and reloads the table/list state. |
 
 #### `ActionConfig<T>` Properties Reference:
 
