@@ -188,14 +188,16 @@ function DataTable<T>({
         }
     }, [pageCount, pageIndex, table]);
 
+    const isSingleSearch = (searchComponent?.length ?? 0) === 1;
+
     const disableGlobal = !!searchOptions?.disableGlobal;
     const disableAdvanced = !!searchOptions?.disableAdvanced;
     const forceAdvancedVisibleOnMobile = !!searchOptions?.forceAdvancedVisibleOnMobile || disableGlobal;
     const isToggleHiddenOnMobile = !forceAdvancedVisibleOnMobile || disableAdvanced;
 
-    const showGlobal = !disableGlobal && !isAdvancedOpen;
-    const showToggle = !disableAdvanced && !disableGlobal;
-    const showAdvancedPanel = !disableAdvanced && (isAdvancedOpen || disableGlobal);
+    const showGlobal = !isSingleSearch && !disableGlobal && !isAdvancedOpen;
+    const showToggle = !isSingleSearch && !disableAdvanced && !disableGlobal;
+    const showAdvancedPanel = !isSingleSearch && !disableAdvanced && (isAdvancedOpen || disableGlobal);
 
     return (
         <div className="w-full space-y-4 max-w-full">
@@ -207,6 +209,20 @@ function DataTable<T>({
                     <div className="flex flex-col gap-3 w-full">
                         {/* Global Search / Advanced Filters Toolbar */}
                         <div className="flex flex-wrap items-center gap-2 w-full">
+
+                            {/* Single Search Mode: render the one configured input directly */}
+                            {isSingleSearch && searchComponent && (
+                                <div className="relative flex-1 min-w-[240px] max-w-sm">
+                                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/70" />
+                                    <Input
+                                        placeholder={searchComponent[0].placeholder ?? `Filter ${toTitleCase(searchComponent[0].column)}...`}
+                                        value={(table.getColumn(searchComponent[0].column)?.getFilterValue() as string) ?? ''}
+                                        onChange={(event) => table.getColumn(searchComponent[0].column)?.setFilterValue(event.target.value)}
+                                        className={cn('pl-8 h-9 text-sm', searchComponent[0].className)}
+                                    />
+                                </div>
+                            )}
+
                             {/* Primary Global Search */}
                             {showGlobal && (
                                 <div className={cn(

@@ -101,14 +101,36 @@ export interface SearchOptions {
 // --- Layout Types ---
 export type LayoutType = "split-view" | "modal" | "tab-view" | "fullscreen";
 
+export interface ActionConfig<T> {
+  enabled?: boolean;
+  resolveData?: (item: T) => Promise<any> | any;
+  hidden?: boolean | ((item: T) => boolean);
+  disabled?: boolean | ((item: T) => boolean);
+}
+
+export interface ActionContext<T> {
+  edit: (item: T) => void;
+  view: (item: T) => void;
+  delete: (item: T) => void;
+  refresh: () => Promise<void>;
+}
+
 export interface RowAction<T> {
   label: string;
   icon?: React.ReactNode;
-  onClick: (item: T) => void | Promise<void>;
+  onClick: (item: T, context: ActionContext<T>) => void | Promise<void>;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   hidden?: boolean | ((item: T) => boolean);
   disabled?: boolean | ((item: T) => boolean);
   className?: string;
+}
+
+export interface ViewFieldConfig<T> {
+  name: string;
+  label?: string;
+  render?: (value: any, item: T) => React.ReactNode;
+  className?: string;
+  isSection?: boolean;
 }
 
 // --- Main Configuration ---
@@ -150,6 +172,7 @@ export interface DataManagerConfig<T extends object> {
       title?: string;
       description?: string;
       renderItem?: (item: T) => React.ReactNode;
+      fields?: ViewFieldConfig<T>[];
     };
 
     createModalConfig?: {
@@ -174,9 +197,9 @@ export interface DataManagerConfig<T extends object> {
     columns?: ColumnDef<T>[];
     persistColumnVisibility?: boolean;
     actions?: {
-      edit?: boolean;
-      delete?: boolean;
-      view?: boolean;
+      edit?: boolean | ActionConfig<T>;
+      delete?: boolean | Omit<ActionConfig<T>, "resolveData">;
+      view?: boolean | ActionConfig<T>;
       custom?: RowAction<T>[];
     };
     searchKeys?: string[]; // Fields to enable search on

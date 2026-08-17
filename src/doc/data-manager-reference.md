@@ -102,12 +102,12 @@ Controls how data records are represented, paginated, sorted, and filtered.
     *   `grid`: Renders records as a multi-column responsive grid layout using `renderItem`.
 *   **`columns`**: Column definitions matching TanStack Table's spec. You can pass custom accessor cells to render badges, icons, formatted currency, or action buttons.
 *   **`persistColumnVisibility`**: If enabled, columns hidden by the user remain hidden on their next visit by saving their preferences to localStorage.
-*   **`actions`**: Configures buttons rendered in the final column of the table (or next to items in lists):
-    *   `edit`: Automatically loads record values and displays the edit form.
-    *   `delete`: Triggers a deletion request and alerts the user.
-    *   `view`: Opens a read-only detail view card.
-    *   `custom`: Array of additional action buttons defined by `RowAction<T>`.
-*   **`viewModalConfig`**: Configures the read-only details modal. You can define custom `title`, `description`, and a custom `renderItem` function to present detailed record fields without edit controls.
+*   **`actions`**: Configures buttons rendered in the final column of the table (or next to items in lists). `edit`, `view`, and `delete` can be simple booleans or configuration objects of type `ActionConfig<T>`:
+    *   `edit`: Displays the edit form. Supports async pre-fetching via `resolveData(item)`, and row-level state predicates: `hidden?: (item) => boolean`, `disabled?: (item) => boolean`.
+    *   `view`: Opens a read-only details card. Supports `resolveData`, `hidden`, and `disabled` predicates.
+    *   `delete`: Triggers deletion. Supports `hidden` and `disabled` predicates.
+    *   `custom`: Array of additional custom action buttons defined by `RowAction<T>`.
+*   **`viewModalConfig`**: Configures the read-only details modal. You can define a custom `title`, `description`, a custom `renderItem` function, or a structured `fields?: ViewFieldConfig<T>[]` layout schema to map and auto-format record details inside a premium two-column grid.
 *   **`createModalConfig`**: Configures the creation dialog trigger. Allows specifying `createButtonText` to customize the button text (e.g. "Create Product" instead of "Add Item").
 *   **`searchKeys`**: Declares which attributes of entity `T` the search filters look at. If empty, the search input fields will not render.
 *   **`searchOptions`**: Configures how the search inputs are presented (as a single global bar, specific column inputs, or a toggleable layout). See details below.
@@ -283,29 +283,22 @@ When `disableBulkActions` is set to `false`, the Table layout enables checkboxes
 
 ## 8. Sorting & Ordering Mechanics
 
-DataManager integrates client-side column sorting out-of-the-box when using the `'table'` display type.
+DataManager integrates client-side column sorting for the `'table'` display type. However, **column sorting is disabled by default** (`enableSorting: false` is configured for all columns).
 
-### A. Core User Interactions & Indicators
-*   **Toggle Sort:** Tapping on a column header toggles its sorting state through a cycle: **Ascending** ➔ **Descending** ➔ **Unsorted (Clear)**.
-*   **Visual Icons:**
-    *   `ArrowUp`: Active Ascending sorting.
-    *   `ArrowDown`: Active Descending sorting.
-    *   `ArrowUpDown` (50% opacity): Indicates the column is sortable but currently unsorted.
+### A. Enabling Column Sorting
 
-### B. Customizing Column Sorting
-
-You can restrict or customize sorting directly inside the TanStack Table `columns` array:
-
-#### 1. Disabling sorting on specific columns (e.g. actions, description columns)
-Set `enableSorting: false` in the column metadata.
+To enable sorting on a column, you must explicitly set `enableSorting: true` in that column's definition inside the TanStack Table `columns` array:
 
 ```typescript
 columns: [
-    { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'name', header: 'Name' },
-    // Disables sorting for the description column
-    { accessorKey: 'description', header: 'Description', enableSorting: false },
-    // Actions are usually not sortable
+    // Sorting enabled explicitly
+    { accessorKey: 'id', header: 'ID', enableSorting: true },
+    { accessorKey: 'name', header: 'Name', enableSorting: true },
+    
+    // Sorting disabled by default (no action needed)
+    { accessorKey: 'description', header: 'Description' },
+    
+    // Actions are usually not sortable (explicitly disabled or left empty)
     {
         id: 'actions',
         header: '',
@@ -315,7 +308,18 @@ columns: [
 ]
 ```
 
-#### 2. Defining a Custom Sorting Function (`sortingFn`)
+### B. Core User Interactions & Indicators
+
+Once sorting is enabled on a column:
+*   **Toggle Sort:** Tapping on a column header toggles its sorting state through a cycle: **Ascending** ➔ **Descending** ➔ **Unsorted (Clear)**.
+*   **Visual Icons:**
+    *   `ArrowUp`: Active Ascending sorting.
+    *   `ArrowDown`: Active Descending sorting.
+    *   `ArrowUpDown` (50% opacity): Indicates the column is sortable but currently unsorted.
+
+### C. Customizing Column Sorting
+
+#### 1. Defining a Custom Sorting Function (`sortingFn`)
 By default, TanStack Table uses alphanumeric sorting. You can provide a custom `sortingFn` for complex types like formatted strings or priority states:
 
 ```typescript
@@ -545,21 +549,100 @@ display: {
 }
 ```
 
+### F. Asynchronous Data Resolution & Row-Level Action Configuration
+
+This example highlights configuring `edit` and `view` actions with asynchronous pre-fetching hooks, as well as row-level conditional access constraints:
+
+```typescript
+display: {
+    type: 'table',
+    columns: [
+        { accessorKey: 'id', header: 'ID' },
+        { accessorKey: 'title', header: 'Title' }
+    ],
+    actions: {
+        // Simple boolean enables standard behavior
+        delete: true,
+        // Advanced view config with dynamic resolver hook and hidden predicate
+        view: {
+            enabled: true,
+            resolveData: async (post) => {
+                // Fetch full details from database before opening the details modal
+                const res = await fetch(`/api/posts/${post.id}/details`);
+                return await res.json();
+            },
+            hidden: (post) => post.isPrivate // Hide view details for private posts
+        },
+        // Advanced edit config with dynamic disabled predicate
+        edit: {
+            enabled: true,
+            resolveData: async (post) => {
+                const res = await fetch(`/api/posts/${post.id}/edit-payload`);
+                return await res.json();
+            },
+            disabled: (post) => post.isLockedByAdmin // Disable editing if post is locked
+        }
+    }
+}
+```
+
 #### `RowAction<T>` Properties Reference:
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `label` | `string` | The text label displayed on the action button or tooltip. |
 | `icon` | `React.ReactNode` | Optional visual React component (e.g. Lucide icon) rendered inside the button. |
-| `onClick` | `(item: T) => void \| Promise<void>` | Callback function executed when clicked, receiving the specific row's record. |
+| `onClick` | `(item: T, context: ActionContext<T>) => void \| Promise<void>` | Callback function executed when clicked, receiving the specific row's record and control context parameters. |
 | `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | Tailwind visual variation style of the button. |
 | `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to hide the action for a given record. |
 | `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or dynamic function evaluating whether to disable/lock the button. |
 | `className` | `string` | Custom Tailwind classes injected into the button element wrapper. |
 
+#### `ActionContext<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `edit` | `(item: T) => void` | Programmatically triggers the edit modal/panel workflow for the specified item. |
+| `view` | `(item: T) => void` | Programmatically triggers the view details modal workflow for the specified item. |
+| `delete` | `(item: T) => void` | Programmatically triggers the delete confirmation prompt flow for the specified item. |
+| `refresh` | `() => Promise<void>` | Re-fetches the current dataset and reloads the table/list state. |
+
+#### `ActionConfig<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `enabled` | `boolean` | Whether the action button is active globally. Defaults to `true`. |
+| `resolveData` | `(item: T) => Promise<any> \| any` | Optional async function to fetch full details of the record before mounting the form/details viewer. |
+| `hidden` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be hidden for a given record. |
+| `disabled` | `boolean \| ((item: T) => boolean)` | Boolean or callback evaluating if the button should be disabled for a given record. |
+
+#### `ViewFieldConfig<T>` Properties Reference:
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The attribute/field key name in the record object `T` to fetch values from. |
+| `label` | `string` | Optional human-readable text label header. Defaults to key automatically converted to Title Case. |
+| `render` | `(value: any, item: T) => React.ReactNode` | Optional custom formatter function to render custom components, colors, icons, or badges. |
+| `className` | `string` | Custom CSS classes injected directly into the field card container element. |
+| `isSection` | `boolean` | If set to `true`, renders this item as a full-width section header divider (`border-b pb-1.5`) rather than a details field card. |
+
 ---
 
-## 12. Complete Implementation Demos
+## 12. DOM Attribute Conventions for Testing & Styling
+
+All interactive action button containers and elements generated inside the `DataManager` are stamped with clean, standardized `data-dm-*` HTML attributes to provide stable targets for automated E2E tests (such as Playwright or Cypress) and custom CSS overrides:
+
+*   **Actions Container Wrapper**: Elements wrapping list or row actions are tagged with `data-dm="actions-wrapper"`.
+*   **Action Type Identifier**: Native action buttons are tagged with `data-dm-action="[action_type]"`:
+    *   `data-dm-action="view"` (View details action trigger)
+    *   `data-dm-action="edit"` (Edit record form trigger)
+    *   `data-dm-action="delete"` (Delete confirmation trigger)
+    *   `data-dm-action="custom"` (Custom custom action trigger)
+*   **Custom Action Label**: Custom actions are stamped with `data-dm-custom-label="[kebab-case-label]"` to uniquely identify each custom button by its title (e.g., `data-dm-custom-label="approve-product"`).
+
+---
+
+## 13. Complete Implementation Demos
 
 ### Demo 1: Dense E-Commerce Products (Modal Table View)
 A modal-driven grid view featuring search overrides, static column selections, async dropdowns, image uploading, and custom cells.

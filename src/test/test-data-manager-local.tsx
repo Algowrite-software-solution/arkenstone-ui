@@ -247,6 +247,16 @@ export function TestDataManagerLocal() {
             List View (Tab Layout)
           </button>
           <button
+            onClick={() => window.location.hash = '#/resolve-data'}
+            className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
+              currentPath === '#/resolve-data'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Resolve Data (Async Loading)
+          </button>
+          <button
             onClick={() => window.location.hash = '#/other'}
             className={`px-4 py-2 font-medium text-sm rounded-t-md transition-colors cursor-pointer shrink-0 ${
               currentPath === '#/other'
@@ -289,8 +299,9 @@ export function TestDataManagerLocal() {
                       {
                         label: "Alert Title",
                         icon: <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
-                        onClick: (item) => {
-                          alert(`Custom action: ${item.title}`);
+                        onClick: (item, context) => {
+                          alert(`Custom action for "${item.title}". Triggers a manual list refresh.`);
+                          context.refresh();
                         }
                       },
                       {
@@ -299,8 +310,9 @@ export function TestDataManagerLocal() {
                         className: "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50",
                         hidden: (item) => item.id % 2 === 0, // Hidden for even ID posts
                         disabled: (item) => item.id % 3 === 0, // Disabled if ID is divisible by 3
-                        onClick: (item) => {
-                          alert(`Liked: ${item.title}`);
+                        onClick: (item, context) => {
+                          alert(`Liked: "${item.title}". Opening edit modal as a custom secondary flow.`);
+                          context.edit(item);
                         }
                       }
                     ]
@@ -618,6 +630,114 @@ export function TestDataManagerLocal() {
                     {
                       name: "body",
                       label: "Content Body",
+                      type: "textarea",
+                      validation: { required: true },
+                    },
+                  ],
+                },
+              }}
+            />
+          </>
+        )}
+
+        {/* Tab: Resolve Data */}
+        {currentPath === '#/resolve-data' && (
+          <>
+            <p className="text-muted-foreground mb-4">
+              Demonstrates asynchronous data resolution (`resolveData`) before mounting the details panel or form.
+              Clicking edit/view on any item will show a loading spinner on the button for 1.5 seconds, then open with deep/resolved content.
+            </p>
+
+            <DataManager<ExampleData>
+              config={{
+                title: "Posts (Async Resolve)",
+                description: "Simulates fetching rich detailed body text on demand when editing or viewing a post.",
+                service: ExampleDataService,
+                layout: "modal",
+                modalSize: "lg",
+                devMode: true,
+                display: {
+                  type: "table",
+                  columns: postColumns,
+                  searchKeys: ["title", "body"],
+                  pagination: {
+                    pageSizeOptions: [10, 20, 30],
+                  },
+                  actions: {
+                    view: {
+                      enabled: true,
+                      resolveData: async (item) => {
+                        // Simulate delay
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        return {
+                          ...item,
+                          body: `[RESOLVED VIEW DETAILS] ${item.body}`,
+                          isActive: item.id % 2 !== 0,
+                          coverImageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400",
+                          authorEmail: "writer.admin@arkenstone.io",
+                          readingTimeMinutes: 5,
+                          projectMetadata: {
+                            category: "Developer Documentation",
+                            tags: ["react", "data-manager", "tailwind"],
+                            version: "v2.4"
+                          },
+                          resolvedAt: new Date().toISOString()
+                        };
+                      },
+                      // Hide view action dynamically for even IDs
+                      hidden: (item) => item.id % 2 === 0,
+                    },
+                    edit: {
+                      enabled: true,
+                      resolveData: async (item) => {
+                        // Simulate delay
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        return {
+                          ...item,
+                          title: `${item.title} (RESOLVED FOR EDITING)`
+                        };
+                      },
+                      // Disable edit action dynamically if ID is divisible by 3
+                      disabled: (item) => item.id % 3 === 0,
+                    },
+                    delete: {
+                      enabled: true,
+                      // Hide delete action dynamically if ID is divisible by 5
+                      hidden: (item) => item.id % 5 === 0,
+                    }
+                  },
+                  viewModalConfig: {
+                    title: "Post Inspection Profile",
+                    description: "Detailed system record containing resolved content fields.",
+                    fields: [
+                      { name: "sec-system", label: "System Status & Meta", isSection: true },
+                      { name: "id", label: "Post Identifier" },
+                      { name: "isActive", label: "Is Published / Active" },
+                      { name: "resolvedAt", label: "Date & Time Resolved" },
+
+                      { name: "sec-content", label: "Core Content details", isSection: true },
+                      { name: "title", label: "Structured Title", className: "bg-primary/5" },
+                      { name: "body", label: "Resolved Content Body" },
+
+                      { name: "sec-author", label: "Author Profile & Analytics", isSection: true },
+                      { name: "coverImageUrl", label: "Featured Cover Image" },
+                      { name: "authorEmail", label: "Author Contact Email" },
+                      { name: "readingTimeMinutes", label: "Est. Reading Time" },
+                      { name: "projectMetadata", label: "Nested JSON Metadata" }
+                    ]
+                  }
+                },
+                form: {
+                  fields: [
+                    {
+                      name: "title",
+                      label: "Title",
+                      type: "text",
+                      validation: { required: true },
+                    },
+                    {
+                      name: "body",
+                      label: "Body",
                       type: "textarea",
                       validation: { required: true },
                     },

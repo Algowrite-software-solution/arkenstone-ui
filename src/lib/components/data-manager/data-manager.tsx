@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // --- Internal Modules ---
-import { DataManagerConfig } from './types';
+import { DataManagerConfig, ActionContext, ViewFieldConfig } from './types';
 import { LayoutManager } from './layout-manager';
 import { GenericForm } from './input-engine';
 import { DisplayEngine } from './display-engine';
@@ -40,11 +40,19 @@ export function DataManager<T extends { id: string | number }>({
     const { service, devMode } = config;
 
     // Action Config
+    const viewConfig = config.display.actions?.view ?? true;
+    const editConfig = config.display.actions?.edit ?? true;
+    const deleteConfig = config.display.actions?.delete ?? true;
+
+    const isViewEnabled = viewConfig !== false && (typeof viewConfig !== 'object' || viewConfig.enabled !== false);
+    const isEditEnabled = editConfig !== false && (typeof editConfig !== 'object' || editConfig.enabled !== false);
+    const isDeleteEnabled = deleteConfig !== false && (typeof deleteConfig !== 'object' || deleteConfig.enabled !== false);
+
     const actionConfig = {
-        view: true,
-        edit: true,
-        delete: true,
-        ...config.display.actions
+        view: isViewEnabled,
+        edit: isEditEnabled,
+        delete: isDeleteEnabled,
+        custom: config.display.actions?.custom
     };
 
     // =========================================================================
@@ -57,6 +65,9 @@ export function DataManager<T extends { id: string | number }>({
     const [selectedId, setSelectedId] = useState<string | number | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [isViewing, setIsViewing] = useState(false);
+    const [resolvedData, setResolvedData] = useState<any>(null);
+    const [resolvingId, setResolvingId] = useState<string | number | null>(null);
+    const [resolvingType, setResolvingType] = useState<'edit' | 'view' | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -180,6 +191,32 @@ export function DataManager<T extends { id: string | number }>({
     const log = (...args: any[]) => {
         if (devMode) console.log(`[DataManager:${config.title}]`, ...args);
     };
+
+    const getActionState = useCallback((actionConfig: any, item: T) => {
+        if (actionConfig === false) return { hidden: true, disabled: false };
+        if (actionConfig === true) return { hidden: false, disabled: false };
+        if (typeof actionConfig === 'function') {
+            const res = actionConfig(item);
+            return {
+                hidden: !!res?.hidden,
+                disabled: !!res?.disabled
+            };
+        }
+        if (typeof actionConfig === 'object' && actionConfig !== null) {
+            const isHidden = typeof actionConfig.hidden === 'function' 
+                ? actionConfig.hidden(item) 
+                : !!actionConfig.hidden;
+            const isDisabled = typeof actionConfig.disabled === 'function' 
+                ? actionConfig.disabled(item) 
+                : !!actionConfig.disabled;
+            const isEnabled = actionConfig.enabled !== false;
+            return { 
+                hidden: isHidden || !isEnabled, 
+                disabled: isDisabled 
+            };
+        }
+        return { hidden: true, disabled: false };
+    }, []);
 
     // =========================================================================
     // 2. CONFIRMATION LOGIC
@@ -445,11 +482,39 @@ export function DataManager<T extends { id: string | number }>({
         }
     };
 
+    const resolveItemData = async (item: T, type: 'edit' | 'view') => {
+        const actionConfig = config.display.actions?.[type];
+        let finalData: any = item;
+
+        if (actionConfig && typeof actionConfig === 'object' && 'resolveData' in actionConfig && actionConfig.resolveData) {
+            setResolvingId(item.id);
+            setResolvingType(type);
+            try {
+                finalData = await actionConfig.resolveData(item);
+            } catch (error) {
+                toast.error("Failed to load details");
+                setResolvingId(null);
+                setResolvingType(null);
+                return;
+            }
+            setResolvingId(null);
+            setResolvingType(null);
+        }
+
+        setResolvedData(finalData);
+        setSelectedId(item.id);
+        if (type === 'edit') {
+            setIsCreating(false);
+        } else {
+            setIsViewing(true);
+        }
+    };
+
     const handleClose = () => {
         setSelectedId(null);
         setIsCreating(false);
         setIsViewing(false);
-        // console.log("closed all opened panels!");
+        setResolvedData(null);
     };
 
     // =========================================================================
@@ -551,103 +616,156 @@ export function DataManager<T extends { id: string | number }>({
             baseColumns.push({
                 id: 'actions',
                 header: 'Actions',
-                cell: ({ row }: any) => (
-                    <div className="flex items-center justify-end gap-2">
+                cell: ({ row }: any) => {
+                    const item = row.original;
+                    const viewState = getActionState(viewConfig, item);
+                    const editState = getActionState(editConfig, item);
+                    const deleteState = getActionState(deleteConfig, item);
 
-                        {actionConfig?.view && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsViewing(true);
-                                    setSelectedId(row.original.id);
-                                }}
-                            >
-                                <Eye className="h-4 w-4" />
-                            </Button>
-                        )}
+                    return (
+                        <div className="flex items-center justify-end gap-2" data-dm="actions-wrapper">
 
-
-                        {actionConfig?.custom && actionConfig.custom.map((action: any, index: number) => {
-                            const isHidden = typeof action.hidden === 'function' ? action.hidden(row.original) : action.hidden;
-                            if (isHidden) return null;
-
-                            const isDisabled = typeof action.disabled === 'function' ? action.disabled(row.original) : action.disabled;
-
-                            return (
+                            {!viewState.hidden && (
                                 <Button
-                                    key={index}
                                     size="icon"
-                                    variant={action.variant || "ghost"}
-                                    className={cn(
-                                        "h-8 w-8 cursor-pointer",
-                                        action.variant === 'destructive' 
-                                            ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/20' 
-                                            : 'text-primary hover:primary hover:bg-primary/20',
-                                        action.className
-                                    )}
-                                    disabled={isDisabled}
+                                    variant="ghost"
+                                    className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        action.onClick(row.original);
+                                        resolveItemData(item, 'view');
                                     }}
-                                    title={action.label}
+                                    disabled={viewState.disabled || (resolvingId === item.id && resolvingType === 'view')}
+                                    data-dm-action="view"
                                 >
-                                    {action.icon || action.label}
+                                    {resolvingId === item.id && resolvingType === 'view' ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    ) : (
+                                        <Eye className="h-4 w-4" />
+                                    )}
                                 </Button>
-                            );
-                        })}
-                        {actionConfig?.edit && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsCreating(false);
-                                    setSelectedId(row.original.id);
-                                }}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                        )}
+                            )}
 
-                        {actionConfig?.delete && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(row.original.id);
-                                }}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-                ),
+
+                            {actionConfig?.custom && actionConfig.custom.map((action: any, index: number) => {
+                                const isHidden = typeof action.hidden === 'function' ? action.hidden(item) : action.hidden;
+                                if (isHidden) return null;
+
+                                const isDisabled = typeof action.disabled === 'function' ? action.disabled(item) : action.disabled;
+
+                                const context: ActionContext<T> = {
+                                    edit: (targetItem) => resolveItemData(targetItem, 'edit'),
+                                    view: (targetItem) => resolveItemData(targetItem, 'view'),
+                                    delete: (targetItem) => handleDelete(targetItem.id),
+                                    refresh: () => loadData(),
+                                };
+
+                                return (
+                                    <Button
+                                        key={index}
+                                        size="icon"
+                                        variant={action.variant || "ghost"}
+                                        className={cn(
+                                            "h-8 w-8 cursor-pointer",
+                                            action.variant === 'destructive' 
+                                                ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/20' 
+                                                : 'text-primary hover:primary hover:bg-primary/20',
+                                            action.className
+                                        )}
+                                        disabled={isDisabled}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            action.onClick(item, context);
+                                        }}
+                                        title={action.label}
+                                        data-dm-action="custom"
+                                        data-dm-custom-label={action.label.toLowerCase().replace(/\s+/g, '-')}
+                                    >
+                                        {action.icon || action.label}
+                                    </Button>
+                                );
+                            })}
+                            {!editState.hidden && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-primary hover:primary hover:bg-primary/20 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        resolveItemData(item, 'edit');
+                                    }}
+                                    disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                                    data-dm-action="edit"
+                                >
+                                    {resolvingId === item.id && resolvingType === 'edit' ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    ) : (
+                                        <Pencil className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            )}
+
+                            {!deleteState.hidden && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/20 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(item.id);
+                                    }}
+                                    disabled={deleteState.disabled}
+                                    data-dm-action="delete"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                    );
+                },
             });
         }
 
         return baseColumns;
-    }, [config.display.columns, config.display.bulkActions?.enabled, config.display.actions, selectedId, isMobile]);
+    }, [config.display.columns, config.display.bulkActions?.enabled, config.display.actions, selectedId, isMobile, resolvingId, resolvingType]);
 
     const renderWrapper = (item: T) => {
         if (!config.display.renderItem) return null;
 
+        const editState = getActionState(editConfig, item);
+        const deleteState = getActionState(deleteConfig, item);
+
         return (
             <div className="group relative">
                 {config.display.renderItem(item)}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border">
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setSelectedId(item.id)}>
-                        <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/90 p-1 rounded-md shadow-sm border" data-dm="actions-wrapper">
+                    {!editState.hidden && (
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-6 w-6" 
+                            onClick={() => resolveItemData(item, 'edit')}
+                            disabled={editState.disabled || (resolvingId === item.id && resolvingType === 'edit')}
+                            data-dm-action="edit"
+                        >
+                            {resolvingId === item.id && resolvingType === 'edit' ? (
+                                <span className="h-3.5 w-3.5 animate-spin rounded-full border border-primary border-t-transparent" />
+                            ) : (
+                                <Pencil className="h-3 w-3" />
+                            )}
+                        </Button>
+                    )}
+                    {!deleteState.hidden && (
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-6 w-6 text-destructive" 
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deleteState.disabled}
+                            data-dm-action="delete"
+                        >
+                            <Trash2 className="h-3 w-3" />
+                        </Button>
+                    )}
                 </div>
             </div>
         );
@@ -801,7 +919,7 @@ export function DataManager<T extends { id: string | number }>({
                             isCreating={isCreating}
                             fields={config.form.fields}
                             updateFormValues={config.updateFormValues}
-                            initialValues={isCreating ? {} : (activeItem ?? {})}
+                            initialValues={isCreating ? {} : (resolvedData ?? activeItem ?? {})}
                             onSubmit={isCreating ? handleCreate : handleUpdate}
                             isLoading={isLoading}
                             submitLabel={isCreating ? "Create" : "Save Changes"}
@@ -845,7 +963,7 @@ export function DataManager<T extends { id: string | number }>({
 
             <ViewDialog
                 isOpen={isViewing}
-                data={activeItem}
+                data={resolvedData ?? activeItem}
                 handleClose={handleClose}
                 config={config.display?.viewModalConfig}
             />
@@ -900,10 +1018,76 @@ interface ViewDialogProps {
         title?: string;
         description?: string;
         renderItem?: (item: any) => React.ReactNode;
+        fields?: ViewFieldConfig<any>[];
     };
 }
 
 export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProps) {
+    const renderValue = (value: any, item: any) => {
+        if (value === null || value === undefined || value === '') {
+            return <span className="text-muted-foreground/60 italic">—</span>;
+        }
+
+        if (typeof value === 'boolean') {
+            return value ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30">Yes</span>
+            ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/50">No</span>
+            );
+        }
+
+        if (typeof value === 'string') {
+            // Check for image URL
+            if (value.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) || value.startsWith('data:image/')) {
+                return (
+                    <div className="relative group max-w-[240px] mt-1 rounded-lg overflow-hidden bg-muted/40 shadow-sm">
+                        <img src={value} alt="Preview" className="max-h-28 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    </div>
+                );
+            }
+            // Check for Email
+            if (value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                return (
+                    <a href={`mailto:${value}`} className="text-primary hover:underline break-all inline-flex items-center gap-1">
+                        {value}
+                    </a>
+                );
+            }
+            // Check for Web Link
+            if (value.startsWith('http://') || value.startsWith('https://')) {
+                return (
+                    <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all inline-flex items-center gap-1">
+                        {value}
+                    </a>
+                );
+            }
+            // Check for ISO Date
+            if (value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+                try {
+                    return new Date(value).toLocaleString();
+                } catch (e) {
+                    // Fall through
+                }
+            }
+        }
+
+        if (typeof value === 'object') {
+            return (
+                <pre className="text-xs bg-muted/80 p-3 rounded-lg overflow-x-auto max-w-full font-mono text-foreground mt-1">
+                    {JSON.stringify(value, null, 2)}
+                </pre>
+            );
+        }
+
+        return String(value);
+    };
+
+    const getFieldColSpan = (value: any) => {
+        if (value && typeof value === 'object') return 'sm:col-span-2';
+        if (value && typeof value === 'string' && (value.length > 80 || value.includes('\n'))) return 'sm:col-span-2';
+        return 'sm:col-span-1';
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-4xl w-full" >
@@ -921,23 +1105,63 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
 
                 {/* SCROLLABLE BODY */}
                 <div className="overflow-y-auto pr-2 space-y-4 max-h-[60vh] sm:max-h-[70vh] md:max-h-[80vh]">
-                    {typeof data === "object" && !config?.renderItem &&
-                        data !== null &&
-                        Object.keys(data).map((key) => (
-                            <div key={key} className="flex flex-col space-y-1">
-                                <p className="text-sm text-muted-foreground">{key}</p>
-                                <p>{typeof data[key] !== "object" ? data[key] : null}</p>
+                    {config?.renderItem ? (
+                        config.renderItem(data)
+                    ) : (
+                        typeof data !== "object" || data === null ? (
+                            <div className="bg-muted/20 p-4 rounded-xl">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Data</p>
+                                <p className="text-sm font-medium text-foreground mt-1">{String(data)}</p>
                             </div>
-                        ))}
-
-                    {typeof data === "string" && (
-                        <div className="flex flex-col space-y-1">
-                            <p className="text-sm text-muted-foreground">Data</p>
-                            <p>{data}</p>
-                        </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {config?.fields ? (
+                                    config.fields.map((field) => {
+                                        if (field.isSection) {
+                                            return (
+                                                <div 
+                                                    key={field.name} 
+                                                    className={cn(
+                                                        "sm:col-span-2 font-bold text-[10px] uppercase tracking-wider text-primary border-b border-border pb-1.5 mt-4 first:mt-0", 
+                                                        field.className
+                                                    )}
+                                                >
+                                                    {field.label || toTitleCase(String(field.name))}
+                                                </div>
+                                            );
+                                        }
+                                        const val = data[field.name];
+                                        const colSpan = getFieldColSpan(val);
+                                        return (
+                                            <div key={field.name} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan, field.className)}>
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                    {field.label || toTitleCase(String(field.name))}
+                                                </p>
+                                                <div className="text-sm font-medium text-foreground break-words">
+                                                    {field.render ? field.render(val, data) : renderValue(val, data)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    Object.keys(data).filter(key => typeof data[key] !== 'function').map((key) => {
+                                        const val = data[key];
+                                        const colSpan = getFieldColSpan(val);
+                                        return (
+                                            <div key={key} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan)}>
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                    {toTitleCase(key)}
+                                                </p>
+                                                <div className="text-sm font-medium text-foreground break-words">
+                                                    {renderValue(val, data)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        )
                     )}
-
-                    {config?.renderItem && config.renderItem(data)}
                 </div>
 
                 <DialogFooter>
