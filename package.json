@@ -13,6 +13,7 @@
       "import": "./dist/index.js",
       "types": "./dist/types/index.d.ts"
     },
+    "./index.css": "./dist/index.css",
     "./theme.css": "./dist/css/theme.css"
   },
   "files": [
