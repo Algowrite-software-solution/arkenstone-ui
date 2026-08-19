@@ -199,6 +199,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     let isValid = true;
 
     fields.forEach((field) => {
+      if (field.type === "section") return; // Ignore sections in validation check
       const error = validateField(
         field.name,
         values[field.name],
@@ -213,7 +214,14 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     setErrors(newErrors);
 
     if (isValid) {
-      onSubmit(values);
+      // Filter out any section pseudo-keys from the submitted payload
+      const payload = { ...values };
+      fields.forEach((f) => {
+        if (f.type === "section") {
+          delete payload[f.name];
+        }
+      });
+      onSubmit(payload);
     } else {
       toast.error("Please fix the validation errors.");
     }
@@ -222,7 +230,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn("space-y-4 p-2.5 sm:p-4 h-full overflow-y-auto", className)}
+      className={cn("grid grid-cols-12 gap-x-4 gap-y-3.5 p-2.5 sm:p-4 h-full overflow-y-auto content-start", className)}
     >
       {fields.map((field) => {
         // Handle Conditional Visibility
@@ -235,6 +243,42 @@ export const GenericForm: React.FC<GenericFormProps> = ({
           return null;
         }
 
+        // Render Section Header Block
+        if (field.type === "section") {
+          const variant = field.sectionVariant || "line";
+
+          if (variant === "ghost") {
+            return (
+              <div
+                key={field.name}
+                className={cn("col-span-12 pb-1.5 pt-5 first:pt-1 flex flex-col gap-0.5 mt-2", field.className)}
+              >
+                {field.label && (
+                  <h4 className="text-sm font-semibold tracking-tight text-foreground text-left">{field.label}</h4>
+                )}
+                {field.description && (
+                  <p className="text-xs text-muted-foreground text-left">{field.description}</p>
+                )}
+              </div>
+            );
+          }
+
+          // Default: line (refined with light border line)
+          return (
+            <div
+              key={field.name}
+              className={cn("col-span-12 border-b border-border/40 pb-2 pt-5 first:pt-1 flex flex-col gap-0.5 mt-2", field.className)}
+            >
+              {field.label && (
+                <h4 className="text-sm font-semibold tracking-tight text-foreground text-left">{field.label}</h4>
+              )}
+              {field.description && (
+                <p className="text-xs text-muted-foreground text-left">{field.description}</p>
+              )}
+            </div>
+          );
+        }
+
         const error = errors[field.name];
         if (field.currentDataLoadConfig && !isCreating) {
           // Logic moved to initialization, so we just use the value from state
@@ -243,17 +287,22 @@ export const GenericForm: React.FC<GenericFormProps> = ({
 
         const fieldValue = values[field.name] ?? field.defaultValue ?? "";
 
+        // Calculate responsive column span (falls back to full col-span-12 on mobile)
+        const colSpanClass = field.colSpan ? `col-span-12 md:col-span-${field.colSpan}` : "col-span-12";
+
         return (
           <div
             key={field.name}
-            className={cn("flex flex-col gap-1.5", field.className)}
+            className={cn("flex flex-col gap-1.5", colSpanClass, field.className)}
           >
-            <Label className={cn(error && "text-destructive")}>
-              {field.label}{" "}
-              {field.validation?.required && (
-                <span className="text-destructive">*</span>
-              )}
-            </Label>
+            {field.label && (
+              <Label className={cn("text-left", error && "text-destructive")}>
+                {field.label}{" "}
+                {field.validation?.required && (
+                  <span className="text-destructive">*</span>
+                )}
+              </Label>
+            )}
 
             {/* INPUT: TEXT / EMAIL / NUMBER */}
             {["text", "email", "number", "password"].includes(field.type) && (
@@ -530,7 +579,7 @@ export const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       {!liveUpdate && (
-        <div className="pt-4 flex justify-end">
+        <div className="col-span-12 pt-4 flex justify-end">
           <Button type="submit" disabled={isLoading} className={isLoading ? "cursor-not-allowed" : "cursor-pointer"}>
             {isLoading ? "Processing..." : submitLabel}
           </Button>

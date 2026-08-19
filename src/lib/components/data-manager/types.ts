@@ -20,6 +20,7 @@ export type InputType =
   | "multiple_images"
   | "single_image"
   | "image"
+  | "section"
   | "custom";
 
 export interface ValidationRule {
@@ -47,7 +48,10 @@ export interface FieldConfig {
     useObjectIdProperty?: boolean;
   };
 
-  label: string;
+  label?: string;
+  description?: string;
+  colSpan?: number; // Span from 1 to 12 in the grid
+  sectionVariant?: "line" | "ghost";
   type: InputType;
   placeholder?: string;
   defaultValue?: any;
@@ -128,6 +132,8 @@ export interface RowAction<T> {
 export interface ViewFieldConfig<T> {
   name: string;
   label?: string;
+  description?: string;
+  type?: string;
   render?: (value: any, item: T) => React.ReactNode;
   className?: string;
   isSection?: boolean;
