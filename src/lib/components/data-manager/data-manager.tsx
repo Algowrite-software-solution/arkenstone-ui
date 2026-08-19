@@ -1089,7 +1089,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <Dialog modal={false} open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-4xl w-full" >
                 <DialogHeader>
                     <DialogTitle>
