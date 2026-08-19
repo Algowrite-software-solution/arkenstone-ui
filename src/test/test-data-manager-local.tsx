@@ -272,7 +272,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/posts' && (
           <>
             <p className="text-muted-foreground">
-              Click on headers (ID, Title) to sort the table dynamically.
+              This table configures the <strong>"split-view"</strong> layout (opening the form in a side panel drawer). It enables advanced sorting, custom conditional actions (e.g. Liked conditional triggers), bulk actions, and table pagination sizing.
             </p>
 
             <DataManager<ExampleData>
@@ -281,7 +281,7 @@ export function TestDataManagerLocal() {
                 description: "A table view of posts with built-in search, filtering, pagination, and sorting support.",
                 showDescriptionOnMobile: true,
                 service: ExampleDataService,
-                layout: "modal",
+                layout: "split-view",
                 modalSize: "lg",
                 devMode: true,
                 display: {
@@ -356,7 +356,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/users' && (
           <>
             <p className="text-muted-foreground">
-              This dataset is fully dynamic. Click the refresh button in the header—every single reload queries randomuser.me and returns completely different records.
+              This table configures the <strong>"modal"</strong> layout and tests fetching fully dynamic data from randomuser.me. It uses custom renderers for user avatars, disables global search while keeping advanced individual column filters active (<code>disableGlobal: true</code>), and manages custom bulk actions.
             </p>
 
             <DataManager<RandomUserData>
@@ -364,7 +364,7 @@ export function TestDataManagerLocal() {
                 title: "Random Users",
                 description: "Tests bulk actions, filters, and rendering using login.uuid as the identifierKey.",
                 service: RandomUserService,
-                layout: "split-view",
+                layout: "modal",
                 devMode: true,
                 display: {
                   type: "table",
@@ -421,7 +421,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/only-global' && (
           <>
             <p className="text-muted-foreground">
-              This table configures search keys but hides advanced individual filters (`disableAdvanced: true`). Only the global search is visible.
+              This table configures the <strong>"modal"</strong> layout and demonstrates clean global search capabilities by disabling advanced individual column filters (<code>disableAdvanced: true</code>). Only the central global search input is visible.
             </p>
 
             <DataManager<ExampleData>
@@ -473,7 +473,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/force-mobile' && (
           <>
             <p className="text-muted-foreground">
-              This table forces the advanced filters toggle to remain visible on mobile viewports (`forceAdvancedVisibleOnMobile: true`).
+              This table configures the <strong>"modal"</strong> layout and demonstrates custom search options on smaller screens. It forces the advanced search toggle button to remain visible on mobile viewports (<code>forceAdvancedVisibleOnMobile: true</code>).
             </p>
 
             <DataManager<ExampleData>
@@ -525,7 +525,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/grid' && (
           <>
             <p className="text-muted-foreground">
-              This layout showcases grid rendering of items with card layouts and custom header widgets. Hover over a card to trigger actions.
+              This view configures the <strong>"fullscreen"</strong> layout and demonstrates rendering data in a <strong>"grid"</strong> card view instead of a table. It showcases custom card elements (hover cards) and injects a custom KPI statistics header inside the <code>layoutSpaces.header</code> area.
             </p>
 
             <DataManager<ExampleData>
@@ -594,7 +594,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/list' && (
           <>
             <p className="text-muted-foreground">
-              This layout showcases a standard vertical list view using the "tab-view" layout, which opens the editor in an elegant secondary tab.
+              This view configures the <strong>"tab-view"</strong> layout and showcases standard vertical <strong>"list"</strong> item rendering. The viewer and editor open inside an elegant nested secondary sub-tab layout instead of a modal or drawer.
             </p>
 
             <DataManager<ExampleData>
@@ -644,8 +644,7 @@ export function TestDataManagerLocal() {
         {currentPath === '#/resolve-data' && (
           <>
             <p className="text-muted-foreground mb-4">
-              Demonstrates asynchronous data resolution (`resolveData`) before mounting the details panel or form.
-              Clicking edit/view on any item will show a loading spinner on the button for 1.5 seconds, then open with deep/resolved content.
+              This table configures the <strong>"modal"</strong> layout and demonstrates asynchronous data resolution (<code>resolveData</code>) before mounting the details view. Clicking edit/view on any row displays a loading spinner for 1.5s while it fetches rich detailed content on demand.
             </p>
 
             <DataManager<ExampleData>
