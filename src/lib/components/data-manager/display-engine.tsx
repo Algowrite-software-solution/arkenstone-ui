@@ -13,15 +13,14 @@ import {
     OnChangeFn,
     PaginationState,
 } from '@tanstack/react-table';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, HelpCircle } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, SlidersHorizontal, HelpCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -392,23 +391,29 @@ function DataTable<T>({
                         {pagination && (
                             <div className="flex items-center gap-2">
                                 <p className="text-xs font-medium text-muted-foreground whitespace-nowrap hidden sm:block">Rows per page</p>
-                                <Select
-                                    value={`${table.getState().pagination.pageSize}`}
-                                    onValueChange={(value) => {
-                                        table.setPageSize(Number(value));
-                                    }}
-                                >
-                                    <SelectTrigger className="h-8 w-[80px] sm:w-[90px] px-2">
-                                        <SelectValue placeholder={table.getState().pagination.pageSize} />
-                                    </SelectTrigger>
-                                    <SelectContent side="top">
+                                <DropdownMenu modal={false}>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-[65px] sm:w-[75px] px-2 flex items-center justify-between text-xs rounded-full cursor-pointer"
+                                        >
+                                            <span>{table.getState().pagination.pageSize}</span>
+                                            <ChevronDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="center" className="min-w-[65px] sm:min-w-[75px] max-h-48 overflow-y-auto">
                                         {(pagination.pageSizeOptions || [15, 25, 50, 100]).map((pageSize) => (
-                                            <SelectItem key={pageSize} value={`${pageSize}`}>
+                                            <DropdownMenuItem
+                                                key={pageSize}
+                                                onClick={() => table.setPageSize(pageSize)}
+                                                className="cursor-pointer text-xs py-1 justify-center"
+                                            >
                                                 {pageSize}
-                                            </SelectItem>
+                                            </DropdownMenuItem>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         )}
                     </div>

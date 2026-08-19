@@ -814,7 +814,7 @@ export function DataManager<T extends { id: string | number }>({
                     )}
 
                     {config.display.type === 'table' && (
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="outline"
