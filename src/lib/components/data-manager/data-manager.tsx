@@ -350,6 +350,7 @@ export function DataManager<T extends { id: string | number }>({
             let hasChanges = false;
 
             config.form.fields.forEach((field) => {
+                if (field.type === "section") return;
                 const key = field.name;
                 const newValue = values[key];
                 const oldValue = (activeItem as any)[key];
@@ -814,7 +815,7 @@ export function DataManager<T extends { id: string | number }>({
                     )}
 
                     {config.display.type === 'table' && (
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -965,7 +966,10 @@ export function DataManager<T extends { id: string | number }>({
                 isOpen={isViewing}
                 data={resolvedData ?? activeItem}
                 handleClose={handleClose}
-                config={config.display?.viewModalConfig}
+                config={{
+                    ...config.display?.viewModalConfig,
+                    fields: config.display?.viewModalConfig?.fields ?? (config.form.fields as any)
+                }}
             />
         </div>
     );
@@ -1089,7 +1093,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <Dialog modal={false} open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="sm:max-w-4xl w-full" >
                 <DialogHeader>
                     <DialogTitle>
@@ -1110,23 +1114,32 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
                     ) : (
                         typeof data !== "object" || data === null ? (
                             <div className="bg-muted/20 p-4 rounded-xl">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Data</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">Data</p>
                                 <p className="text-sm font-medium text-foreground mt-1">{String(data)}</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {config?.fields ? (
                                     config.fields.map((field) => {
-                                        if (field.isSection) {
+                                        if (field.isSection || field.type === "section") {
                                             return (
                                                 <div 
                                                     key={field.name} 
                                                     className={cn(
-                                                        "sm:col-span-2 font-bold text-[10px] uppercase tracking-wider text-primary border-b border-border pb-1.5 mt-4 first:mt-0", 
+                                                        "sm:col-span-2 border-b border-border/40 pb-1.5 mt-4 first:mt-0 flex flex-col gap-0.5", 
                                                         field.className
                                                     )}
                                                 >
-                                                    {field.label || toTitleCase(String(field.name))}
+                                                    {(field.label || field.isSection) && (
+                                                        <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                                                            {field.label || toTitleCase(String(field.name))}
+                                                        </span>
+                                                    )}
+                                                    {field.description && (
+                                                        <span className="text-xs text-muted-foreground mt-0.5">
+                                                            {field.description}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             );
                                         }
@@ -1134,7 +1147,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
                                         const colSpan = getFieldColSpan(val);
                                         return (
                                             <div key={field.name} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan, field.className)}>
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
                                                     {field.label || toTitleCase(String(field.name))}
                                                 </p>
                                                 <div className="text-sm font-medium text-foreground break-words">
@@ -1149,7 +1162,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
                                         const colSpan = getFieldColSpan(val);
                                         return (
                                             <div key={key} className={cn("bg-muted/20 p-3.5 rounded-xl hover:bg-muted/30 transition-colors flex flex-col space-y-1.5", colSpan)}>
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
                                                     {toTitleCase(key)}
                                                 </p>
                                                 <div className="text-sm font-medium text-foreground break-words">

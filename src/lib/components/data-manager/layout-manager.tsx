@@ -91,7 +91,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
         return (
             <div className="w-full h-full max-w-full">
                 {children}
-                <Dialog open={isDetailsOpen} onOpenChange={(open) => !open && onCloseDetails()}>
+                <Dialog modal={false} open={isDetailsOpen} onOpenChange={(open) => !open && onCloseDetails()}>
                     <DialogContent
                         className={cn(
                             "overflow-hidden flex flex-col max-h-[90vh] max-w-[95vw] sm:w-full p-4 sm:p-6", // Ensure internal scrolling works and doesn't spill off page; responsive padding
