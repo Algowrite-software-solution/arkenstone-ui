@@ -19,7 +19,7 @@ export default function ProductInventoryPage() {
             config={{
                 title: "Product Inventory",
                 service: ProductService,
-                layout: "split-view", // 'split-view' | 'modal'
+                layout: "split-view", // 'split-view' | 'modal' | 'tab-view' | 'fullscreen'
                 display: {
                     type: 'table',
                     columns: [
@@ -52,7 +52,7 @@ The configuration object controls layout behavior, local Zustand state stores, v
 | `title` | `string` | **Required** | - | The main title text rendered in the header toolbar. |
 | `service` | `ServiceFactory<T>` | **Required** | - | Zustand store/API service instance managing CRUD state. |
 | `serviceConfig` | `ServiceConfig` | Optional | `undefined` | Custom query parameters or parameter mappings for CRUD operations. |
-| `layout` | `'split-view' \| 'modal'` | Optional | `'modal'` | Layout model determining how forms and records align. |
+| `layout` | `'split-view' \| 'modal' \| 'tab-view' \| 'fullscreen'` | Optional | `'modal'` | Layout model determining how forms and records align. |
 | `modalSize` | `'sm' \| 'md' \| 'lg' \| 'xl' \| 'full'` | Optional | `'md'` | Specifies the size dimensions of the dialog overlay modal. |
 | `description` | `string` | Optional | `undefined` | Subtitle/description text rendered under the header. |
 | `showDescriptionOnMobile` | `boolean` | Optional | `false` | Controls whether description text is visible on small screen sizes. |
@@ -68,6 +68,8 @@ The configuration object controls layout behavior, local Zustand state stores, v
 *   **`layout`**: 
     *   `modal`: Renders a full-width table. Editing or creating records opens a popup `<Dialog>`. Ideal for dense data sheets.
     *   `split-view`: Splits the workspace into a left-side list view and a right-side detail/form panel. Centers on mobile into a single view. Ideal for email client interfaces, settings menus, and master-detail dashboards.
+    *   `tab-view`: Replaces the current data overview list with the edit/details form inside a focused tab interface, with a navigation back arrow.
+    *   `fullscreen`: Renders the form/details replacement panel on a full-width viewport canvas for immersive editing.
 *   **`modalSize`**: Sets width boundary dimensions for the popup modal dialog form canvas: `sm` (384px), `md` (448px), `lg` (512px), `xl` (576px), `full` (100vw).
 *   **`showDescriptionOnMobile`**: If set to `false`, hides the description text on mobile screens to conserve vertical height.
 *   **`devMode`**: Prints store dispatches, API payloads, and query parameters directly into the browser console to simplify debugging.
@@ -363,7 +365,10 @@ Configures edit, create, and detail view sheets.
 ```typescript
 export interface FieldConfig {
     name: string;                               // Key in the data object
-    label: string;                              // Form label text
+    label?: string;                             // Form label text (optional)
+    description?: string;                       // Helper / subtitle text (used on sections)
+    colSpan?: number;                           // Layout span from 1 to 12 in the grid
+    sectionVariant?: 'line' | 'ghost';          // Design separator styling for sections
     type: InputType;                            // Control component type
     placeholder?: string;                       // Text shown when empty
     defaultValue?: any;                         // Initial default value
@@ -404,7 +409,12 @@ export interface FieldConfig {
 ### Property Descriptions
 
 *   **`name`**: The exact key path of the data object. Supports nested dot notation if your service supports nested keys (e.g., `'profile.firstName'`).
-*   **`type`**: The control type. Supports `'text'`, `'number'`, `'email'`, `'password'`, `'textarea'`, `'select'`, `'checkbox'`, `'date'`, `'image'`, and `'custom'`.
+*   **`type`**: The control type. Supports `'text'`, `'number'`, `'email'`, `'password'`, `'textarea'`, `'select'`, `'checkbox'`, `'date'`, `'image'`, `'section'`, and `'custom'`.
+*   **`description`**: Helper or subtitle text. When used on a `"section"` field, it displays as the section's description copy directly under the heading.
+*   **`colSpan`**: Responsive column span (1 to 12). By default, fields occupy a full row width (`colSpan: 12`). Setting smaller spans (like `6` or `4`) aligns fields side-by-side on desktop while automatically stacking them vertically on mobile layouts.
+*   **`sectionVariant`**: Header style variant for `"section"` elements:
+    *   `line` (default): Minimal divider line separating form sections.
+    *   `ghost`: Spaced typographic divider with no border line.
 *   **`validation`**: Validation rules evaluated before form submissions (e.g. `required`, `min`, `max`, `pattern`, or a `custom` callback).
 *   **`hidden` / `disabled`**: Can be simple booleans, or dynamic callback functions that parse current form values: `(values) => values.role !== 'admin'`.
 *   **`className`**: String of Tailwind CSS classes injected directly into the outer container element wrapping this form field. Useful for defining custom widths (e.g., `col-span-2`), margins, or borders.
