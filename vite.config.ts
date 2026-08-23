@@ -4,12 +4,11 @@ import dts from "vite-plugin-dts";
 import { resolve } from "path";
 import tailwindcss from '@tailwindcss/vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { libInjectCss } from 'vite-plugin-lib-inject-css';
+
 
 export default defineConfig({
   plugins: [
     react(),
-    libInjectCss(),
     dts({
       entryRoot: "src/lib",
       outDir: "dist/types",
@@ -20,7 +19,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: "src/lib/css/theme.css",
+          src: "src/lib/css/*.css",
           dest: "./css/"
         }
       ]
@@ -42,6 +41,10 @@ export default defineConfig({
     rollupOptions: {
       external: ["react", "react-dom", "react/jsx-runtime", "sonner"],
       output: {
+        preserveModules: true,
+        preserveModulesRoot: "src/lib",
+        entryFileNames: "[name].js",
+        assetFileNames: "index.css",
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
