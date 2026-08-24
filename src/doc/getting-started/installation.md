@@ -45,12 +45,12 @@ export default {
 }
 ```
 
-### 3. Add CSS Variables
+### 3. Import Stylesheet
 
-Add the theme CSS variables to your main CSS file:
+Import the compiled library stylesheet in your main CSS file (or application entry point):
 
 ```css
-@import "arkenstone-ui/src/lib/css/theme.css";
+@import "arkenstone-ui/index.css";
 ```
 
 ### 4. Configure Path Aliases
