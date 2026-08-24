@@ -94,7 +94,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
                 <Dialog modal={false} open={isDetailsOpen} onOpenChange={(open) => !open && onCloseDetails()}>
                     <DialogContent
                         className={cn(
-                            "overflow-hidden flex flex-col max-h-[90vh] max-w-[95vw] sm:w-full p-4 sm:p-6", // Ensure internal scrolling works and doesn't spill off page; responsive padding
+                            "ark-ui-root overflow-hidden flex flex-col max-h-[90vh] max-w-[95vw] sm:w-full p-4 sm:p-6", // Ensure internal scrolling works and doesn't spill off page; responsive padding
                             sizeClasses[modalSize]
                         )}
                     >
@@ -116,7 +116,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     if (type === 'tab-view' || type === 'fullscreen') {
         if (isDetailsOpen) {
             return (
-                <div className="w-full h-full min-h-[400px] border rounded-xl bg-background overflow-hidden flex flex-col shadow-sm animate-in fade-in duration-200">
+                <div className="ark-ui-root w-full h-full min-h-[400px] border rounded-xl bg-background overflow-hidden flex flex-col shadow-sm animate-in fade-in duration-200">
                     <div className="flex justify-between items-center p-4 border-b bg-muted/20">
                         <div className="flex items-center gap-2">
                             <Button
