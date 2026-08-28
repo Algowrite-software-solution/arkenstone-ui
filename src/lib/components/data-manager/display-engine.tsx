@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn, toTitleCase } from '@/lib/utils';
 import { SearchOptions } from './types';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // --- Types & Interfaces ---
 
@@ -187,12 +188,14 @@ function DataTable<T>({
         }
     }, [pageCount, pageIndex, table]);
 
+    const isMobile = useIsMobile();
     const isSingleSearch = (searchComponent?.length ?? 0) === 1;
 
     const disableGlobal = !!searchOptions?.disableGlobal;
     const disableAdvanced = !!searchOptions?.disableAdvanced;
     const forceAdvancedVisibleOnMobile = !!searchOptions?.forceAdvancedVisibleOnMobile || disableGlobal;
     const isToggleHiddenOnMobile = !forceAdvancedVisibleOnMobile || disableAdvanced;
+    const hideAdvancedOnMobile = !forceAdvancedVisibleOnMobile && isMobile;
 
     const showGlobal = !isSingleSearch && !disableGlobal && !isAdvancedOpen;
     const showToggle = !isSingleSearch && !disableAdvanced && !disableGlobal;
@@ -266,7 +269,7 @@ function DataTable<T>({
                                 <div className={cn(
                                     "flex flex-wrap items-center gap-2 flex-1",
                                     !forceAdvancedVisibleOnMobile && "hidden md:flex"
-                                )} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', flex: '1 1 0%' }}>
+                                )} style={{ display: hideAdvancedOnMobile ? 'none' : 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', flex: '1 1 0%' }}>
                                     {searchComponent?.map((component) => (
                                         <div key={component.column} className="relative flex-1 min-w-[160px] max-w-sm" style={{ position: 'relative', flex: '1 1 0%', minWidth: '160px', maxWidth: '384px' }}>
                                             <Search className="absolute left-2.5 text-muted-foreground/70" style={{ position: 'absolute', left: '10px', top: '11px', height: '14px', width: '14px', color: 'var(--muted-foreground, #6b7280)', opacity: 0.7, pointerEvents: 'none' }} />
@@ -305,7 +308,7 @@ function DataTable<T>({
                                         // Hidden on mobile by default (hidden md:flex) unless forceAdvancedVisibleOnMobile is true
                                         !forceAdvancedVisibleOnMobile && "hidden md:inline-flex"
                                     )}
-                                    style={{ gap: '0.5rem', height: '2.25rem', fontSize: '0.75rem', cursor: 'pointer', marginLeft: 'auto', width: '160px', paddingLeft: '1.25rem', paddingRight: '1.25rem', flexShrink: 0 }}
+                                    style={{ display: hideAdvancedOnMobile ? 'none' : 'inline-flex', gap: '0.5rem', height: '2.25rem', fontSize: '0.75rem', cursor: 'pointer', marginLeft: 'auto', width: '160px', paddingLeft: '1.25rem', paddingRight: '1.25rem', flexShrink: 0 }}
                                 >
                                     <SlidersHorizontal className="h-3.5 w-3.5" style={{ height: '0.875rem', width: '0.875rem' }} />
                                     {isAdvancedOpen ? "Hide Filters" : "Advanced Filters"}
