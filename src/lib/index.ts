@@ -1,4 +1,5 @@
-import "./css/lib-dist.css";
+// styles
+import "./css/app.css";
 
 export * from "./components";
 export * from "./hooks";

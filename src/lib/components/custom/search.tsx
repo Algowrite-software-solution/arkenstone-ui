@@ -83,7 +83,7 @@ export function Search({
 
 
     return (
-        <form onSubmit={handleSubmit} className={cn("ark-ui-root w-full", classNames.form)}>
+        <form onSubmit={handleSubmit} className={cn("w-full", classNames.form)}>
             {label && (
                 <label className={cn("text-sm font-medium mb-1 block", classNames.label)}>
                     {label}

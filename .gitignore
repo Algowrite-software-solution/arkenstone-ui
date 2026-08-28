@@ -25,6 +25,3 @@ dist-ssr
 
 *storybook.log
 storybook-static
-
-# Local Integration Guides
-integration_guide.md

@@ -45,20 +45,12 @@ export default {
 }
 ```
 
-### 3. Import Stylesheet & Wrap Layout
+### 3. Add CSS Variables
 
-Import the compiled library stylesheet in your main CSS file (or application entry point):
+Add the theme CSS variables to your main CSS file:
 
 ```css
-@import "arkenstone-ui/index.css";
-```
-
-To prevent variables from conflicting with your customer-facing pages, the library's theme variables are scoped. You must wrap the root container of your admin panel layout in a `div` with the `ark-ui-root` class:
-
-```html
-<div class="ark-ui-root">
-    <!-- Admin panel dashboard / components go here -->
-</div>
+@import "arkenstone-ui/src/lib/css/theme.css";
 ```
 
 ### 4. Configure Path Aliases
