@@ -777,7 +777,7 @@ export function DataManager<T extends { id: string | number }>({
     // =========================================================================
 
     return (
-        <div className="ark-ui-root w-full flex flex-col overflow-hidden bg-sidebar rounded-2xl relative">
+        <div className="w-full flex flex-col overflow-hidden bg-sidebar rounded-2xl relative">
 
             {/* --- HEADER --- */}
             <div className="flex-none px-0 py-3 sm:p-4 md:p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -826,7 +826,7 @@ export function DataManager<T extends { id: string | number }>({
                                     Columns
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="ark-ui-root" align="end">
+                            <DropdownMenuContent align="end">
                                 {config.display.columns
                                     ?.filter((column: any) => 
                                         (column.accessorKey || column.id) && 
@@ -1094,7 +1094,7 @@ export function ViewDialog({ isOpen, data, handleClose, config }: ViewDialogProp
 
     return (
         <Dialog modal={false} open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="ark-ui-root sm:max-w-4xl w-full" >
+            <DialogContent className="sm:max-w-4xl w-full" >
                 <DialogHeader>
                     <DialogTitle>
                         {config?.title || "View Details"}

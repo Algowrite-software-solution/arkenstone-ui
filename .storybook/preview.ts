@@ -1,12 +1,10 @@
-import React from 'react'
 import type { Preview } from '@storybook/react-vite'
 import "../src/lib/css/theme.css"; 
 import '../src/lib/css/app.css';
 
+
+
 const preview: Preview = {
-  decorators: [
-    (Story) => React.createElement('div', { className: 'ark-ui-root' }, React.createElement(Story))
-  ],
   parameters: {
     controls: {
       matchers: {

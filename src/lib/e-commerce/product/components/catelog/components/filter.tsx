@@ -124,7 +124,7 @@ export function Filters({
 
   return (
     <div
-      className={cn("ark-ui-root flex", 
+      className={cn("flex", 
         direction === "vertical" ? cn(verticalFilterClassName, "flex-col") : cn(horizontalFilterClassName,"flex-row")
       )}
     >
