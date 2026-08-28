@@ -205,19 +205,20 @@ function DataTable<T>({
             <div className="flex w-full flex-col gap-4">
                 {/* Search Bar Logic */}
                 {(searchComponent?.length ?? 0) > 0 && (
-                    <div className="flex flex-col gap-3 w-full">
+                    <div className="flex flex-col gap-3 w-full" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
                         {/* Global Search / Advanced Filters Toolbar */}
-                        <div className="flex flex-wrap items-center gap-2 w-full">
+                        <div className="flex flex-wrap items-center gap-2 w-full" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
 
                             {/* Single Search Mode: render the one configured input directly */}
                             {isSingleSearch && searchComponent && (
-                                <div className="relative flex-1 min-w-[240px] max-w-sm">
-                                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/70" />
+                                <div className="relative flex-1 min-w-[240px] max-w-sm" style={{ position: 'relative', flex: '1 1 0%', minWidth: '240px', maxWidth: '384px' }}>
+                                    <Search className="absolute left-2.5 text-muted-foreground/70" style={{ position: 'absolute', left: '10px', top: '11px', height: '14px', width: '14px', color: 'var(--muted-foreground, #6b7280)', opacity: 0.7, pointerEvents: 'none' }} />
                                     <Input
                                         placeholder={searchComponent[0].placeholder ?? `Filter ${toTitleCase(searchComponent[0].column)}...`}
                                         value={(table.getColumn(searchComponent[0].column)?.getFilterValue() as string) ?? ''}
                                         onChange={(event) => table.getColumn(searchComponent[0].column)?.setFilterValue(event.target.value)}
                                         className={cn('pl-8 h-9 text-sm', searchComponent[0].className)}
+                                        style={{ paddingLeft: '32px', height: '36px', fontSize: '14px' }}
                                     />
                                 </div>
                             )}
@@ -227,28 +228,29 @@ function DataTable<T>({
                                 <div className={cn(
                                     "relative flex-1 min-w-[240px] max-w-sm",
                                     isToggleHiddenOnMobile && "mx-auto md:ml-0 md:mr-auto"
-                                )}>
-                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                )} style={{ position: 'relative', flex: '1 1 0%', minWidth: '240px', maxWidth: '384px' }}>
+                                    <Search className="absolute left-2.5 text-muted-foreground" style={{ position: 'absolute', left: '10px', top: '10px', height: '16px', width: '16px', color: 'var(--muted-foreground, #6b7280)', pointerEvents: 'none' }} />
                                     <Input
                                         placeholder="Search..."
                                         value={globalFilter ?? ''}
                                         onChange={(event) => setGlobalFilter(event.target.value)}
                                         className="pl-9 pr-9 h-9 text-sm"
+                                        style={{ paddingLeft: '36px', paddingRight: '36px', height: '36px', fontSize: '14px' }}
                                     />
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 h-5 w-5 text-muted-foreground/70 hover:text-foreground cursor-help transition-colors flex items-center justify-center rounded-full hover:bg-muted/50">
-                                                    <HelpCircle className="h-3.5 w-3.5" />
+                                                <span className="absolute z-10 text-muted-foreground/70 hover:text-foreground cursor-help transition-colors flex items-center justify-center rounded-full hover:bg-muted/50" style={{ position: 'absolute', right: '8px', top: '8px', zIndex: 10, height: '20px', width: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '9999px', cursor: 'help' }}>
+                                                    <HelpCircle className="h-3.5 w-3.5" style={{ height: '14px', width: '14px', flexShrink: 0 }} />
                                                 </span>
                                             </TooltipTrigger>
-                                            <TooltipContent side="top" align="center" className="max-w-xs p-3">
-                                                <p className="text-primary-foreground/75 text-[11px] leading-relaxed">
+                                            <TooltipContent side="top" align="center" className="max-w-xs p-3" style={{ maxWidth: '20rem', padding: '0.75rem' }}>
+                                                <p className="text-primary-foreground/75 text-[11px] leading-relaxed" style={{ fontSize: '11px', lineHeight: '1.625' }}>
                                                     Matches keywords against:
                                                 </p>
-                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                <div className="flex flex-wrap gap-1 mt-1.5" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.375rem' }}>
                                                     {searchComponent?.map(s => (
-                                                        <span key={s.column} className="px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground capitalize">
+                                                        <span key={s.column} className="px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground capitalize" style={{ paddingLeft: '0.375rem', paddingRight: '0.375rem', paddingTop: '0.125rem', paddingBottom: '0.125rem', fontSize: '10px', fontWeight: 600, textTransform: 'capitalize' }}>
                                                             {toTitleCase(s.column)}
                                                         </span>
                                                     ))}
@@ -264,15 +266,16 @@ function DataTable<T>({
                                 <div className={cn(
                                     "flex flex-wrap items-center gap-2 flex-1",
                                     !forceAdvancedVisibleOnMobile && "hidden md:flex"
-                                )}>
+                                )} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', flex: '1 1 0%' }}>
                                     {searchComponent?.map((component) => (
-                                        <div key={component.column} className="relative flex-1 min-w-[160px] max-w-sm">
-                                            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/70" />
+                                        <div key={component.column} className="relative flex-1 min-w-[160px] max-w-sm" style={{ position: 'relative', flex: '1 1 0%', minWidth: '160px', maxWidth: '384px' }}>
+                                            <Search className="absolute left-2.5 text-muted-foreground/70" style={{ position: 'absolute', left: '10px', top: '11px', height: '14px', width: '14px', color: 'var(--muted-foreground, #6b7280)', opacity: 0.7, pointerEvents: 'none' }} />
                                             <Input
                                                 placeholder={component.placeholder ?? `Filter ${toTitleCase(component.column)}...`}
                                                 value={(table.getColumn(component.column)?.getFilterValue() as string) ?? ''}
                                                 onChange={(event) => table.getColumn(component.column)?.setFilterValue(event.target.value)}
                                                 className={cn('pl-8 h-9 text-xs', component.className)}
+                                                style={{ paddingLeft: '32px', height: '36px', fontSize: '12px' }}
                                             />
                                         </div>
                                     ))}
@@ -302,8 +305,9 @@ function DataTable<T>({
                                         // Hidden on mobile by default (hidden md:flex) unless forceAdvancedVisibleOnMobile is true
                                         !forceAdvancedVisibleOnMobile && "hidden md:inline-flex"
                                     )}
+                                    style={{ gap: '0.5rem', height: '2.25rem', fontSize: '0.75rem', cursor: 'pointer', marginLeft: 'auto', width: '160px', paddingLeft: '1.25rem', paddingRight: '1.25rem', flexShrink: 0 }}
                                 >
-                                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                                    <SlidersHorizontal className="h-3.5 w-3.5" style={{ height: '0.875rem', width: '0.875rem' }} />
                                     {isAdvancedOpen ? "Hide Filters" : "Advanced Filters"}
                                 </Button>
                             )}
