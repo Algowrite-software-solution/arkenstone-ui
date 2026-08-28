@@ -1,11 +1,11 @@
 /* data manager - search icon glitch */
-.ark-ui-root .ark-ui-search-wrapper:has(.lucide-search) {
+.ark-ui-search-wrapper:has(.lucide-search) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
 /* Style native checkboxes to match primary theme */
-.ark-ui-root input[type="checkbox"] {
+input[type="checkbox"] {
   accent-color: var(--primary) !important;
 }
