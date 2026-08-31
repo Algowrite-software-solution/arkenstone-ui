@@ -61,11 +61,11 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
     if (type === 'split-view') {
         return (
             <div 
-                className="flex h-max w-full gap-4 overflow-hidden"
+                className="flex h-max w-full gap-2 overflow-hidden"
                 style={{
                     display: 'flex',
                     width: '100%',
-                    gap: '16px',
+                    gap: '8px',
                     overflow: 'hidden',
                 }}
             >
