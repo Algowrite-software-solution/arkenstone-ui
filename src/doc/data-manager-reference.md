@@ -234,6 +234,16 @@ The `layout` parameter governs how the records and forms are presented and arran
 *   **Desktop Structure:** Renders the data grid/table across 100% of the container width. Selecting "Add Item" or editing an existing row opens a centered overlay dialog modal containing the form fields.
 *   **Mobile Viewports:** The main table features responsive horizontal overflow scrolls (`overflow-x-auto`). Columns shrink and truncate text dynamically. Forms render as a popover overlay that fills the viewport width with comfortable edge margins.
 
+### C. Tab-View Model (`layout: 'tab-view'`)
+*   **Workflow Focus:** Linear form flows, nested configurations, or dedicated sub-panels where side-panels or modal overlays feel too cramped.
+*   **Desktop Structure:** Renders the main display (table, list, or grid) full-width. Editing an item or clicking "Add Item" completely replaces the list view with the details/form panel, complete with a clean header containing a navigation back arrow (`ArrowLeft`) and a close button (`X`) to return.
+*   **Mobile Viewports:** Seamless transition that naturally fills the viewport. Swapping the entire component content with the form avoids complex nesting and provides maximum space for touch inputs.
+
+### D. Fullscreen Model (`layout: 'fullscreen'`)
+*   **Workflow Focus:** Immersive detail viewing, rich content editing, or dashboard setups where forms or details need the absolute maximum canvas space.
+*   **Desktop Structure:** Like `tab-view`, it renders the overview full-width. Opening details replaces the overview content completely with a spacious editing canvas. This is particularly effective when coupled with a `grid` card layout or custom KPI statistics headers.
+*   **Mobile Viewports:** Fits natively by taking up the full screen height and width, providing a distraction-free, focused configuration workspace.
+
 ---
 
 ## 6. The Form Validation Engine
