@@ -616,7 +616,16 @@ export const GenericForm: React.FC<GenericFormProps> = ({
       })}
 
       {!liveUpdate && (
-        <div className="col-span-12 pt-4 flex justify-end">
+        <div 
+          className="col-span-12 pt-4 flex justify-end"
+          style={{
+            gridColumn: 'span 12 / span 12',
+            paddingTop: '16px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            width: '100%',
+          }}
+        >
           <Button type="submit" disabled={isLoading} className={isLoading ? "cursor-not-allowed" : "cursor-pointer"}>
             {isLoading ? "Processing..." : submitLabel}
           </Button>

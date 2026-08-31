@@ -31,6 +31,8 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
 }) => {
 
     const [isMobile, setIsMobile] = React.useState(false);
+    const [visible, setVisible] = React.useState(isDetailsOpen);
+    const [animatingClose, setAnimatingClose] = React.useState(false);
 
     React.useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -38,6 +40,22 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    React.useEffect(() => {
+        if (isDetailsOpen) {
+            setVisible(true);
+            setAnimatingClose(false);
+        } else if (visible) {
+            setAnimatingClose(true);
+            const timer = setTimeout(() => {
+                setVisible(false);
+                setAnimatingClose(false);
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [isDetailsOpen, visible]);
+
+    const displayDetails = visible || animatingClose;
 
     // --- LAYOUT: SPLIT VIEW (Sidebar List, Main Details) ---
     if (type === 'split-view') {
@@ -51,14 +69,31 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
                     overflow: 'hidden',
                 }}
             >
-                {/* Left Panel: List - Collapses on mobile if details open */}
+                <style>{`
+                    @keyframes expandPanel {
+                        from { width: 0; opacity: 0; }
+                        to { width: 50%; opacity: 1; }
+                    }
+                    @keyframes collapsePanel {
+                        from { width: 50%; opacity: 1; }
+                        to { width: 0; opacity: 0; }
+                    }
+                    @media (min-width: 1024px) {
+                        .animate-expand-panel {
+                            animation: expandPanel 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                        .animate-collapse-panel {
+                            animation: collapsePanel 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                    }
+                `}</style>
                 <div 
                     className={cn(
-                        "flex-1 overflow-y-auto max-w-full border rounded-xl transition-all duration-300",
+                        "flex-1 overflow-y-auto max-w-full border rounded-xl transition-[width] duration-300",
                         isDetailsOpen ? "hidden lg:block lg:w-1/2 lg:flex-none" : "w-full"
                     )}
                     style={{
-                        flex: isDetailsOpen && !isMobile ? '0 0 50%' : 1,
+                        flex: displayDetails && !isMobile ? 'none' : 1,
                         width: isDetailsOpen && !isMobile ? '50%' : '100%',
                         display: isDetailsOpen && isMobile ? 'none' : 'block',
                         overflowY: 'auto',
@@ -71,11 +106,16 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
                 </div>
 
                 {/* Right Panel: Details */}
-                {isDetailsOpen && (
+                {displayDetails && (
                     <div 
-                        className="flex-1 border rounded-xl bg-background overflow-hidden flex flex-col shadow-sm animate-in fade-in slide-in-from-right-4 lg:w-1/2 w-full max-w-full"
+                        className={cn(
+                            "flex-1 border rounded-xl bg-background overflow-hidden flex flex-col shadow-sm w-full max-w-full",
+                            isMobile 
+                                ? (animatingClose ? "animate-out fade-out slide-out-to-right-4 duration-300" : "animate-in fade-in slide-in-from-right-4") 
+                                : (animatingClose ? "animate-collapse-panel" : "animate-expand-panel")
+                        )}
                         style={{
-                            flex: isMobile ? 1 : '0 0 50%',
+                            flex: isMobile ? 1 : 'none',
                             width: isMobile ? '100%' : '50%',
                             maxWidth: '100%',
                             display: 'flex',
@@ -186,7 +226,7 @@ export const LayoutManager: React.FC<LayoutManagerProps> = ({
                             position: 'fixed',
                             top: '50%',
                             left: '50%',
-                            transform: 'translate(-50%, -50%)',
+                            translate: '-50% -50%',
                             backgroundColor: 'hsl(var(--background))',
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '12px',
