@@ -60,6 +60,14 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     Record<string, InputOption[]>
   >({});
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // update the form inputs only when the updateFormInputs is manually changed. not when the inital load
   useEffect(() => {
     if (updateFormValues.loadData) {
@@ -231,6 +239,16 @@ export const GenericForm: React.FC<GenericFormProps> = ({
     <form
       onSubmit={handleSubmit}
       className={cn("grid grid-cols-12 gap-x-4 gap-y-3.5 p-2.5 sm:p-4 h-full overflow-y-auto content-start", className)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
+        rowGap: '14px',
+        columnGap: '16px',
+        padding: isMobile ? '10px' : '16px',
+        height: '100%',
+        overflowY: 'auto',
+        alignContent: 'start',
+      }}
     >
       {fields.map((field) => {
         // Handle Conditional Visibility
@@ -252,6 +270,12 @@ export const GenericForm: React.FC<GenericFormProps> = ({
               <div
                 key={field.name}
                 className={cn("col-span-12 pb-1.5 pt-5 first:pt-1 flex flex-col gap-0.5 mt-2", field.className)}
+                style={{
+                  gridColumn: 'span 12 / span 12',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                }}
               >
                 {field.label && (
                   <h4 className="text-sm font-semibold tracking-tight text-foreground text-left">{field.label}</h4>
@@ -268,6 +292,13 @@ export const GenericForm: React.FC<GenericFormProps> = ({
             <div
               key={field.name}
               className={cn("col-span-12 border-b border-border/40 pb-2 pt-5 first:pt-1 flex flex-col gap-0.5 mt-2", field.className)}
+              style={{
+                gridColumn: 'span 12 / span 12',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px',
+                borderBottom: '1px solid hsl(var(--border) / 0.4)',
+              }}
             >
               {field.label && (
                 <h4 className="text-sm font-semibold tracking-tight text-foreground text-left">{field.label}</h4>
@@ -294,6 +325,12 @@ export const GenericForm: React.FC<GenericFormProps> = ({
           <div
             key={field.name}
             className={cn("flex flex-col gap-1.5", colSpanClass, field.className)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              gridColumn: (isMobile || !field.colSpan) ? 'span 12 / span 12' : `span ${field.colSpan} / span ${field.colSpan}`,
+            }}
           >
             {field.label && (
               <Label className={cn("text-left", error && "text-destructive")}>
